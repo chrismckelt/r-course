@@ -31,7 +31,7 @@
 # packages and setup
 ###############################################################################
 rm(list = ls()) # clear vars
-packages <- c("data.table", "reshape2", "plyr", "assertthat")
+packages <- c("data.table", "reshape2", "plyr", "assertthat", "knitr", "markdown")
 sapply(packages, require, character.only = TRUE, quietly = TRUE)
 
 setwd("C:/dev/r-course/course-2/project")
@@ -103,15 +103,18 @@ print("data table added : train")
 # merge all 3 into 1 data table called dt
 dt <- cbind(subject, activity, train)
 dt <- arrange(dt, subject, activity)
-colnames(dt)
+#colnames(dt)
 print("data tables merged to dt")
+
 # 2. Extracts only the measurements on the mean and standard deviation for each measurement.
 features <- fread(file.path(pathIn, "features.txt"))
+# append another column with V  eg V1, V2, V3 - so they match up 
 setnames(features, names(features), c("featureId", "featureName"))
+features$version <- features[, paste0("V", featureId)]
 features <- features[grepl("mean\\(\\)|std\\(\\)", featureName)]
 row_count <- nrow(features)
 assert_that(row_count == 66)
-print("data table added : features")
+print("data table added : features (66 found)")
 
 # append V to featureId column and convert to variable names for column filtering (include pre-named)
 filt <- sapply(list(features$featureId), FUN = function(x) {
@@ -119,21 +122,37 @@ filt <- sapply(list(features$featureId), FUN = function(x) {
 })
 select_expression <- c(key(dt), filt)
 print(nrow(dt))
-filtered <- dt[colnames(dt) %in% filt]
-
+#filter for the found column names 
+dt <- dt[colnames(dt) %in% filt] 
 print(nrow(dt))
-print("dt filtered for columns with mean or standard deviation")
+assert_that(nrow(dt)==1253)
+print("dt filtered for columns with mean or standard deviation is 1253")
 saveresults(dt, "mean_and_standard_deviation")
 setkey(dt,subject,activityId)
-stop("stopping...")
 
 # 3. Uses descriptive activity names to name the activities in the data set
 activity_labels <- fread(file.path(pathIn, "activity_labels.txt"))
 setnames(activity_labels, names(activity_labels), c("activityId", "activityName"))
-dt <- merge(dt, activity_labels, all.x = TRUE)
+# bolt on activityName
+dt <- merge(dt, activity_labels, by = "activityId", all.x = TRUE)
+dt <- arrange(dt, subject, activityId, activityName)
 
- 
+#stop("stopping...")
+
 #4) Appropriately labels the data set with descriptive variable names. 
-dt$activity <- factor(dt$V1)
-dt$feature <- factor(dt$V2)
-dt <- arrange(dt, feature,activity)
+#reshape2.melt -- warnings //TODO
+melted <- data.table(melt(dt, key(dt), id.vars = c("subject", "activityId", "activityName"), message.vars=filt, variable.name = "version"))
+melted <- merge(melted, features[, list(featureId, featureName, version)], by = "version", all.x = TRUE)
+melted$activity <- factor(melted$activityName)
+melted$feature <- factor(melted$version)
+melted <- arrange(melted, activity, feature)
+
+#5) Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
+setkey(melted, subject, activity)
+tidied <- melted[, list(count = .N, average = mean(value)), by = key(melted)]
+
+
+#) make codebook
+md <- file.path(getwd(),"codebook.md")
+knit("makeCodebook.Rmd", output = md , encoding = "ISO8859-1", quiet = TRUE)
+markdownToHTML("codebook.md", "codebook.html")
