@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Title: run_analysis.R</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h1>Title: run_analysis.R</h1>
+
+<h1>Version: 1.0</h1>
+
+<h1>Author: Chris McKelt</h1>
+
+<p>###############################################################################</p>
+
+<p>#The purpose of this project is to demonstrate your ability to collect, work with, and clean a data set.
+#The goal is to prepare tidy data that can be used for later analysis. 
+#You will be graded by your peers on a series of yes/no questions related to the project. 
+#You will be required to submit: 
+#1) a tidy data set as described below, 
+#2) a link to a Github repository with your script for performing the analysis, and 
+#3) a code book that describes the variables, the data, and any transformations or work that you performed 
+#to clean up the data called CodeBook.md. You should also include a README.md in the repo with your scripts. 
+#This repo explains how all of the scripts work and how they are connected. </p>
+
+<p>#One of the most exciting areas in all of data science right now is wearable computing - see for example this article . 
+#Companies like Fitbit, Nike, and Jawbone Up are racing to develop the most advanced algorithms to attract new users. The data linked to from the course website represent data collected from the accelerometers from the Samsung Galaxy S smartphone. A full description is available at the site where the data was obtained:
+#<a href="http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones">http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones</a>
+#Here are the data for the project:
+#<a href="https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip">https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip</a>
+#You should create one R script called run_analysis.R that does the following. 
+#1) Merges the training and the test sets to create one data set.
+#2) Extracts only the measurements on the mean and standard deviation for each measurement. 
+#3) Uses descriptive activity names to name the activities in the data set
+#4) Appropriately labels the data set with descriptive variable names. 
+#5) Creates a second, independent tidy data set with the average of each variable for each activity and each subject. </p>
+
+<p>#Good luck!</p>
+
+<p>###############################################################################</p>
+
+<h1>packages and setup</h1>
+
+<p>###############################################################################
+rm(list = ls()) # clear vars
+packages &lt;- c(&ldquo;data.table&rdquo;, &ldquo;reshape2&rdquo;, &ldquo;plyr&rdquo;, &ldquo;assertthat&rdquo;, &ldquo;knitr&rdquo;, &ldquo;markdown&rdquo;)
+sapply(packages, require, character.only = TRUE, quietly = TRUE)</p>
+
+<p>setwd(&ldquo;C:/dev/r-course/course-2/project&rdquo;)
+path &lt;- getwd()
+path</p>
+
+<p>pathIn &lt;- file.path(path, &ldquo;UCI HAR Dataset&rdquo;) # may not be created yet</p>
+
+<h1>create results folder</h1>
+
+<p>resultsfolder &lt;- &ldquo;results&rdquo;
+if (!file.exists(resultsfolder)) {
+    print(&ldquo;create results folder&rdquo;)
+    dir.create(resultsfolder)
+}</p>
+
+<p>###############################################################################</p>
+
+<h1>functions</h1>
+
+<p>###############################################################################</p>
+
+<h1>download zip and extract to folder</h1>
+
+<p>downloadProjectFile &lt;- function() {
+    url &lt;- &ldquo;<a href="https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip">https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip</a>&rdquo;
+    filename &lt;- &ldquo;Dataset.zip&rdquo;
+    if (!file.exists(path)) {
+        dir.create(path)
+    }
+    zipFile &lt;- file.path(path, filename)
+    download.file(url, zipFile)
+    unzip(zipFile, exdir = path)
+}</p>
+
+<h1>read file from given folder and filename</h1>
+
+<p>getFile &lt;- function(folder, filename) {
+    res &lt;- file.path(pathIn, folder, filename)
+    class(res)
+    fread(res)
+}</p>
+
+<p>#save to results folder
+saveresults &lt;- function(data, name) {
+    print(paste(&ldquo;saving results&rdquo;, name))
+    file &lt;- paste(resultsfolder, &ldquo;/&rdquo;, name, &ldquo;.csv&rdquo;, sep = &ldquo;&rdquo;)
+    write.csv(data, file)
+}
+###############################################################################</p>
+
+<h1>download if not already downloaded</h1>
+
+<p>if (!file.exists(&ldquo;./UCI HAR Dataset&rdquo;))
+    downloadProjectFile()</p>
+
+<h1>1.Merges the training and the test sets to create one data set.</h1>
+
+<h1>subjects</h1>
+
+<p>subject_train &lt;- getFile(&ldquo;train&rdquo;, &ldquo;subject_train.txt&rdquo;)
+subject_test &lt;- getFile(&ldquo;test&rdquo;, &ldquo;subject_test.txt&rdquo;)
+subject &lt;- rbind(subject_train, subject_test) #merge
+setnames(subject, &ldquo;V1&rdquo;, &ldquo;subject&rdquo;)
+print(&ldquo;data table added : subjects&rdquo;)</p>
+
+<h1>activity</h1>
+
+<p>activity_train &lt;- getFile(&ldquo;train&rdquo;, &ldquo;Y_train.txt&rdquo;)
+activity_test &lt;- getFile(&ldquo;test&rdquo;, &ldquo;Y_test.txt&rdquo;)
+activity &lt;- rbind(activity_train, activity_test)
+setnames(activity, &ldquo;V1&rdquo;, &ldquo;activityId&rdquo;)
+print(&ldquo;data table added : activity&rdquo;)
+#training
+train_train &lt;- getFile(&ldquo;train&rdquo;, &ldquo;X_train.txt&rdquo;)
+train_test &lt;- getFile(&ldquo;test&rdquo;, &ldquo;X_test.txt&rdquo;)
+train &lt;- rbind(train_train, train_test) #merge
+print(&ldquo;data table added : train&rdquo;)</p>
+
+<h1>merge all 3 into 1 data table called dt</h1>
+
+<p>dt &lt;- cbind(subject, activity, train)
+dt &lt;- arrange(dt, subject, activity)
+#colnames(dt)
+print(&ldquo;data tables merged to dt&rdquo;)</p>
+
+<h1>2. Extracts only the measurements on the mean and standard deviation for each measurement.</h1>
+
+<p>features &lt;- fread(file.path(pathIn, &ldquo;features.txt&rdquo;))</p>
+
+<h1>append another column with V  eg V1, V2, V3 - so they match up</h1>
+
+<p>setnames(features, names(features), c(&ldquo;featureId&rdquo;, &ldquo;featureName&rdquo;))
+features$version &lt;- features[, paste0(&ldquo;V&rdquo;, featureId)]
+features &lt;- features[grepl(&ldquo;mean\(\)|std\(\)&rdquo;, featureName)]
+row_count &lt;- nrow(features)
+assert_that(row_count == 66)
+print(&ldquo;data table added : features (66 found)&rdquo;)</p>
+
+<h1>append V to featureId column and convert to variable names for column filtering (include pre-named)</h1>
+
+<p>filt &lt;- sapply(list(features$featureId), FUN = function(x) {
+    c(&ldquo;subject&rdquo;, &ldquo;activityId&rdquo;, paste0(&ldquo;V&rdquo;, x))
+})
+select_expression &lt;- c(key(dt), filt)
+print(nrow(dt))
+#filter for the found column names 
+dt &lt;- dt[colnames(dt) %in% filt] 
+print(nrow(dt))
+assert_that(nrow(dt)==1253)
+print(&ldquo;dt filtered for columns with mean or standard deviation is 1253&rdquo;)
+saveresults(dt, &ldquo;mean_and_standard_deviation&rdquo;)
+setkey(dt,subject,activityId)</p>
+
+<h1>3. Uses descriptive activity names to name the activities in the data set</h1>
+
+<p>activity_labels &lt;- fread(file.path(pathIn, &ldquo;activity_labels.txt&rdquo;))
+setnames(activity_labels, names(activity_labels), c(&ldquo;activityId&rdquo;, &ldquo;activityName&rdquo;))</p>
+
+<h1>bolt on activityName</h1>
+
+<p>dt &lt;- merge(dt, activity_labels, by = &ldquo;activityId&rdquo;, all.x = TRUE)
+dt &lt;- arrange(dt, subject, activityId, activityName)</p>
+
+<p>#stop(&ldquo;stopping&hellip;&rdquo;)</p>
+
+<p>#4) Appropriately labels the data set with descriptive variable names. 
+#reshape2.melt &ndash; warnings //TODO
+melted &lt;- data.table(melt(dt, key(dt), id.vars = c(&ldquo;subject&rdquo;, &ldquo;activityId&rdquo;, &ldquo;activityName&rdquo;), message.vars=filt, variable.name = &ldquo;version&rdquo;))
+melted &lt;- merge(melted, features[, list(featureId, featureName, version)], by = &ldquo;version&rdquo;, all.x = TRUE)
+melted$activity &lt;- factor(melted$activityName)
+melted$feature &lt;- factor(melted$version)
+melted &lt;- arrange(melted, activity, feature)</p>
+
+<p>#5) Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
+setkey(melted, subject, activity)
+tidied &lt;- melted[, list(count = .N, average = mean(value)), by = key(melted)]</p>
+
+<p>#) make codebook
+rmd &lt;- file.path(getwd(), &ldquo;run_analysis.r&rdquo;)
+knit(rmd, output = &ldquo;codebook.md&rdquo;, encoding = &ldquo;ISO8859-1&rdquo;, quiet = FALSE)
+markdownToHTML(&ldquo;codebook.md&rdquo;, &ldquo;codebook.html&rdquo;)</p>
+
+</body>
+
+</html>
