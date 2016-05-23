@@ -31,7 +31,7 @@
 # packages and setup
 ###############################################################################
 rm(list = ls()) # clear vars
-packages <- c("data.table", "reshape2", "plyr")
+packages <- c("data.table", "reshape2", "plyr", "assertthat")
 sapply(packages, require, character.only = TRUE, quietly = TRUE)
 
 setwd("C:/dev/r-course/course-2/project")
@@ -88,45 +88,52 @@ subject_train <- getFile("train", "subject_train.txt")
 subject_test <- getFile("test", "subject_test.txt")
 subject <- rbind(subject_train, subject_test) #merge
 setnames(subject, "V1", "subject")
-
+print("data table added : subjects")
 # activity
 activity_train <- getFile("train", "Y_train.txt")
 activity_test <- getFile("test", "Y_test.txt")
 activity <- rbind(activity_train, activity_test)
 setnames(activity, "V1", "activityId")
-
+print("data table added : activity")
 #training
 train_train <- getFile("train", "X_train.txt")
 train_test <- getFile("test", "X_test.txt")
 train <- rbind(train_train, train_test) #merge
-
+print("data table added : train")
 # merge all 3 into 1 data table called dt
 dt <- cbind(subject, activity, train)
-arrange(dt, subject, activity)
+dt <- arrange(dt, subject, activity)
 colnames(dt)
-
+print("data tables merged to dt")
 # 2. Extracts only the measurements on the mean and standard deviation for each measurement.
 features <- fread(file.path(pathIn, "features.txt"))
 setnames(features, names(features), c("featureId", "featureName"))
 features <- features[grepl("mean\\(\\)|std\\(\\)", featureName)]
-features$featureCode <- features[, paste0("V", featureId)]
-head(features)
-features$featureCode,
-featureFilter <- cbind("subject", "activityId")
-select <- c(key(dt), features$featureCode)
-dt <- dt[, select, with = FALSE]
+row_count <- nrow(features)
+assert_that(row_count == 66)
+print("data table added : features")
 
+# append V to featureId column and convert to variable names for column filtering (include pre-named)
+filt <- sapply(list(features$featureId), FUN = function(x) {
+    c("subject", "activityId", paste0("V", x))
+})
+select_expression <- c(key(dt), filt)
+print(nrow(dt))
+filtered <- dt[colnames(dt) %in% filt]
+
+print(nrow(dt))
+print("dt filtered for columns with mean or standard deviation")
+saveresults(dt, "mean_and_standard_deviation")
+setkey(dt,subject,activityId)
+stop("stopping...")
 
 # 3. Uses descriptive activity names to name the activities in the data set
-
 activity_labels <- fread(file.path(pathIn, "activity_labels.txt"))
 setnames(activity_labels, names(activity_labels), c("activityId", "activityName"))
-dt <- merge(dt, activity_labels, by = "activityId", all.x = TRUE)
-# add activityName as key
-setkey(dt, subject, activityId, activityName)
-dt <- data.table(melt(dt, key(dt), variable.name = "featureCode"))
-dt <- merge(dt, features[, list(featureId, featureCode, featureName)], by = "featureCode", all.x = TRUE)
+dt <- merge(dt, activity_labels, all.x = TRUE)
 
+ 
 #4) Appropriately labels the data set with descriptive variable names. 
-dt$activity <- factor(dt$activityName)
-dt$feature <- factor(dt$featureName)
+dt$activity <- factor(dt$V1)
+dt$feature <- factor(dt$V2)
+dt <- arrange(dt, feature,activity)
