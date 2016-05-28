@@ -1,18 +1,11 @@
-# Coursera - GettingAndCleaningData - Assignment results
+# Coursera - Getting and Cleaning Data: course project
 ###based off dataset http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
 # 
 
-**run_analysis.R performs the following operations**
+This project transforms the raw Human Activity Recognition Using Smartphones Dataset from www.smartlab.ws (Jorge L. Reyes-Ortiz, Alessandro Ghio, Luca Oneto, Davide Anguita. November 2012) into a tidy data set. The source data and code books are available at https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip 
 
-1. gets packages ("data.table", "reshape2", "plyr", "assertthat", "knitr", "markdown")
-2. create local folders (results, UCI, HAR Dataset) after pulling down and extracting the zip
-3. combines the provided subject, activity and training data in 1 main data set 'dt'
-4. filters the feature data for measurements on the mean and standard deviation 
-5. on the main data set applies select expression using the filtered features column names
-6. appends the activities to the main data set
-7. melts the main data set category names (subject, activityId, activityName) by measurements
-8. outputs a tidy dataset containing the count, average, for each variable for each activity and each subject
-
-
-
-![image](https://cloud.githubusercontent.com/assets/662868/15468419/c18fe40a-2116-11e6-9e0f-3287602d37de.png)
+Files in repository include the following:
+* code book codebook.md which describes the variables and transformations used to clean the data set
+* the code to clean the data run_analysis.R 
+* tidy data set named tidy_fitness_data.csv
+* second tidy data set which summarises the average per Subject per Activity: tidy_fitness_data_averages_per_subject_activity.csv

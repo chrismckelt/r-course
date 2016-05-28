@@ -19,9 +19,6 @@ window.onload = function() {
 
 
 
-<!-- MathJax scripts -->
-<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
 
 
 <style type="text/css">
@@ -168,185 +165,138 @@ hr {
 <body>
 <h1>Title: run_analysis.R</h1>
 
-<h1>Version: 1.0</h1>
+<h1>Version: 2.0</h1>
 
 <h1>Author: Chris McKelt</h1>
 
-<p>###############################################################################</p>
+<p>####packages and setup</p>
 
-<p>#The purpose of this project is to demonstrate your ability to collect, work with, and clean a data set.
-#The goal is to prepare tidy data that can be used for later analysis. 
-#You will be graded by your peers on a series of yes/no questions related to the project. 
-#You will be required to submit: 
-#1) a tidy data set as described below, 
-#2) a link to a Github repository with your script for performing the analysis, and 
-#3) a code book that describes the variables, the data, and any transformations or work that you performed 
-#to clean up the data called CodeBook.md. You should also include a README.md in the repo with your scripts. 
-#This repo explains how all of the scripts work and how they are connected. </p>
+<pre><code>rm(list = ls()) # clear vars
+setwd(&quot;C:/dev/r-course/course-2/project&quot;)
+</code></pre>
 
-<p>#One of the most exciting areas in all of data science right now is wearable computing - see for example this article . 
-#Companies like Fitbit, Nike, and Jawbone Up are racing to develop the most advanced algorithms to attract new users. The data linked to from the course website represent data collected from the accelerometers from the Samsung Galaxy S smartphone. A full description is available at the site where the data was obtained:
-#<a href="http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones">http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones</a>
-#Here are the data for the project:
-#<a href="https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip">https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip</a>
-#You should create one R script called run_analysis.R that does the following. 
-#1) Merges the training and the test sets to create one data set.
-#2) Extracts only the measurements on the mean and standard deviation for each measurement. 
-#3) Uses descriptive activity names to name the activities in the data set
-#4) Appropriately labels the data set with descriptive variable names. 
-#5) Creates a second, independent tidy data set with the average of each variable for each activity and each subject. </p>
+<p>####install missing packages and reference
+    list.of.packages &lt;- c(&ldquo;dplyr&rdquo;, &ldquo;tidyr&rdquo;, &ldquo;knitr&rdquo;, &ldquo;markdown&rdquo;)
+    new.packages &lt;- list.of.packages[!(list.of.packages %in% installed.packages()[, &ldquo;Package&rdquo;])]
+    if (length(new.packages))
+        install.packages(new.packages)
+    sapply(new.packages, require, character.only = TRUE, quietly = FALSE)</p>
 
-<p>#Good luck!</p>
+<p>####set working directory
+    path &lt;- getwd()
+    path
+    data_folder &lt;- file.path(path, &ldquo;UCI HAR Dataset&rdquo;) # may not be created yet</p>
 
-<p>###############################################################################</p>
+<p>####create results folder for output if required
+    results_folder &lt;- &ldquo;results&rdquo;
+    if (!file.exists(results_folder)) {
+        print(&ldquo;create results folder&rdquo;)
+        dir.create(results_folder)
+    }</p>
 
-<h1>packages and setup</h1>
+<p>##&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-   functions start &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-</p>
 
-<p>###############################################################################
-rm(list = ls()) # clear vars
-packages &lt;- c(&ldquo;data.table&rdquo;, &ldquo;reshape2&rdquo;, &ldquo;plyr&rdquo;, &ldquo;assertthat&rdquo;, &ldquo;knitr&rdquo;, &ldquo;markdown&rdquo;)
-sapply(packages, require, character.only = TRUE, quietly = TRUE)</p>
+<p>####download zip and extract to folder
+    download_project_files &lt;- function() {
+        url &lt;- &ldquo;<a href="https://d396qusza40orc.cloudfront.net/extract_data%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip">https://d396qusza40orc.cloudfront.net/extract_data%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip</a>&rdquo;
+        filename &lt;- &ldquo;Dataset.zip&rdquo;
+        if (!file.exists(path)) {
+            dir.create(path)
+        }
+        zip_file &lt;- file.path(path, filename)
+        download.file(url, zip_file)
+        unzip(zip_file, exdir = path)
+    }</p>
 
-<p>setwd(&ldquo;C:/dev/r-course/course-2/project&rdquo;)
-path &lt;- getwd()
-path</p>
+<p>####read extract and convert it to a data.frame
+    get_tables &lt;- function(filename, cols = NULL) {
+        print(paste(&ldquo;Getting table:&rdquo;, filename))
+        f &lt;- paste(data_folder, filename, sep = &ldquo;/&rdquo;)
+        data &lt;- data.frame()
+        if (is.null(cols)) {
+            data &lt;- read.table(f, sep = &ldquo;&rdquo;, stringsAsFactors = F)
+        } else {
+            data &lt;- read.table(f, sep = &ldquo;&rdquo;, stringsAsFactors = F, col.names = cols)
+        }
+        data
+    }</p>
 
-<p>pathIn &lt;- file.path(path, &ldquo;UCI HAR Dataset&rdquo;) # may not be created yet</p>
+<p>####for the type of data (test/test) read the relevant columns in each file per folder<br/>
+    extract<em>data &lt;- function(type, features) {
+        print(paste(&ldquo;Getting data&rdquo;, type))
+        subject_data &lt;- get_tables(paste(type, &ldquo;/&rdquo;, &ldquo;subject</em>&rdquo;, type, &ldquo;.txt&rdquo;, sep = &ldquo;&rdquo;), &ldquo;subject&rdquo;)
+        y<em>data &lt;- get_tables(paste(type, &ldquo;/&rdquo;, &ldquo;y</em>&rdquo;, type, &ldquo;.txt&rdquo;, sep = &ldquo;&rdquo;), &ldquo;activity&rdquo;)
+        x<em>data &lt;- get_tables(paste(type, &ldquo;/&rdquo;, &ldquo;X</em>&rdquo;, type, &ldquo;.txt&rdquo;, sep = &ldquo;&rdquo;), features$V2)
+        return(cbind(subject_data, y_data, x_data))
+    }</p>
 
-<h1>create results folder</h1>
+<p>####save to results folder ./results
+    save_results &lt;- function(data, name) {
+        print(paste(&ldquo;saving results&rdquo;, name))
+        file &lt;- paste(results_folder, &ldquo;/&rdquo;, name, &ldquo;.csv&rdquo;, sep = &ldquo;&rdquo;)
+        write.csv(data, file)
+    }</p>
 
-<p>resultsfolder &lt;- &ldquo;results&rdquo;
-if (!file.exists(resultsfolder)) {
-    print(&ldquo;create results folder&rdquo;)
-    dir.create(resultsfolder)
-}</p>
+<p>##&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-   functions end &mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-</p>
 
-<p>###############################################################################</p>
+<p>####download if not already downloaded
+    if (!file.exists(&ldquo;./UCI HAR Dataset&rdquo;))
+        download_project_files()</p>
 
-<h1>functions</h1>
+<h1>Step 1 - Merges the training and the test sets to create one data set.</h1>
 
-<p>###############################################################################</p>
+<p>####metadata
+    features &lt;- get_tables(&ldquo;features.txt&rdquo;)
+    activity_labels &lt;- get_tables(&ldquo;activity_labels.txt&rdquo;)</p>
 
-<h1>download zip and extract to folder</h1>
+<p>####training data
+    test &lt;- extract_data(&ldquo;test&rdquo;, features)
+    train &lt;- extract_data(&ldquo;train&rdquo;, features)
+####merge both train and test data
+    combined_set &lt;- rbind(train, test)
+    combined_set</p>
 
-<p>downloadProjectFile &lt;- function() {
-    url &lt;- &ldquo;<a href="https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip">https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip</a>&rdquo;
-    filename &lt;- &ldquo;Dataset.zip&rdquo;
-    if (!file.exists(path)) {
-        dir.create(path)
-    }
-    zipFile &lt;- file.path(path, filename)
-    download.file(url, zipFile)
-    unzip(zipFile, exdir = path)
-}</p>
+<h1>Step 2 - Extracts only the measurements on the mean and standard deviation for each measurement.</h1>
 
-<h1>read file from given folder and filename</h1>
+<pre><code>clean_set &lt;- combined_set[, grepl(&quot;[Mm]ean|std|subject|activity&quot;, names(combined_set)) &amp; !grepl(&quot;meanFreq&quot;, names(combined_set))]
+</code></pre>
 
-<p>getFile &lt;- function(folder, filename) {
-    res &lt;- file.path(pathIn, folder, filename)
-    class(res)
-    fread(res)
-}</p>
+<h1>Step 3 - Uses descriptive activity names to name the activities in the data set</h1>
 
-<p>#save to results folder
-saveresults &lt;- function(data, name) {
-    print(paste(&ldquo;saving results&rdquo;, name))
-    file &lt;- paste(resultsfolder, &ldquo;/&rdquo;, name, &ldquo;.csv&rdquo;, sep = &ldquo;&rdquo;)
-    write.csv(data, file)
-}
-###############################################################################</p>
+<pre><code>clean_names &lt;- tolower(names(clean_set))
+clean_names &lt;- sub(&quot;^t&quot;, &quot;time&quot;, clean_names)
+clean_names &lt;- sub(&quot;^f&quot;, &quot;frequency&quot;, clean_names)
+clean_names &lt;- gsub(&quot;\\.&quot;, &quot;&quot;, clean_names)
+clean_names &lt;- sub(&quot;acc&quot;, &quot;acceleration&quot;, clean_names)
+clean_names &lt;- sub(&quot;mag&quot;, &quot;magnitude&quot;, clean_names)
+clean_names &lt;- sub(&quot;std&quot;, &quot;standarddeviation&quot;, clean_names)
+clean_names &lt;- sub(&quot;gyro&quot;, &quot;gyroscope&quot;, clean_names)
+clean_names &lt;- sub(&quot;tbody&quot;, &quot;timebody&quot;, clean_names)
+</code></pre>
 
-<h1>download if not already downloaded</h1>
+<h1>Step 4 - Appropriately labels the data set with descriptive variable names.</h1>
 
-<p>if (!file.exists(&ldquo;./UCI HAR Dataset&rdquo;))
-    downloadProjectFile()</p>
+<pre><code>names(clean_set) &lt;- clean_names
+save_results(clean_set, &quot;tidy_fitness_data&quot;)
+</code></pre>
 
-<h1>1.Merges the training and the test sets to create one data set.</h1>
+<h1>Step 5 -  Creates a second, independent tidy data set with the average of each variable for each activity and each subject.</h1>
 
-<h1>subjects</h1>
+<p>####activity and subject are the first 2 columns
+    tidy_set &lt;- aggregate(clean_set[, 3:75], list(subject = clean_set$subject, activity = clean_set$activity), mean, use.names = TRUE)</p>
 
-<p>subject_train &lt;- getFile(&ldquo;train&rdquo;, &ldquo;subject_train.txt&rdquo;)
-subject_test &lt;- getFile(&ldquo;test&rdquo;, &ldquo;subject_test.txt&rdquo;)
-subject &lt;- rbind(subject_train, subject_test) #merge
-setnames(subject, &ldquo;V1&rdquo;, &ldquo;subject&rdquo;)
-print(&ldquo;data table added : subjects&rdquo;)</p>
+<pre><code>save_results(tidy_set, &quot;tidy_fitness_data_averages_per_subject_activity&quot;)
+</code></pre>
 
-<h1>activity</h1>
-
-<p>activity_train &lt;- getFile(&ldquo;train&rdquo;, &ldquo;Y_train.txt&rdquo;)
-activity_test &lt;- getFile(&ldquo;test&rdquo;, &ldquo;Y_test.txt&rdquo;)
-activity &lt;- rbind(activity_train, activity_test)
-setnames(activity, &ldquo;V1&rdquo;, &ldquo;activityId&rdquo;)
-print(&ldquo;data table added : activity&rdquo;)
-#training
-train_train &lt;- getFile(&ldquo;train&rdquo;, &ldquo;X_train.txt&rdquo;)
-train_test &lt;- getFile(&ldquo;test&rdquo;, &ldquo;X_test.txt&rdquo;)
-train &lt;- rbind(train_train, train_test) #merge
-print(&ldquo;data table added : train&rdquo;)</p>
-
-<h1>merge all 3 into 1 data table called dt</h1>
-
-<p>dt &lt;- cbind(subject, activity, train)
-dt &lt;- arrange(dt, subject, activity)
-#colnames(dt)
-print(&ldquo;data tables merged to dt&rdquo;)</p>
-
-<h1>2. Extracts only the measurements on the mean and standard deviation for each measurement.</h1>
-
-<p>features &lt;- fread(file.path(pathIn, &ldquo;features.txt&rdquo;))</p>
-
-<h1>append another column with V  eg V1, V2, V3 - so they match up</h1>
-
-<p>setnames(features, names(features), c(&ldquo;featureId&rdquo;, &ldquo;featureName&rdquo;))
-features$version &lt;- features[, paste0(&ldquo;V&rdquo;, featureId)]
-features &lt;- features[grepl(&ldquo;mean\(\)|std\(\)&rdquo;, featureName)]
-row_count &lt;- nrow(features)
-assert_that(row_count == 66)
-print(&ldquo;data table added : features (66 found)&rdquo;)</p>
-
-<h1>append V to featureId column and convert to variable names for column filtering (include pre-named)</h1>
-
-<p>filt &lt;- sapply(list(features$featureId), FUN = function(x) {
-    c(&ldquo;subject&rdquo;, &ldquo;activityId&rdquo;, paste0(&ldquo;V&rdquo;, x))
-})
-select_expression &lt;- c(key(dt), filt)
-print(nrow(dt))
-#filter for the found column names 
-dt &lt;- dt[colnames(dt) %in% filt] 
-print(nrow(dt))
-assert_that(nrow(dt)==1253)
-print(&ldquo;dt filtered for columns with mean or standard deviation is 1253&rdquo;)
-saveresults(dt, &ldquo;mean_and_standard_deviation&rdquo;)
-setkey(dt,subject,activityId)</p>
-
-<h1>3. Uses descriptive activity names to name the activities in the data set</h1>
-
-<p>activity_labels &lt;- fread(file.path(pathIn, &ldquo;activity_labels.txt&rdquo;))
-setnames(activity_labels, names(activity_labels), c(&ldquo;activityId&rdquo;, &ldquo;activityName&rdquo;))</p>
-
-<h1>bolt on activityName</h1>
-
-<p>dt &lt;- merge(dt, activity_labels, by = &ldquo;activityId&rdquo;, all.x = TRUE)
-dt &lt;- arrange(dt, subject, activityId, activityName)</p>
-
-<p>#stop(&ldquo;stopping&hellip;&rdquo;)</p>
-
-<p>#4) Appropriately labels the data set with descriptive variable names. 
-#reshape2.melt &ndash; warnings //TODO
-melted &lt;- data.table(melt(dt, key(dt), id.vars = c(&ldquo;subject&rdquo;, &ldquo;activityId&rdquo;, &ldquo;activityName&rdquo;), message.vars=filt, variable.name = &ldquo;version&rdquo;))
-melted &lt;- merge(melted, features[, list(featureId, featureName, version)], by = &ldquo;version&rdquo;, all.x = TRUE)
-melted$activity &lt;- factor(melted$activityName)
-melted$feature &lt;- factor(melted$version)
-melted &lt;- arrange(melted, activity, feature)</p>
-
-<p>#5) Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
-setkey(melted, subject, activity)
-tidied &lt;- melted[, list(count = .N, average = mean(value)), by = key(melted)]</p>
-
-<p>#) make codebook
-rmd &lt;- file.path(getwd(), &ldquo;run_analysis.r&rdquo;)
-knit(rmd, output = &ldquo;codebook.md&rdquo;, encoding = &ldquo;ISO8859-1&rdquo;, quiet = FALSE)
-markdownToHTML(&ldquo;codebook.md&rdquo;, &ldquo;codebook.html&rdquo;)</p>
+<p>####output files required for assessment results.txt
+    file &lt;- paste(results_folder, &ldquo;/&rdquo;, &ldquo;tidy_set&rdquo;, &ldquo;.txt&rdquo;, sep = &ldquo;&rdquo;)
+    write.table(tidy_set, file, row.names = FALSE)
+####output codebook.md
+    library(knitr)
+    library(markdown)
+    rmd &lt;- file.path(getwd(), &ldquo;run_analysis.r&rdquo;)
+    knit(rmd, output = &ldquo;codebook.md&rdquo;, encoding = &ldquo;ISO8859-1&rdquo;, quiet = FALSE)
+    markdownToHTML(&ldquo;codebook.md&rdquo;, &ldquo;codebook.html&rdquo;)</p>
 
 </body>
 
