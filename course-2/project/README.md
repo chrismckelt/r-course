@@ -9,3 +9,9 @@ Files in repository include the following:
 * the code to clean the data run_analysis.R 
 * tidy data set named tidy_fitness_data.csv
 * second tidy data set which summarises the average per Subject per Activity: tidy_fitness_data_averages_per_subject_activity.csv
+* 
+
+see codebook.md for further details on the R script
+
+![image](https://cloud.githubusercontent.com/assets/662868/15627150/a6a0319a-250d-11e6-8e9b-ec7350dd7506.png)
+
