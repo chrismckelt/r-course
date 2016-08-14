@@ -1,5 +1,37 @@
-saveFile = function(url,name){
+
+rm(list = ls())
+
+saveFile = function(url, name) {
   url <- url
   filename <- name
   download.file(url, filename)
 }
+
+
+### update existing packages
+### http://stackoverflow.com/questions/3971815/automatically-update-packages-installed-from-r-forge
+
+# 1. Get the list of packages you have installed, 
+#    use priority to exclude base and recommended packages.
+#    that may have been distributed with R.
+pkgList <- installed.packages(priority = 'NA')[, 'Package']
+
+# 2. Find out which packages are on CRAN and R-Forge.  Because
+#    of R-Forge build capacity is currently limiting the number of
+#    binaries available, it is queried for source packages only.
+CRANpkgs <- available.packages(
+  contriburl = contrib.url('http://cran.r-project.org'))[, 'Package']
+forgePkgs <- available.packages(
+  contriburl = contrib.url('http://r-forge.r-project.org', type = 'source')
+)[, 'Package']
+
+# 3. Calculate the set of packages which are installed on your machine,
+#    not on CRAN but also present on R-Force.
+pkgsToUp <- intersect(setdiff(pkgList, CRANpkgs), forgePkgs)
+
+# 4. Update the packages, using oldPkgs to restrict the list considered.
+update.packages(checkBuilt = TRUE, ask = FALSE,
+  repos = "http://r-forge.r-project.org",
+  oldPkgs = pkgsToUp)
+
+# 5. Profit?

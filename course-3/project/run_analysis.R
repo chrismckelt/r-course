@@ -10,11 +10,11 @@
     setwd("C:/dev/r-course/course-2/project")
 
 ####install missing packages and reference
-    list.of.packages <- c("dplyr", "tidyr", "knitr", "markdown")
-    new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
-    if (length(new.packages))
-        install.packages(new.packages)
-    sapply(new.packages, require, character.only = TRUE, quietly = FALSE)
+list.of.packages <- c("dplyr", "tidyr", "knitr", "markdown")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
+if (length(new.packages))
+    install.packages(new.packages)
+sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = FALSE), require, character.only = TRUE, quietly = FALSE)
 
 ####set working directory
     path <- getwd()
