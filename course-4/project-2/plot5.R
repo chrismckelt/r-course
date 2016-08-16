@@ -1,7 +1,7 @@
 # Title: plot5.R
 # Description: https://www.coursera.org/learn/exploratory-data-analysis/peer/b5Ecl/course-project-2
 
-# How have emissions from motor vehicle sources changed from 1999–2008 in Baltimore City?
+#How have emissions from motor vehicle sources changed from 1999–2008 in Baltimore City?
 
 rm(list = ls()) # clear vars
 setwd("C:\\dev\\r-course\\course-4\\project-2")
@@ -11,12 +11,15 @@ library(dplyr)
 NEI <- readRDS("summarySCC_PM25.rds")
 SCC <- readRDS("Source_Classification_Code.rds")
 
-NEI.24510 <- (NEI) %>% filter(fips == "24510")
+SCC.motor <- grep("motor", SCC$Short.Name, ignore.case = TRUE)
+SCC.motor <- SCC[SCC.motor,]
 
-baltimore <- NEI.24510 %>% group_by(year, type) %>% summarise(Emissions = sum(as.numeric(as.character(Emissions))))
+baltimore.yearly.motor.emissions <- tbl_df(NEI) %>%
+        filter(NEI$SCC %in% SCC.motor$SCC & NEI$fips=="24510") %>% # motor vehicles in baltimore
+        group_by(year) %>%
+        summarise(Emissions = sum(as.numeric(as.character(Emissions))))
 
-g <- qplot(year, Emissions, data = baltimore, group = baltimore$type, color = baltimore$type,
-    geom = c("point", "line"), ylab = expression("Total Emissions, PM"[2.5]),
-    xlab = "Year", main = "Total Emissions in U.S. by Type of Pollutant")
+png("plot5.png")
+plot(baltimore.yearly.motor.emissions, type="o", ylab = expression("Total Emissions, PM"[2.5]), xlab = "Year", main = "Baltimore annual motor emissions", xlim = c(1999, 2008))
 
-ggsave("plot3.png", plot = g)
+dev.off()

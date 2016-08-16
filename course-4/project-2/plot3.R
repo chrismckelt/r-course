@@ -15,7 +15,9 @@ SCC <- readRDS("Source_Classification_Code.rds")
 
 NEI.24510 <- (NEI) %>% filter(fips == "24510")
 
-baltimore <- NEI.24510 %>% group_by(year, type) %>% summarise(Emissions = sum(as.numeric(as.character(Emissions))))
+baltimore <- NEI.24510 %>% 
+                group_by(year, type) %>%
+                summarise(Emissions = sum(as.numeric(as.character(Emissions))))
 
 g <- qplot(year, Emissions, data = baltimore, group = baltimore$type, color = baltimore$type,
     geom = c("point", "line"), ylab = expression("Total Emissions, PM"[2.5]),

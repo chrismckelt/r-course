@@ -11,21 +11,17 @@ library(dplyr)
 NEI <- readRDS("summarySCC_PM25.rds")
 SCC <- readRDS("Source_Classification_Code.rds")
 
-coal_related <- grepl("coal", SCC$Short.Name, ignore.case = TRUE) |
-grepl("coal", SCC$EI.Sector, ignore.case = T)
+SCC.coal <- grep("coal", SCC$Short.Name, ignore.case = TRUE)
+SCC.coal <- SCC[SCC.coal,]
 
-coal_related <- SCC[coal_related,]
-
-aggregate.coal <- tbl_df(NEI) %>%
-        filter(SCC %in% coal_related$SCC) %>%
+coal.yearly.emissions <- tbl_df(NEI) %>%
+        filter(NEI$SCC %in% SCC.coal$SCC) %>%
         group_by(year) %>%
         summarise(Emissions = sum(as.numeric(as.character(Emissions))))
 
-aggregate.coal$year = as.factor(aggregate.coal$year)
-
 png("plot4.png")
-plot(aggregate.coal, type = "o", ylab = expression("Total Emissions, PM"[2.5]),
-    xlab = "Year", main = "Emissions and Total Coal Combustion for the United States",
+plot(coal.yearly.emissions, ylab = expression("Total Emissions, PM"[2.5]),
+    xlab = "Year", main = "Annual Coal Combustion Emissions for the USA",
     xlim = c(1999, 2008))
-polygon(aggregate.coal, col = "red", border = "red")
+polygon(coal.yearly.emissions, col = "red", border = "red")
 dev.off()
