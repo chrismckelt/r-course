@@ -7,3 +7,4 @@ library(flipsideR)
 
 WBC = getOptionChain("WBC", "ASX")
 head(WBC)
+plot(WBC)
