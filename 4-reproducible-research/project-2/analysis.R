@@ -56,18 +56,12 @@ df.indicators[df.indicators$CROPDMGEXP == "K",]$CROPDMGCALC = df.indicators[df.i
 df.indicators[df.indicators$CROPDMGEXP == "M",]$CROPDMGCALC = df.indicators[df.indicators$CROPDMGEXP == "M",]$CROPDMG * 10 ^ 6
 df.indicators[df.indicators$CROPDMGEXP == "B",]$CROPDMGCALC = df.indicators[df.indicators$CROPDMGEXP == "B",]$CROPDMG * 10 ^ 9
 
-# Display the top 10 event that cause the most propery damage
-df.property_damage_costs <- sqldf("select EvType as Event_Type, sum(PROPDMGCALC) as Property_Damage_Cost from [df.indicators] group by Event_Type order by Property_Damage_Cost desc limit 10")
-ggplot(df.property_damage_costs, aes(x = Event_Type, y = Property_Damage_Cost)) +
+# Sum the property and crop total calculated cost into a new Total Damage Cost field and display the top 10
+df.total_damage_costs <- sqldf("select EvType as Event_Type, sum(PROPDMGCALC) + sum(CROPDMGCALC) as Total_Damage_Cost from [df.indicators] group by Event_Type order by Total_Damage_Cost desc limit 10")
+ggplot(df.total_damage_costs, aes(x = Event_Type, y = Total_Damage_Cost)) +
     geom_bar(stat = "identity", fill = "red", position = "stack") +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-xlab("Event Type") + ylab("Property Damage Cost $") + ggtitle("Cost of property damage by top 10 Weather Events")
+xlab("Event Type") + ylab("Total Damage Cost (USD $)") + ggtitle("Total cost of property and crop damage by top 10 Weather Events")
 
 
-# Display the top 10 injurious events types 
-
-df.crop_damage_costs <- sqldf("select EvType as Event_Type, sum(CROPDMGEXP) as Crop_Damage_Cost from [df.indicators] group by Event_Type order by Crop_Damage_Cost desc limit 10")
-ggplot(df.crop_damage_costs, aes(x = Event_Type, y = Crop_Damage_Cost)) +
-    geom_bar(stat = "identity", fill = "red", position = "stack") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    xlab("Event Type") + ylab("Cost Damage Cost $") + ggtitle("Cost of crop damage by top 10 Weather Events")
+ 

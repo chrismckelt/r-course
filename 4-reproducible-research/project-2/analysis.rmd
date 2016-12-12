@@ -1,0 +1,111 @@
+---
+title: "Health and Economic Impact of Weather Events in the US"
+output: html_document
+---
+
+
+## Synopsis:
+ 1. Objective: explore the NOAA Storm Database to find out the most severe types of events(EVTYPE variable) with respect to population health and economic consequences.
+ 2. Population health include two related variables: "FATALITIES(number of fatalities)", "INJURIES(number of injuries)". 
+ 3. Economic consequeces include four related variables: "PROPDMG(number of properties damaged)", "PROPDMGEXP(exponent for property damage)", "CROPDMG(number of crops damaged)", "CROPDMGEXP(exponent for crop damage)". 
+ 4. The report shows the top 10 weather event types for each index. 
+ 
+
+## Conclusion: 
+
+- Tornado is the most severe event type with respect to population health
+- Flood is the most severe event type with respect to economic consequences.
+
+
+## Data
+
+- Dataset: U.S. National Oceanic and Atmospheric Administration's (NOAA) storm database [storm data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
+- This database tracks characteristics of major storms and weather events in the United States, including when and where they occur, as well as estimates of any fatalities, injuries, and property damage.
+- The dataset is stored in a comma-separated-value file compressed via the bzip2 algorithm to reduce its size and there are a total of 902297 observations and 37 variables in this dataset
+
+## Data Processing
+
+###### environment setup
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+rm(list = ls()) 
+setwd("C:\\dev\\r-course\\4-reproducible-research\\project-2")
+list.of.packages <- c("dplyr", "tidyr", "ggplot2", "knitr", "markdown", "downloader", "sqldf")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
+if (length(new.packages))
+    install.packages(new.packages)
+sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = TRUE), require, character.only = TRUE, quietly = TRUE)
+if (!file.exists("StormData.csv.bz2")) {
+    library(downloader)
+    download("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile = "StormData.csv.bz2")
+}
+```
+
+#### Take the columns related to population health and economic consequences
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+df <- read.csv("Stormdata.csv.bz2", stringsAsFactors = FALSE, header = TRUE)
+df.indicators <- sqldf(" select STATE, EVTYPE, FATALITIES, INJURIES, PROPDMG, PROPDMGEXP, CROPDMG, CROPDMGEXP from df")
+df.indicators$EVTYPE <- as.factor(df.indicators$EVTYPE)
+df.indicators$PROPDMGEXP <- as.factor(df.indicators$PROPDMGEXP)
+df.indicators$CROPDMGEXP <- as.factor(df.indicators$CROPDMGEXP)
+```
+
+#### select the top 10 fatal events types by summing fatalities by event type
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+df.event_fatalities_summary <- sqldf("select EVTYPE as Event_Type, sum(FATALITIES) as Total_Fatalities from [df.indicators] group by EVTYPE order by Total_Fatalities desc limit 10")
+```
+#### summarise the top 10 fatal events types 
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+df.event_fatalities_summary
+```
+
+#### Display the top 10 fatal events types 
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+ggplot(df.event_fatalities_summary, aes(x = Event_Type, y = Total_Fatalities)) +
+    geom_bar(stat = "identity", fill = "blue", position = "stack") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    xlab("Event_Type") + ylab("Total_Injuries") + ggtitle("Number of fatalities by top 10 Weather Events")
+```
+ 
+
+#### To calculate the property and crop costs - use the relative exponentor column to calculate the cost
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+unique.property.exp <- unique(df.indicators$PROPDMGEXP)
+unique.crop.exp <- unique(df.indicators$CROPDMGEXP)
+```
+
+#### For property damage introduce a new column called PROPDMGCALC  - multiple the property damage by its multiplier (H, K, M, B units)
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+df.indicators$PROPDMGCALC = 0
+df.indicators[df.indicators$PROPDMGEXP == "H",]$PROPDMGCALC = df.indicators[df.indicators$PROPDMGEXP == "H",]$PROPDMG * 10 ^ 2
+df.indicators[df.indicators$PROPDMGEXP == "K",]$PROPDMGCALC = df.indicators[df.indicators$PROPDMGEXP == "K",]$PROPDMG * 10 ^ 3
+df.indicators[df.indicators$PROPDMGEXP == "M",]$PROPDMGCALC = df.indicators[df.indicators$PROPDMGEXP == "M",]$PROPDMG * 10 ^ 6
+df.indicators[df.indicators$PROPDMGEXP == "B",]$PROPDMGCALC = df.indicators[df.indicators$PROPDMGEXP == "B",]$PROPDMG * 10 ^ 9
+```
+
+#### For crop damage introduce a new column called CROPDMGCALC  - multiple the crop damage by its multiplier (H, K, M, B units)
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+df.indicators$CROPDMGCALC = 0
+df.indicators[df.indicators$CROPDMGEXP == "H",]$CROPDMGCALC = df.indicators[df.indicators$CROPDMGEXP == "H",]$CROPDMG * 10 ^ 2
+df.indicators[df.indicators$CROPDMGEXP == "K",]$CROPDMGCALC = df.indicators[df.indicators$CROPDMGEXP == "K",]$CROPDMG * 10 ^ 3
+df.indicators[df.indicators$CROPDMGEXP == "M",]$CROPDMGCALC = df.indicators[df.indicators$CROPDMGEXP == "M",]$CROPDMG * 10 ^ 6
+df.indicators[df.indicators$CROPDMGEXP == "B",]$CROPDMGCALC = df.indicators[df.indicators$CROPDMGEXP == "B",]$CROPDMG * 10 ^ 9
+```
+
+#### Sum the property and crop total calculated cost into a new Total Damage Cost field and display the top 10
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+df.total_damage_costs <- sqldf("select EvType as Event_Type, sum(PROPDMGCALC) + sum(CROPDMGCALC) as Total_Damage_Cost from [df.indicators] group by Event_Type order by Total_Damage_Cost desc limit 10")
+```
+
+#### summarise the top 10 damage costs (shown in billions)
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+df.total_damage_costs
+```
+
+#### Display the top 10 property & crop events that caused the most damage in USD $
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+ggplot(df.total_damage_costs, aes(x = Event_Type, y = Total_Damage_Cost)) +
+    geom_bar(stat = "identity", fill = "red", position = "stack") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+xlab("Event Type") + ylab("Total Damage Cost (USD $)") + ggtitle("Total cost of property and crop damage by top 10 Weather Events")
+
+```
