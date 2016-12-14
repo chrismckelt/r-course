@@ -1,0 +1,41 @@
+---
+title: "Fair Go Finance Development team velocity"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+rm(list = ls()) # clear vars
+setwd("C:\\dev\\r-course\\me")
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(knitr)
+library(markdown)
+library(sqldf)
+```
+ 
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+
+df <- read.csv("time-series-data.csv", stringsAsFactors = FALSE, header = TRUE)
+colnames(df)[1] <- 'Sprint_Date_string'
+df$Sprint_Date <- as.Date(df$Sprint_Date_string, "%d/%m/%Y")
+
+sprint_results <- sqldf::sqldf("select Sprint_Date, Velocity, Estimation_Inaccuracy as Estimation_Inaccuracy_Percentage,Remaining_Points from df")
+```
+
+#### Sprint stats (verifiable from Slack Stats channel)
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+sprint_results
+```
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+ggplot(data = sprint_results, aes(Sprint_Date)) +
+geom_line(aes(y = Velocity, color = "Velocity")) +
+xlab("Sprint end date") + ylab("Velocity") + ggtitle("Dev team velocity over time")
+```
+
+
