@@ -33,8 +33,8 @@ sprint_results
 ```
 
 ```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
-last_3 <- Sys.Date - 
-total_velocity <- sqldf::sqldf("select sum(Velocity) from df where Sprint_Date >   order by Sprint_Date desc limit 3")
+ 
+total_velocity <- sqldf::sqldf("select sum(Velocity) from df  order by Sprint_Date desc limit 3")
 velocity <- total_velocity / 3
 ```
 
