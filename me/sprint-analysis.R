@@ -7,7 +7,7 @@ setwd("C:\\dev\\r-course\\me")
 
 #------
 ####install missing packages and reference
-list.of.packages <- c("dplyr", "tidyr", "ggplot2", "knitr", "markdown", "downloader", "sqldf")
+list.of.packages <- c("dplyr", "tidyr", "ggplot2", "knitr", "markdown", "downloader", "sqldf", "lubridate")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
 if (length(new.packages))
     install.packages(new.packages)
@@ -18,7 +18,10 @@ colnames(df)[1] <- 'Sprint_Date_string'
 df$Sprint_Date <- as.Date(df$Sprint_Date_string, "%d/%m/%Y")
 
 sprint_results <- sqldf::sqldf("select Sprint_Date, Velocity, Estimation_Inaccuracy as Estimation_Inaccuracy_Percentage,Remaining_Points from df")
-
+last_3_sprints_start_date <- ymd(Sys.Date()) - 48
+sprint_velocity <- subset(sprint_results, as.Date(Sprint_Date) > last_3_sprints_start_date)
+total_velocity <- sum(sprint_velocity$Velocity)
+velocity <- total_velocity / 3
 
 ggplot(data = sprint_results, aes(Sprint_Date)) +
   geom_line(aes(y = Velocity, color = "Velocity")) +

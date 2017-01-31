@@ -34,7 +34,10 @@ sprint_results
 
 ```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
  
-total_velocity <- sqldf::sqldf("select sum(Velocity) from df  order by Sprint_Date desc limit 3")
+sprint_results <- sqldf::sqldf("select Sprint_Date, Velocity, Estimation_Inaccuracy as Estimation_Inaccuracy_Percentage,Remaining_Points from df")
+last_3_sprints_start_date <- ymd(Sys.Date()) - 48
+sprint_velocity <- subset(sprint_results, as.Date(Sprint_Date) > last_3_sprints_start_date)
+total_velocity <- sum(sprint_velocity$Velocity)
 velocity <- total_velocity / 3
 ```
 
