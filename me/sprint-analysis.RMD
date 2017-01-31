@@ -33,6 +33,17 @@ sprint_results
 ```
 
 ```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+last_3 <- Sys.Date - 
+total_velocity <- sqldf::sqldf("select sum(Velocity) from df where Sprint_Date >   order by Sprint_Date desc limit 3")
+velocity <- total_velocity / 3
+```
+
+#### Overall Velocity (last 3 sprints averaged)
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+velocity
+```
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 ggplot(data = sprint_results, aes(Sprint_Date)) +
 geom_line(aes(y = Velocity, color = "Velocity")) +
 xlab("Sprint end date") + ylab("Velocity") + ggtitle("Dev team velocity over time")
