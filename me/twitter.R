@@ -14,7 +14,7 @@ accessURL <- "http://api.twitter.com/oauth/access_token"
 
 authURL <- "http://api.twitter.com/oauth/authorize"
 
-source("C:/GDrive/Software/code/settings.R")
+source("d:/GDrive/Software/code/settings.R")
 
 download.file(url = "http://curl.haxx.se/ca/cacert.pem", destfile = "cacert.pem")
 
