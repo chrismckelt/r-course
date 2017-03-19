@@ -1,4 +1,4 @@
-# Title: assignment.R
+# Title: Part 2: Basic Inferential Data Analysis
 # Description: https://www.coursera.org/learn/statistical-inference/peer/3k8j5/statistical-inference-course-project
 
 ####setup
@@ -17,15 +17,15 @@ sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = FALSE)
 # Part 1 - Simulations
 
 ## simulation inputs
-lambda <- 0.2 ## lambda = 0.2 for all of the simulations
-size <- 40 ## 40 exponentials
+lambda <- 0.2  
+size <- 40  
 simulations <- 1000 
 
-# set a seed so we can reproduce the results
+# settings a seed will allow us to reproduce the results
 set.seed(881) # prime
 
-# init a dataframe with column title 'mean' for recording sample mean results
-samples <- data.frame(mean = numeric(size))
+# create a dataframe with column title 'individual_mean' for recording each sample distributions mean
+samples <- data.frame(individual_mean = numeric(size))
 
 replicate(simulations, mean(rexp(size, lambda)))
 # create a new sample for each simulation and get its mean and added to samples data frame
@@ -41,7 +41,7 @@ data <- samples[, 1]
 sample_mean <- mean(data)
 
 ### plot samples with theoretical mean vs sample mean
-ggplot(samples, aes(x = mean)) +
+ggplot(samples, aes(x = individual_mean)) +
     geom_histogram(bins = 20, boundary = -0.5, fill = NA, color = "black") +
     geom_density(alpha = .2, fill = "#FF6666",show.legend = FALSE) +
     geom_vline(aes(xintercept = sample_mean, color = "sample_mean", linetype = "sample_mean", show.legend = FALSE)) +
@@ -58,10 +58,10 @@ sample_variance <- var(data)
 
 # Show that the distribution is approximately normal.
 # visually inspect bell curve
-ggplot(samples, aes(x = mean)) +
+ggplot(samples, aes(x = individual_mean)) +
     geom_histogram(aes(y = ..density..), bins = 20, boundary = -0.5, fill = NA, color = "black") +
     geom_density(alpha = .2, fill = "#FF6666", show.legend = FALSE) +
-    stat_function(fun = dnorm, args = list(mean = mean, sd = sqrt(sample_variance)), colour = "yellow", size = 2) +
+    stat_function(fun = dnorm, args = list(mean = mean(data), sd = sqrt(sample_variance)), colour = "yellow", size = 2) +
     labs(title = "Approximation to Normality - visual inspection of bell curve") +
     labs(x = "Sample means", y = "Frequency")
 
