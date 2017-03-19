@@ -1,7 +1,6 @@
-n <- 100 #subject
-u <- 0.01 # m^3 brain volume loss mean
-s <- 0.04 # m^3 brain volume loss std. dev.
-p <- 0.05 # sign level
-
-x <- power.t.test(power = 0.9, delta = u, sd = s, sig.level = p, type = "one.sample", alt = "one.sided")$n
-ceiling(x / 10) * 10
++####output codebook.md
+ + library(knitr)
+ + library(markdown)
+ + rmd <- file.path("C:\\dev\\r-course\\5-statistical-inference", "assignment_1.rmd")
+ + knit(rmd, output = "assignment_1.md", encoding = "ISO8859-1", quiet = FALSE)
+ + mark("assignment_1.md", "codebook.html")

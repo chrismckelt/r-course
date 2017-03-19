@@ -33,5 +33,4 @@ pkgsToUp <- intersect(setdiff(pkgList, CRANpkgs), forgePkgs)
 update.packages(checkBuilt = TRUE, ask = FALSE,
   repos = "http://r-forge.r-project.org",
   oldPkgs = pkgsToUp)
-
-# 5. Profit?
+ 

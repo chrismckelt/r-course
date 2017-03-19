@@ -1,21 +1,126 @@
 ---
-title: "Statistical Inference Project - Part I Sample Mean vs Theoretical Mean"
-# Description: https://www.coursera.org/learn/statistical-inference/peer/3k8j5/statistical-inference-course-project
-output: html_document
+title: 'Statistical Inference Project -  Part 1: Simulation Exercise'
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and Microsoft Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Part 1: Simulation Exercise Instructions
 
-When you click the **R Tools | Publish | Preview** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# In this project you will investigate the exponential distribution in R and compare it with the Central Limit Theorem. 
+# The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter. 
+# The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. Set lambda = 0.2 for all of the simulations. 
+# You will investigate the distribution of averages of 40 exponentials. Note that you will need to do a thousand simulations.
 
-```{r}
-summary(cars)
+####setup
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+rm(list = ls()) # clear vars
+setwd("C:\\dev\\r-course\\5-statistical-inference")
+#------
+####install missing packages and reference
+list.of.packages <- c("dplyr", "tidyr", "ggplot2", "knitr", "markdown", "moments", "nortest", "e1071")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
+
+if (length(new.packages))
+    install.packages(new.packages)
+
+sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = FALSE), require, character.only = TRUE, quietly = FALSE)
 ```
 
-You can also embed plots, for example:
-
-```{r, echo=FALSE}
-plot(cars)
+# Part 1 - Simulations
+## simulation inputs
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+lambda <- 0.2
+size <- 40
+simulations <- 1000
+```
+# settings a seed will allow us to reproduce the results
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+set.seed(881) # prime
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# create a dataframe with column title 'individual_mean' for recording each sample distributions mean
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+samples <- data.frame(individual_mean = numeric(size))
+replicate(simulations, mean(rexp(size, lambda)))
+# create a new sample for each simulation and get its mean and added to samples data frame
+# iteration over vectorisation 
+for (i in 1:simulations) {
+    individual_sample <- rexp(size, lambda) # specific set simulation with 40 exponentials of lambda
+    samples[i, 1] <- mean(individual_sample)
+}
+```
+# Show the sample mean and compare it to the theoretical mean of the distribution.
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+	theoretical_mean <- 1 / lambda
+	data <- samples[, 1]
+	sample_mean <- mean(data)
+```
+
+### plot samples with theoretical mean vs sample mean
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+ggplot(samples, aes(x = individual_mean)) +
+    geom_histogram(bins = 20, boundary = -0.5, fill = NA, color = "black") +
+    geom_density(alpha = .2, fill = "#FF6666", show.legend = FALSE) +
+    geom_vline(aes(xintercept = sample_mean, color = "sample_mean", linetype = "sample_mean", show.legend = FALSE)) +
+    geom_vline(aes(xintercept = theoretical_mean, color = "theoretical_mean", linetype = "theoretical_mean", show.legend = FALSE)) +
+    scale_colour_manual(name = "Units", values = c(sample_mean = "red", theoretical_mean = "blue")) +
+    scale_linetype_manual(name = "Units", values = c(sample_mean = "dashed", theoretical_mean = "dotted"), guide = FALSE) +
+    labs(title = "Theoretical vs sample mean of 40 exponentials over 1000 samples") +
+    labs(x = "Sample means", y = "Frequency")
+```
+
+# Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+theoretical_sd <- (1 / lambda) / sqrt(size)
+theoretical_variance <- theoretical_sd ^ 2
+sample_variance <- var(data)
+```
+
+# Show that the distribution is approximately normal.
+# visually inspect bell curve
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+ggplot(samples, aes(x = individual_mean)) +
+    geom_histogram(aes(y = ..density..), bins = 20, boundary = -0.5, fill = NA, color = "black") +
+    geom_density(alpha = .2, fill = "#FF6666", show.legend = FALSE) +
+    stat_function(fun = dnorm, args = list(mean = mean(data), sd = sqrt(sample_variance)), colour = "yellow", size = 2) +
+    labs(title = "Approximation to Normality - visual inspection of bell curve") +
+    labs(x = "Sample means", y = "Frequency")
+```
+
+# https://en.wikipedia.org/wiki/Normal_probability_plot
+# nortest package to the rescue
+# http://stats.stackexchange.com/questions/52293/r-qqplot-how-to-see-whether-data-are-normally-distributed/52295
+
+# Test 1 - skewness and kurtosis, they should be around (0,3)
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+skewness(data)
+kurtosis(data)
+```
+# Test 2 - Shapiro-Wilks test
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+shapiro.test(data)
+```
+# Test 3 - Kolmogorov-Smirnov test
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+ks.test(data, "pnorm", mean(data), sqrt(var(data)))
+```
+# Test 4 - Anderson-Darling test
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+ad.test(data)
+```
+# Test 5 - qq-plot: you should observe a good fit of the straight line
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+qqnorm(data, ylab = "Sample Means of Exponentials (lambda 0.2)")
+qqline(data)
+```
+# Test 6 - p-plot: you should observe a good fit of the straight line
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+probplot(data, qdist = qnorm)
+```
+# Test 7 - fitted normal density
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+f.den <- function(t) dnorm(t, mean(data), sqrt(var(data)))
+curve(f.den, xlim = c(6, 14))
+hist(data, prob = T, add = T)
+```

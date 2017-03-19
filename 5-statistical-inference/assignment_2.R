@@ -44,11 +44,12 @@ overview <- rbind(team_oj_total, team_vc_total)
 
 ggplot(overview, aes(x = total_dose, y = tooth_length)) +
   geom_point() +
-
   geom_line(data = subset(overview, supplement == "OJ"), colour = "red", linetype = "solid", size = 1) +
   geom_line(data = subset(overview, supplement == "VC"), colour = "blue", linetype = "solid", size = 1) +
+  scale_colour_manual(name = "Units", values = c(sample_mean = "red", theoretical_mean = "blue")) +
+  scale_linetype_manual(name = "Units", values = c(sample_mean = "dashed", theoretical_mean = "dotted"), guide = FALSE) +
   labs(title = "Tooth growth by supplement dose") +
-  labs(x = "Total dose", y = "Tooth growth")
+  labs(x = "Total dose (supplement count * total dosed mg", y = "Tooth growth")
 
 # Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. 
 # (Only use the techniques from class, even if there's other approaches worth considering)
