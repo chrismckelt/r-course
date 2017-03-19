@@ -35,3 +35,18 @@ for (i in 1:simulations) {
     samples[i, 1] <- mean(individual_sample) 
 }
 
+# compare theoretical mean vs sample mean
+theoretical_mean <- 1 / lambda
+sample_mean <- mean(samples[, 1])
+
+### plot samples with theoretical mean vs sample mean
+ggplot(samples, aes(x = mean)) +
+    geom_histogram(bins = 20, boundary = -0.5, fill = NA, color = "black") +
+    geom_density(alpha = .2, fill = "#FF6666",show.legend = FALSE) +
+    geom_vline(aes(xintercept = sample_mean, color = "sample_mean", linetype = "sample_mean", show.legend = FALSE)) +
+    geom_vline(aes(xintercept = theoretical_mean, color = "theoretical_mean", linetype = "theoretical_mean", show.legend = FALSE)) +
+    scale_colour_manual(name = "Units", values = c(sample_mean = "red", theoretical_mean = "blue")) +
+    scale_linetype_manual(name = "Units", values = c(sample_mean = "dashed", theoretical_mean = "dotted"), guide = FALSE) +
+    labs(title = "Theoretical vs sample mean of 40 exponentials over 1000 samples") +
+    labs(x = "Sample means", y = "Frequency") 
+
