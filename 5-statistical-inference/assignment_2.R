@@ -1,12 +1,16 @@
 # Title: Part 2: Basic Inferential Data Analysis
 # Description: https://www.coursera.org/learn/statistical-inference/peer/3k8j5/statistical-inference-course-project
+# https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/ToothGrowth.html
+# ToothGrowth: The response is the length of odontoblasts (cells responsible for tooth growth) in 60 guinea pigs. 
+#Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, (orange juice or ascorbic acid (a form of vitamin C and coded as VC).
+
 
 ####setup
 rm(list = ls()) # clear vars
 setwd("C:\\dev\\r-course\\5-statistical-inference")
 #------
 ####install missing packages and reference
-list.of.packages <- c("dplyr", "tidyr", "ggplot2", "knitr", "markdown", "moments", "nortest", "e1071")
+list.of.packages <- c("dplyr", "tidyr", "ggplot2", "knitr", "markdown", "moments", "nortest", "e1071", "data.table","sqldf")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
 
 if (length(new.packages))
@@ -14,76 +18,46 @@ if (length(new.packages))
 
 sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = FALSE), require, character.only = TRUE, quietly = FALSE)
 
-# Part 1 - Simulations
+# Part 2 - Tooth Growth
 
-## simulation inputs
-lambda <- 0.2  
-size <- 40  
-simulations <- 1000 
+# Load the ToothGrowth data and perform some basic exploratory data analyses
+library(datasets)
+data(ToothGrowth)
 
-# settings a seed will allow us to reproduce the results
-set.seed(881) # prime
+#cleanup
+tbl <- data.table(ToothGrowth)
+setnames(tbl, c('len', 'supp', 'dose'), c('tooth_length', 'supplement', 'dose'))
 
-# create a dataframe with column title 'individual_mean' for recording each sample distributions mean
-samples <- data.frame(individual_mean = numeric(size))
+# Provide a basic summary of the data.
+# Exploratory Data Analysis 
+summary(tbl)
+head(tbl)
+table(tbl$supplement, tbl$dose)
 
-replicate(simulations, mean(rexp(size, lambda)))
-# create a new sample for each simulation and get its mean and added to samples data frame
-# iteration over vectorisation 
-for (i in 1:simulations) {
-    individual_sample <- rexp(size, lambda) # specific set simulation with 40 exponentials of lambda
-    samples[i, 1] <- mean(individual_sample) 
-}
+team_oj <- sqldf("select tooth_length, supplement, dose from tbl where supplement = 'OJ'")
+team_vc <- sqldf("select tooth_length, supplement, dose from tbl where supplement = 'VC'")
 
-# Show the sample mean and compare it to the theoretical mean of the distribution.
-theoretical_mean <- 1 / lambda
-data <- samples[, 1]
-sample_mean <- mean(data)
+team_oj_total <- sqldf("select tooth_length, supplement, count(supplement) as total_supplement, sum(dose) as total_dose from team_oj group by tooth_length,supplement order by tooth_length")
+team_vc_total <- sqldf("select tooth_length, supplement,count(supplement) as total_supplement, sum(dose) as total_dose from team_vc group by tooth_length,supplement order by tooth_length")
 
-### plot samples with theoretical mean vs sample mean
-ggplot(samples, aes(x = individual_mean)) +
-    geom_histogram(bins = 20, boundary = -0.5, fill = NA, color = "black") +
-    geom_density(alpha = .2, fill = "#FF6666",show.legend = FALSE) +
-    geom_vline(aes(xintercept = sample_mean, color = "sample_mean", linetype = "sample_mean", show.legend = FALSE)) +
-    geom_vline(aes(xintercept = theoretical_mean, color = "theoretical_mean", linetype = "theoretical_mean", show.legend = FALSE)) +
-    scale_colour_manual(name = "Units", values = c(sample_mean = "red", theoretical_mean = "blue")) +
-    scale_linetype_manual(name = "Units", values = c(sample_mean = "dashed", theoretical_mean = "dotted"), guide = FALSE) +
-    labs(title = "Theoretical vs sample mean of 40 exponentials over 1000 samples") +
-    labs(x = "Sample means", y = "Frequency") 
+overview <- rbind(team_oj_total, team_vc_total)
 
-# Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
-theoretical_sd <- (1 / lambda) / sqrt(size)
-theoretical_variance <- theoretical_sd^2
-sample_variance <- var(data)
+ggplot(overview, aes(x = total_dose, y = tooth_length)) +
+  geom_point() +
 
-# Show that the distribution is approximately normal.
-# visually inspect bell curve
-ggplot(samples, aes(x = individual_mean)) +
-    geom_histogram(aes(y = ..density..), bins = 20, boundary = -0.5, fill = NA, color = "black") +
-    geom_density(alpha = .2, fill = "#FF6666", show.legend = FALSE) +
-    stat_function(fun = dnorm, args = list(mean = mean(data), sd = sqrt(sample_variance)), colour = "yellow", size = 2) +
-    labs(title = "Approximation to Normality - visual inspection of bell curve") +
-    labs(x = "Sample means", y = "Frequency")
+  geom_line(data = subset(overview, supplement == "OJ"), colour = "red", linetype = "solid", size = 1) +
+  geom_line(data = subset(overview, supplement == "VC"), colour = "blue", linetype = "solid", size = 1) +
+  labs(title = "Tooth growth by supplement dose") +
+  labs(x = "Total dose", y = "Tooth growth")
 
-# https://en.wikipedia.org/wiki/Normal_probability_plot
-# nortest package to the rescue
-# http://stats.stackexchange.com/questions/52293/r-qqplot-how-to-see-whether-data-are-normally-distributed/52295
+# Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. 
+# (Only use the techniques from class, even if there's other approaches worth considering)
 
-# Test 1 - skewness and kurtosis, they should be around (0,3)
-skewness(data)
-kurtosis(data)
-# Test 2 - Shapiro-Wilks test
-shapiro.test(data)
-# Test 3 - Kolmogorov-Smirnov test
-ks.test(data, "pnorm", mean(data), sqrt(var(data)))
-# Test 4 - Anderson-Darling test
-ad.test(data)
-# Test 5 - qq-plot: you should observe a good fit of the straight line
-qqnorm(data, ylab = "Sample Means of Exponentials (lambda 0.2)")
-qqline(data)
-# Test 6 - p-plot: you should observe a good fit of the straight line
-probplot(data, qdist = qnorm)
-# Test 7 - fitted normal density
-f.den <- function(t) dnorm(t, mean(data), sqrt(var(data)))
-curve(f.den, xlim = c(6, 14))
-hist(data, prob = T, add = T)
+## visualise each set
+#ggplot(overview, aes(x = tooth_length)) +
+    #geom_histogram(aes(y = ..density..), bins = 20, boundary = -0.5, fill = NA, color = "black") +
+    #geom_density(alpha = .2, fill = "#FF6666", show.legend = FALSE) +
+    #stat_function(fun = dnorm, args = list(mean = mean(overview$tooth_length), sd = sqrt(sample_variance)), colour = "yellow", size = 2) +
+    #labs(title = "Approximation to Normality - visual inspection of bell curve") +
+    #labs(x = "Sample means", y = "Frequency")
+

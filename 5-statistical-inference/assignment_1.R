@@ -1,6 +1,5 @@
 # Title: Part 1: Simulation Exercise
 # Description: https://www.coursera.org/learn/statistical-inference/peer/3k8j5/statistical-inference-course-project
-
 ####setup
 rm(list = ls()) # clear vars
 setwd("C:\\dev\\r-course\\5-statistical-inference")
@@ -14,23 +13,25 @@ if (length(new.packages))
 
 sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = FALSE), require, character.only = TRUE, quietly = FALSE)
 
-## simulation inputs
-lambda <- 0.2 ## lambda = 0.2 for all of the simulations
-size <- 40 ## 40 exponentials
-simulations <- 1000 
+# Part 1 - Simulations
 
-# set a seed so we can reproduce the results
+## simulation inputs
+lambda <- 0.2
+size <- 40
+simulations <- 1000
+
+# settings a seed will allow us to reproduce the results
 set.seed(881) # prime
 
-# init a dataframe with column title 'mean' for recording sample mean results
-samples <- data.frame(mean = numeric(size))
+# create a dataframe with column title 'individual_mean' for recording each sample distributions mean
+samples <- data.frame(individual_mean = numeric(size))
 
 replicate(simulations, mean(rexp(size, lambda)))
 # create a new sample for each simulation and get its mean and added to samples data frame
 # iteration over vectorisation 
 for (i in 1:simulations) {
     individual_sample <- rexp(size, lambda) # specific set simulation with 40 exponentials of lambda
-    samples[i, 1] <- mean(individual_sample) 
+    samples[i, 1] <- mean(individual_sample)
 }
 
 # Show the sample mean and compare it to the theoretical mean of the distribution.
@@ -39,27 +40,27 @@ data <- samples[, 1]
 sample_mean <- mean(data)
 
 ### plot samples with theoretical mean vs sample mean
-ggplot(samples, aes(x = mean)) +
+ggplot(samples, aes(x = individual_mean)) +
     geom_histogram(bins = 20, boundary = -0.5, fill = NA, color = "black") +
-    geom_density(alpha = .2, fill = "#FF6666",show.legend = FALSE) +
+    geom_density(alpha = .2, fill = "#FF6666", show.legend = FALSE) +
     geom_vline(aes(xintercept = sample_mean, color = "sample_mean", linetype = "sample_mean", show.legend = FALSE)) +
     geom_vline(aes(xintercept = theoretical_mean, color = "theoretical_mean", linetype = "theoretical_mean", show.legend = FALSE)) +
     scale_colour_manual(name = "Units", values = c(sample_mean = "red", theoretical_mean = "blue")) +
     scale_linetype_manual(name = "Units", values = c(sample_mean = "dashed", theoretical_mean = "dotted"), guide = FALSE) +
     labs(title = "Theoretical vs sample mean of 40 exponentials over 1000 samples") +
-    labs(x = "Sample means", y = "Frequency") 
+    labs(x = "Sample means", y = "Frequency")
 
 # Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
 theoretical_sd <- (1 / lambda) / sqrt(size)
-theoretical_variance <- theoretical_sd^2
+theoretical_variance <- theoretical_sd ^ 2
 sample_variance <- var(data)
 
 # Show that the distribution is approximately normal.
 # visually inspect bell curve
-ggplot(samples, aes(x = mean)) +
+ggplot(samples, aes(x = individual_mean)) +
     geom_histogram(aes(y = ..density..), bins = 20, boundary = -0.5, fill = NA, color = "black") +
     geom_density(alpha = .2, fill = "#FF6666", show.legend = FALSE) +
-    stat_function(fun = dnorm, args = list(mean = mean, sd = sqrt(sample_variance)), colour = "yellow", size = 2) +
+    stat_function(fun = dnorm, args = list(mean = mean(data), sd = sqrt(sample_variance)), colour = "yellow", size = 2) +
     labs(title = "Approximation to Normality - visual inspection of bell curve") +
     labs(x = "Sample means", y = "Frequency")
 
