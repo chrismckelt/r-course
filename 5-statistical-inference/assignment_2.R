@@ -37,19 +37,14 @@ table(tbl$supplement, tbl$dose)
 team_oj <- sqldf("select tooth_length, supplement, dose from tbl where supplement = 'OJ'")
 team_vc <- sqldf("select tooth_length, supplement, dose from tbl where supplement = 'VC'")
 
-team_oj_total <- sqldf("select tooth_length, supplement, count(supplement) as total_supplement, sum(dose) as total_dose from team_oj group by tooth_length,supplement order by tooth_length")
-team_vc_total <- sqldf("select tooth_length, supplement,count(supplement) as total_supplement, sum(dose) as total_dose from team_vc group by tooth_length,supplement order by tooth_length")
+overview <- rbind(team_oj, team_vc)
 
-overview <- rbind(team_oj_total, team_vc_total)
-
-ggplot(overview, aes(x = total_dose, y = tooth_length)) +
-  geom_point() +
-  geom_line(data = subset(overview, supplement == "OJ"), colour = "red", linetype = "solid", size = 1) +
-  geom_line(data = subset(overview, supplement == "VC"), colour = "blue", linetype = "solid", size = 1) +
-  scale_colour_manual(name = "Units", values = c(sample_mean = "red", theoretical_mean = "blue")) +
-  scale_linetype_manual(name = "Units", values = c(sample_mean = "dashed", theoretical_mean = "dotted"), guide = FALSE) +
+ggplot(overview, aes(x = dose, y = tooth_length)) +
+  geom_smooth(data = subset(overview, supplement == "OJ"), aes(colour = "OJ"), linetype = "solid", size = 1) +
+  geom_smooth(data = subset(overview, supplement == "VC"), aes(colour = "VC"), linetype = "solid", size = 1) +
+  scale_color_manual("Legend", values = c("red", "blue")) +
   labs(title = "Tooth growth by supplement dose") +
-  labs(x = "Total dose (supplement count * total dosed mg", y = "Tooth growth")
+  labs(x = "dose", y = "Tooth growth")
 
 # Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. 
 # (Only use the techniques from class, even if there's other approaches worth considering)
