@@ -1,5 +1,6 @@
 ---
-title: 'Statistical Inference Project - Part 2: Basic Inferential Data Analysis'
+title: "Statistical Inference Project"
+author: Chris McKelt
 output:
   pdf_document: default
   html_document: default
@@ -7,137 +8,141 @@ output:
 
 ## Part 2: Basic Inferential Data Analysis
 
-# Description: https://www.coursera.org/learn/statistical-inference/peer/3k8j5/statistical-inference-course-project
-# https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/ToothGrowth.html
-# ToothGrowth: The response is the length of odontoblasts (cells responsible for tooth growth) in 60 guinea pigs. 
-#Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, (orange juice or ascorbic acid (a form of vitamin C and coded as VC).
+#### Description: https://www.coursera.org/learn/statistical-inference/peer/3k8j5/statistical-inference-course-project
+#### https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/ToothGrowth.html
+#### ToothGrowth: The response is the length of odontoblasts (cells responsible for tooth growth) in 60 guinea pigs. 
+#### Each animal received one of three dose levels of vitamin C (0.5, 1, and 2 mg/day) by one of two delivery methods, 
+#### orange juice or ascorbic acid (form  of vitamin C and coded as VC).
 
-####setup
+
+
+
+
 ```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
-rm(list = ls()) # clear vars
-setwd("C:\\dev\\r-course\\5-statistical-inference")
-#------
-####install missing packages and reference
-list.of.packages <- c("dplyr", "tidyr", "ggplot2", "knitr", "markdown", "moments", "nortest", "e1071", "data.table", "sqldf", "pastecs")
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
+  rm(list = ls()) # clear vars
+  setwd("C:\\dev\\r-course\\5-statistical-inference")
 
-if (length(new.packages))
-    install.packages(new.packages)
-
-sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = FALSE), require, character.only = TRUE, quietly = FALSE)
-
-test_reject <- function(reject_what, tresult) {
-    alpha <- .05
-    if (tresult$p.value > alpha) {
-        #If the p-value is less than or equal to the chosen significance level (?), 
-        #the test suggests that the observed data is inconsistent with the null hypothesis, 
-        #so the null hypothesis must be rejected. However, that does not prove that the tested hypothesis is true
-        msg <- paste("p.value is ", tresult$p.value, " which is greater than alpha (.05) so we reject H0")
-        print(msg)
-        print(paste("REJECT NULL HYPOTHESIS: ", reject_what))
-    } else {
-        print(paste("DO NOT REJECT NULL HYPOTHESIS: ", reject_what))
-    }
-}
+  list.of.packages <- c("dplyr", "tidyr", "ggplot2", "knitr", "markdown", "moments", "nortest", "e1071", "data.table", "sqldf", "pastecs")
+  new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
+  
+  if (length(new.packages))
+      install.packages(new.packages)
+  
+  sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = TRUE), require, character.only = TRUE, quietly = TRUE)
 
 ```
 
-# Part 2 - Tooth Growth
-## Load the ToothGrowth data and perform some basic exploratory data analyses
+
 ```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
-library(datasets)
-data(ToothGrowth)
-```
-# tidy the data
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
-tbl <- data.table(ToothGrowth)
-setnames(tbl, c('len', 'supp', 'dose'), c('tooth_length', 'supplement', 'dose'))
+# utility function to test if pvalue > alpha & output whether to reject H0
+  test_reject <- function(ho, tresult) {
+      alpha <- .05
+      if (tresult$p.value > alpha) {
+          #If the p-value is less than or equal to the chosen significance level (?), 
+          #the test suggests that the observed data is inconsistent with the null hypothesis, 
+          #so the null hypothesis must be rejected. However, that does not prove that the tested hypothesis is true
+          msg <- paste("p.value is ", tresult$p.value, " which is greater than alpha (.05) so we reject H0")
+          print(msg)
+          print(paste("REJECT NULL HYPOTHESIS: ", ho))
+      } else {
+          print(paste("FAIL TO REJECT NULL HYPOTHESIS: ", ho))
+      }
+  }
 ```
 
-# Exploratory Data Analysis 
+### Load & tidy data. Create 2 groups according to supplement type (orange juice vs ascorbic acid )
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-summary(tbl)
-head(tbl)
-table(tbl$supplement, tbl$dose)
-```
-# split the data into 2 groups of tests according to supplement type
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
-	team_oj <- sqldf("select tooth_length, supplement, dose from tbl where supplement = 'OJ'")
+  library(datasets)
+  data(ToothGrowth)
+  tbl <- data.table(ToothGrowth)
+  setnames(tbl, c('len', 'supp', 'dose'), c('tooth_length', 'supplement', 'dose'))
+  team_oj <- sqldf("select tooth_length, supplement, dose from tbl where supplement = 'OJ'")
 	team_vc <- sqldf("select tooth_length, supplement, dose from tbl where supplement = 'VC'")
-```
-# combine groups to get an overview
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 	options(digits = 2)
 	overview <- rbind(team_oj, team_vc)
 	overview$dose <- as.numeric(overview$dose)
 ```
 
+### explore the data
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+  summary(tbl)
+  table(tbl$supplement, tbl$dose)
+```
+
 
 ### plot to compare tooth growth by supplement type and dose
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-ggplot(overview, aes(x = dose, y = tooth_length)) +
-  geom_smooth(data = subset(overview, supplement == "OJ"), aes(colour = "OJ"), linetype = "solid", size = 1) +
-  geom_smooth(data = subset(overview, supplement == "VC"), aes(colour = "VC"), linetype = "solid", size = 1) +
-  scale_color_manual("Legend", values = c("red", "blue")) +
-  labs(title = "Tooth growth by supplement dose") +
-  labs(x = "dose", y = "Tooth growth")
+  ggplot(overview, aes(x = dose, y = tooth_length)) +
+    geom_smooth(data = subset(overview, supplement == "OJ"), aes(colour = "OJ"), linetype = "solid", size = 1) +
+    geom_smooth(data = subset(overview, supplement == "VC"), aes(colour = "VC"), linetype = "solid", size = 1) +
+    scale_color_manual("Legend", values = c("red", "blue")) +
+    labs(title = "Tooth growth by supplement dose") +
+    labs(x = "dose", y = "Tooth growth")
 ```
 
-# Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
-theoretical_sd <- (1 / lambda) / sqrt(size)
-theoretical_variance <- theoretical_sd ^ 2
-sample_variance <- var(data)
-```
 
-# output stats from opposing supplements
+
+
+## Observation: From the 60 samples spread over 2 supplement types with 3 different dosages, Delivery by Orange Juice results in larger tooth growth.  But as dosage increases the growth evens out to where at 2 mg per day the growth between orange juice and ascorbic acid are the same
+
+
+
+### output statistics of data
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-stat.desc(team_oj)
-stat.desc(team_vc)
+  stat.desc(team_oj)
+  stat.desc(team_vc)
 ```
 
-# Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. 
-# (Only use the techniques from class, even if there's other approaches worth considering)
 
-# Supplements
-### H0 supplements have no affect on tooth growth
-### HA supplements will affect tooth growth
+## Observation: VC has a higher standard deviation & standard error meaning it is more disbursed.
+
+
+
+# Compare tooth growth by supplements and dose
+
+
+### Does the amount of supplements affect tooth growth?
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-tresult_supplement <- t.test(tooth_length ~ supplement, data = overview, var.equal = FALSE, paired = FALSE, conf.level = .95)
-test_reject("H0 supplements have no affect on tooth growth", tresult_supplement)
+  tresult_supplement <- t.test(tooth_length ~ supplement, data = overview, var.equal = FALSE, paired = FALSE, conf.level = .95)
+  ho <- 'H0 supplements have not affect on tooth growth'
+  ha <- 'Ha supplements will affect tooth growth'
+  test_reject(ho, tresult_supplement)
 ```
 
-# Dose
-# need to break up the dose into 3 groups
+
+### Does the dosage of OJ vs VC affect tooth growth?
+##### need to break up the dose into 3 groups for testing
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-dose_small <- subset(overview, dose == 0.5)
-dose_medium <- subset(overview, dose == 1.0)
-dose_high <- subset(overview, dose == 2.0)
+  dose_small <- subset(overview, dose == 0.5)
+  dose_medium <- subset(overview, dose == 1.0)
+  dose_high <- subset(overview, dose == 2.0)
 ```
+
 
 ### small dose
-### H0 small supplemented dose .05 mg has no affect on tooth growth
-### HA small supplemented dose .05 mg will affect tooth growth
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-tresult_dose_small <- t.test(tooth_length ~ supplement, data = dose_small, var.equal = FALSE, paired = FALSE, conf.level = .95)
-test_reject("H0 supplemented small dose of .05 mg has no affect on tooth growth", tresult_dose_small)
-tresult_dose_small$conf.int[1:2]
+  tresult_dose_small <- t.test(tooth_length ~ supplement, data = dose_small, var.equal = FALSE, paired = FALSE, conf.level = .95)
+  ho <- 'small dose .05 mg is best delivered by a single supplement type to aid tooth growth'
+  test_reject(ho, tresult_dose_small)
 ```
 
+
 ### medium dose
-### H0 medium supplemented dose of 1.0 mg has no affect on tooth growth
-### HA medium supplemented dose of 1.0 mg will affect tooth growth
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-tresult_dose_medium <- t.test(tooth_length ~ supplement, data = dose_medium, var.equal = FALSE, paired = FALSE, conf.level = .95)
-test_reject("H0 medium supplemented  dose of 1.0 mg has no affect on tooth growth", tresult_dose_medium)
+  tresult_dose_medium <- t.test(tooth_length ~ supplement, data = dose_medium, var.equal = FALSE, paired = FALSE, conf.level = .95)
+  ho <- 'medium dose of 1.0 mg is best delivered by a single supplement type to aid tooth growth'
+  test_reject(ho, tresult_dose_medium)
 ```
 
 ### high  dose
-### H0 high  supplemented dose of 2.0 mg has no affect on tooth growth
-### HA high supplemented dose of 2.0 mg will affect tooth growth
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-tresult_dose_high <- t.test(tooth_length ~ supplement, data = dose_high, var.equal = FALSE, paired = FALSE, conf.level = .95)
-test_reject("H0 high supplemented dose of 2.0 mg has no affect on tooth growth", tresult_dose_high)
+  tresult_dose_high <- t.test(tooth_length ~ supplement, data = dose_high, var.equal = FALSE, paired = FALSE, conf.level = .95)
+  ho <- 'high dose of 2.0 mg is best delivered by a single supplement type to aid tooth growth'
+  test_reject(ho, tresult_dose_high)
 ```
 
 
+# Conclusion: Vitamin C aids in the overall tooth growth of guinea pigs. In smaller doses (.5-1.5) delivering with Orange Juice is more effective  Over larger doses the growth results trend towards similar results per dosage > 2 mg.
+
+# Data may be invalid --> Does the Orange Juice already have Vitamin C in it???

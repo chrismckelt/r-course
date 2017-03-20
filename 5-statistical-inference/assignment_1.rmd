@@ -1,18 +1,21 @@
 ---
-title: 'Statistical Inference Project -  Part 1: Simulation Exercise'
+title: 'Statistical Inference Project'
+author: Chris McKelt
 output:
   pdf_document: default
   html_document: default
 ---
 
-## Part 1: Simulation Exercise Instructions
+# Part 1: Simulation Exercise Instructions
 
-# In this project you will investigate the exponential distribution in R and compare it with the Central Limit Theorem. 
-# The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter. 
-# The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. Set lambda = 0.2 for all of the simulations. 
-# You will investigate the distribution of averages of 40 exponentials. Note that you will need to do a thousand simulations.
+#### In this project you will investigate the exponential distribution in R and compare it with the Central Limit Theorem. 
+#### The exponential distribution can be simulated in R with rexp(n, lambda) where lambda is the rate parameter. 
+#### The mean of exponential distribution is 1/lambda and the standard deviation is also 1/lambda. Set lambda = 0.2 for all of the simulations. 
+#### You will investigate the distribution of averages of 40 exponentials. Note that you will need to do a thousand simulations.
 
-####setup
+
+
+
 ```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 rm(list = ls()) # clear vars
 setwd("C:\\dev\\r-course\\5-statistical-inference")
@@ -24,23 +27,24 @@ new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, 
 if (length(new.packages))
     install.packages(new.packages)
 
-sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = FALSE), require, character.only = TRUE, quietly = FALSE)
+sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = TRUE), require, character.only = TRUE, quietly = TRUE)
 ```
 
 # Part 1 - Simulations
+
 ## simulation inputs
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 lambda <- 0.2
 size <- 40
 simulations <- 1000
 ```
-# settings a seed will allow us to reproduce the results
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## settings a seed will allow us to reproduce the results
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 set.seed(881) # prime
 ```
 
-# create a dataframe with column title 'individual_mean' for recording each sample distributions mean
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## create a dataframe with column title 'individual_mean' for recording each sample distributions mean
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 samples <- data.frame(individual_mean = numeric(size))
 replicate(simulations, mean(rexp(size, lambda)))
 # create a new sample for each simulation and get its mean and added to samples data frame
@@ -50,15 +54,15 @@ for (i in 1:simulations) {
     samples[i, 1] <- mean(individual_sample)
 }
 ```
-# Show the sample mean and compare it to the theoretical mean of the distribution.
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## show the sample mean and compare it to the theoretical mean of the distribution.
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 	theoretical_mean <- 1 / lambda
 	data <- samples[, 1]
 	sample_mean <- mean(data)
 ```
 
-### plot samples with theoretical mean vs sample mean
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## plot samples with theoretical mean vs sample mean
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 ggplot(samples, aes(x = individual_mean)) +
     geom_histogram(bins = 20, boundary = -0.5, fill = NA, color = "black") +
     geom_density(alpha = .2, fill = "#FF6666", show.legend = FALSE) +
@@ -70,16 +74,16 @@ ggplot(samples, aes(x = individual_mean)) +
     labs(x = "Sample means", y = "Frequency")
 ```
 
-# Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 theoretical_sd <- (1 / lambda) / sqrt(size)
 theoretical_variance <- theoretical_sd ^ 2
 sample_variance <- var(data)
 ```
 
-# Show that the distribution is approximately normal.
-# visually inspect bell curve
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+### show that the distribution is approximately normal.
+### visually inspect bell curve
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 ggplot(samples, aes(x = individual_mean)) +
     geom_histogram(aes(y = ..density..), bins = 20, boundary = -0.5, fill = NA, color = "black") +
     geom_density(alpha = .2, fill = "#FF6666", show.legend = FALSE) +
@@ -88,39 +92,45 @@ ggplot(samples, aes(x = individual_mean)) +
     labs(x = "Sample means", y = "Frequency")
 ```
 
-# https://en.wikipedia.org/wiki/Normal_probability_plot
-# nortest package to the rescue
-# http://stats.stackexchange.com/questions/52293/r-qqplot-how-to-see-whether-data-are-normally-distributed/52295
+### Testing for normality
+#### https://en.wikipedia.org/wiki/Normal_probability_plot
+#### nortest package to the rescue
+#### http://stats.stackexchange.com/questions/52293/r-qqplot-how-to-see-whether-data-are-normally-distributed/52295
 
-# Test 1 - skewness and kurtosis, they should be around (0,3)
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## Test 1 - skewness and kurtosis, they should be around (0,3)
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 skewness(data)
 kurtosis(data)
 ```
-# Test 2 - Shapiro-Wilks test
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## Test 2 - Shapiro-Wilks test
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 shapiro.test(data)
 ```
-# Test 3 - Kolmogorov-Smirnov test
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## Test 3 - Kolmogorov-Smirnov test
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 ks.test(data, "pnorm", mean(data), sqrt(var(data)))
 ```
-# Test 4 - Anderson-Darling test
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## Test 4 - Anderson-Darling test
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 ad.test(data)
 ```
-# Test 5 - qq-plot: you should observe a good fit of the straight line
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## Test 5 - qq-plot: you should observe a good fit of the straight line
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 qqnorm(data, ylab = "Sample Means of Exponentials (lambda 0.2)")
 qqline(data)
 ```
-# Test 6 - p-plot: you should observe a good fit of the straight line
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+
+# Observation: if the data follows the line the distribution is normal (as it does)
+
+## Test 6 - p-plot: you should observe a good fit of the straight line
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 probplot(data, qdist = qnorm)
 ```
-# Test 7 - fitted normal density
-```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+## Test 7 - fitted normal density
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 f.den <- function(t) dnorm(t, mean(data), sqrt(var(data)))
 curve(f.den, xlim = c(6, 14))
 hist(data, prob = T, add = T)
 ```
+
+# Conclusion: the data is normally distributed having passed 7 normality tests
