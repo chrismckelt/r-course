@@ -1,36 +1,16 @@
+# util library - functions collections over time
 
-rm(list = ls())
+## setup - install missing packages and reference
+list.of.packages <- c("tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
+if (length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = FALSE), require, character.only = TRUE, quietly = FALSE)
 
-saveFile = function(url, name) {
-  url <- url
-  filename <- name
-  download.file(url, filename)
+#' download and save file
+save_file = function(url, name) {
+    if (!file.exists(name)) {
+        library(downloader)
+        download(url, destfile = name)
+    }
 }
-
-
-### update existing packages
-### http://stackoverflow.com/questions/3971815/automatically-update-packages-installed-from-r-forge
-
-# 1. Get the list of packages you have installed, 
-#    use priority to exclude base and recommended packages.
-#    that may have been distributed with R.
-pkgList <- installed.packages(priority = 'NA')[, 'Package']
-
-# 2. Find out which packages are on CRAN and R-Forge.  Because
-#    of R-Forge build capacity is currently limiting the number of
-#    binaries available, it is queried for source packages only.
-CRANpkgs <- available.packages(
-  contriburl = contrib.url('http://cran.r-project.org'))[, 'Package']
-forgePkgs <- available.packages(
-  contriburl = contrib.url('http://r-forge.r-project.org', type = 'source')
-)[, 'Package']
-
-# 3. Calculate the set of packages which are installed on your machine,
-#    not on CRAN but also present on R-Force.
-pkgsToUp <- intersect(setdiff(pkgList, CRANpkgs), forgePkgs)
-
-# 4. Update the packages, using oldPkgs to restrict the list considered.
-update.packages(checkBuilt = TRUE, ask = FALSE,
-  repos = "http://r-forge.r-project.org",
-  oldPkgs = pkgsToUp)
  
