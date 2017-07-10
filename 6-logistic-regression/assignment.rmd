@@ -1,5 +1,5 @@
 ---
-title: "Regression Models Course Project - Is an automatic or manual transmission better for MPG?"
+title: Regression Models Course Project - Is an automatic or manual transmission better for MPG?
 author: "Chris McKelt"
 output: pdf_document
 ---
@@ -10,8 +10,14 @@ Motor Trend, a popular automotive magazine, has expressed an interest in underst
 In order to conduct an analysis in this regard, we will leverage the 1974 Motor Trend Car Road Tests, which can be found [here](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html).
 Ultimately, Motor Trend would like to answer two questions:
 
- 1. Is an automatic or manual transmission better for MPG?
- 2. Quantify the MPG difference between automatic and manual transmissions?
+### 1. Is an automatic or manual transmission better for MPG?
+    All other things being equal a manual transmission is more efficient for miles per gallon.
+	However when taking into account other variables it is a combination of factors that lead to the optimum result.
+
+
+### 2. Quantify the MPG difference between automatic and manual transmissions?
+	The best fit model is a combination of cylinders numbers, horsepower, weight and transmission to determine miles per gallon.
+	This combination of variables accounted for 87% of data variance.
 
 This analysis was conducted as part of the [Coursera Data Science Specialization](https://www.coursera.org/learn/regression-models/peer/nxntd/regression-models-course-project)
 
@@ -24,13 +30,21 @@ if (length(new.packages)) install.packages(new.packages, dependencies = TRUE)
 sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = TRUE), require, character.only = TRUE, quietly = TRUE)
 ```
 
-## Data import and tidy
 
-    - vs variable = V engine or a straight engine. 0 means a V-engine, and 1 straight engine. 
-    - am variable = automatic / manual 0 = automatic, 1 = manual
+----------
+
+
+## Data import and tidy
+First we operate on the data set and given better descriptive names to the columns.
+    
+ - *vs* = V engine or a straight engine. 0 means a V-engine, and 1 straight engine. 
+ - *am* = automatic / manual 0 = automatic, 1 = manual
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 data(mtcars)
-data <- sqldf("select mpg, cyl as cylinders_number, disp as displacement_inches, hp as horsepower, drat as rear_axle_ratio, wt as weight_pounds, qsec as quarter_mile_time, vs as engine_type, am as transmission_type, gear as gears_number, carb as carburetors_number from mtcars")
+sql1 <- 'select mpg, cyl as cylinders_number, disp as displacement_inches, hp as horsepower, drat as rear_axle_ratio, wt as weight_pounds, '
+sql2 <- 'qsec as quarter_mile_time, vs as engine_type, am as transmission_type, gear as gears_number, carb as carburetors_number from mtcars'
+data <- sqldf(paste(sql1, sql2))
 data <- as_tibble(data)
 data$engine_type <- factor(data$engine_type, levels = c(0, 1), labels = c('v_engine', 'straight_engine'))
 data$transmission_type <- factor(data$transmission_type, levels = c(0, 1), labels = c('Automatic', 'Manual'))
@@ -38,21 +52,26 @@ data$cylinders_number <- factor(data$cylinders_number)
 data$carburetors_number <- factor(data$carburetors_number)
 ```
 
+----------
 
 ## Exploratory Analysis
 
 ### Conduct a hypothesis test
-##### H0 --> transmission_type does not affect miles per gallon
-##### H1 --> transmission_type does affect miles per gallon
+**H0      transmission_type does not affect miles per gallon**
+**H1      transmission_type does affect miles per gallon**
+    
+
+> As the variance is not equal between Automatic and Manual rows we use a Welchs
+> t-test to determine if transmission_type impacts mpg by inspecting the
+> p-value ( alpha = 0.05)
 
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-## as variance is not equal Automatic/Manual --> use a Welchs t-test to determine if transmission_type impacts mpg by inspecting the p-value ( alpha = 0.05)
 test <- t.test(mpg ~ transmission_type, data = data, var.equal = FALSE, paired = FALSE, conf.level = .95)
 test$p.value
 ```
-### 0.001373638  --> since the p-value is less than alpha (0.05) we reject the null hypothesis and can determine there is a cause / effect between transmission_type and mile per gallon
+ 0.137%  --> since the p-value is less than alpha (0.05) we reject the null hypothesis and can determine there is a cause / effect between transmission_type and mile per gallon
 
-
+To visualise the difference between manual vs automatic transmission petrol consumption can we seen 
 
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 boxplot(mpg ~ transmission_type, data = data,
@@ -61,32 +80,61 @@ boxplot(mpg ~ transmission_type, data = data,
         ylab = "Miles per Gallon",
         main = "MPG by Transmission Type")
 ```
+Conclusion:  Comparing just mpg to transmission type it appears manual transmissions are more fuel effective.
 
-## Regression Analysis
 
-We can begin by pulling together a simple linear model directly in line with the first question posed; so, when we look at the relationship between `mpg` and `am` alone, we see 7.24 increase in miles per gallon when comparing just the two variables.
+----------
+
+
+Regression Analysis
+-------------------
+
+
+The first model looks at the relationship between  `mpg` and `am` (transmission_type) using 1 predictor
+
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+model_1 <- lm(mpg ~ transmission_type, data = data)
+summary(model_1)$coeff
+summary(model_1)$r.squared
+```
+Interpreting the coefficients , we see an increase of 7.24 in miles per gallon when using a manual transmission over an automated transmission.
+
+But the R squared value is 36% indicating that this does not explain alot of variability in the data (100% indicates that the model explains all the variability of the response data around its mean)
+
+It appears other confounding variables affect the mpg. 
+Collinearity occurs when a predictor is too highly correlated with one or more of the other predictors.
+To detect collinearity we first build a model for all variables,then we can assess the collinearity by variance inflation factor(VIF)
 
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 model_all <- lm(mpg ~ ., data = data)
 vif(model_all)
 ```
-detect collinearity -- find the confounding variables by calculating the variance inflation factors
-We can assess the collinearity by variance inflation factor(VIF) 
-Values for the VIF that are greater than 40 are considered large. 
-We should also pay attention to VIf values over 20
-At these point we might consider leaving only one of these variables in the model.
-```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-vif(model_all)
-```
 
-Use AIC to find the best fitting model -->AIC provides a means for model selection.From a set of models the one with minimum AIC value wins
+As we have factorised a number of fields the **GVIF** variables are produced (see appendix) 
+GVIF values that are greater than 40 are considered large and polluted.
+Any value over 20 should be scrutinised. 
+
+In order to fit the best model in predicting the miles per outcome we use a model selection strategy to find the better combination of variables.
+
+The chosen strategy for model selection is AIC in a Stepwise Algorithm. 
+The optimum model is the one with the smallest AIC
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 model_best <- step(model_all, direction = "both")
-summary(model_best)$coefficients
+```
+
+**Winner Step:  AIC=61.65 --> mpg ~ cylinders_number + horsepower + weight_pounds + transmission_type**
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 summary(model_best)$r.squared
 ```
 
+R squared of 87% indicate a good fit for these variables in computing the miles per gallon. 
+
 ## Conclusion
+
+The best fit model is a combination of cylinders numbers, horsepower, weight and transmission to determine miles per gallon.
+
+This combination of variables accounted for 87% of data variance.
 
 ## Appendix
 
@@ -99,7 +147,7 @@ summary(data)
 Model Variance Summary:
 
 ```{r}
-anova(model_all, model_best)
+anova(model_1, model_all, model_best)
 ```
 
 Pairs Visual:
@@ -110,3 +158,7 @@ pairs(data, panel = panel.smooth, main = "mtcars data")
 ```{r,echo=FALSE}
 kable(data)
 ```
+
+##GVIF
+GVIF represents the squared ratio of hypervolumes of the joint-confidence ellipsoid for a subset of coefficients to the "utopian" ellipsoid that would be obtained if the regressors in this subset were uncorrelated with regressors in the complementary subset. In the case of a single coefficient, this specializes to the usual VIF
+https://stats.stackexchange.com/questions/70679/which-variance-inflation-factor-should-i-be-using-textgvif-or-textgvif/96584#96584
