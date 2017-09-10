@@ -1,0 +1,10 @@
+setwd("C:/dev/r-course/8-machine-learning")
+source("c:/dev/r-course/include.r")
+using("caret")
+using("lubridate")
+using("pgmm")
+using("rpart")
+using("gbm")
+using("forecast")
+using("gbm")
+

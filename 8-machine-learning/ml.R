@@ -9,22 +9,24 @@ using("gbm")
 using("AppliedPredictiveModeling")
 using("ElemStatLearn")
 
- 
+library(ElemStatLearn)
+
 data(vowel.train)
 data(vowel.test)
-
-vowel.train$y <- as.factor(vowel.train$y)
-vowel.test$y <- as.factor(vowel.test$y)
+vowel.train$y <- factor(vowel.train$y)
+vowel.test$y <- factor(vowel.test$y)
 set.seed(33833)
-modRF <- train(y ~ ., data = vowel.train, method = "rf") #, trControl=trainControl("cv"), number=3)
-modBoost <- train(y ~ ., data = vowel.train, method = "gbm", verbose = FALSE)
 
-predRF <- predict(modRF, vowel.test)
-predBoost <- predict(modBoost, vowel.test)
-agreedIndex <- predRF == predBoost
+# random forest
+random_forest_fit <- train(y ~ ., data = vowel.train, method = "rf")
+random_forest_prediction <- predict(random_forest_fit, vowel.test)
+random_forest_accuracy <- confusionMatrix(random_forest_prediction, vowel.test$y)$overall['Accuracy']
 
-cfmRf <- confusionMatrix(vowel.test$y, predRF)
-cfmBoost <- confusionMatrix(vowel.test$y, predBoost)
-cfmAgreed <- confusionMatrix(vowel.test$y[agreedIndex], predRF[agreedIndex])
+boosted_fit <- train(y ~ ., data = vowel.train, method = "gbm", verbose = FALSE)
+boosted_predictor <- predict(boosted_fit, vowel.test)
+boosted_accuracy <- confusionMatrix(boosted_predictor, vowel.test$y)$overall['Accuracy']
 
-cfmRf$overall["Accuracy"]
+aa <- random_forest_prediction == boosted_predictor
+bb <- vowel.test$y == random_forest_prediction
+accuracy <- sum(aa * bb) / sum(aa)
+ 
