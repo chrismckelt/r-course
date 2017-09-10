@@ -1,4 +1,4 @@
-# util library - functions collections over time
+# util library - functions collected over time
 
 ## setup - install missing packages and reference
 list.of.packages <- c("tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader")
