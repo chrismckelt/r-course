@@ -9,7 +9,7 @@ using <- function(packageName) {
 
 install_standard_packages <- function() {
     ## setup - install missing packages and reference
-    default.packages <- c("tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr")
+    default.packages <- c("tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr", "readr")
     #new.packages <- default.packages[!(default.packages %in% installed.packages()[, "Package"])]
     for (pkg in default.packages) {
            using(pkg)

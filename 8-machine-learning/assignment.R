@@ -18,8 +18,8 @@ save_file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv",
 set.seed(333)
 
 #explore
-training <- read.csv("pml-training.csv", header = TRUE)
-testing <- read.csv("pml-testing.csv", header = TRUE)
+training <- readr::read_csv("pml-training.csv", col_names = TRUE, col_types = colString)
+testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types = colString)
 #training <- training[, order(names(training))]
 #testing <- testing[, order(names(testing))]
 dim(training)
@@ -42,14 +42,14 @@ data.test <- training[-data.include,]
 
 
 ## speed up randow forest --> see https: / / github.com / lgreski / datasciencectacontent / blob / master / markdown / pml - randomForestPerformance.md
+cat("random forest model started")
 cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
-fitControl <- trainControl(method = "cv",
-                           number = 20,
+fitControl <- trainControl(method = "oob",
+                           number = 3,
                            allowParallel = TRUE)
 
-cat("random forest model started")
-model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = F, na.action = na.omit)
+#model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = F, na.action = na.omit)
 stopCluster(cluster)
 registerDoSEQ()
 cat("random forest model completed")
