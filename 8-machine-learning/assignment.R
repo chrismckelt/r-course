@@ -8,7 +8,8 @@ using("sqldf")
 using("caret")
 using("randomForest")
 using("pROC")
-using("xgboost")
+using("parallel")
+using("doParallel")
 
 #readme --> https://www.coursera.org/learn/practical-machine-learning/supplement/PvInj/course-project-instructions-read-first
 
@@ -39,9 +40,18 @@ data.include <- createDataPartition(training$classe, p = .70, list = FALSE)
 data.train <- training[data.include,]
 data.test <- training[-data.include,]
 
-##todo remove highly correlated vars
-model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = trainControl(method = "cv", number = 5), verbose = F, na.action = na.pass)
 
-cat("a")
+## speed up randow forest --> see https: / / github.com / lgreski / datasciencectacontent / blob / master / markdown / pml - randomForestPerformance.md
+cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
+registerDoParallel(cluster)
+fitControl <- trainControl(method = "cv",
+                           number = 10,
+                           allowParallel = TRUE)
+
+cat("random forest model started")
+model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = F, na.action = na.pass)
+stopCluster(cluster)
+registerDoSEQ()
+cat("random forest model completed")
  
 
