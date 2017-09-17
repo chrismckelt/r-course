@@ -45,11 +45,11 @@ data.test <- training[-data.include,]
 cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
 fitControl <- trainControl(method = "cv",
-                           number = 10,
+                           number = 20,
                            allowParallel = TRUE)
 
 cat("random forest model started")
-model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = F, na.action = na.pass)
+model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = F, na.action = na.omit)
 stopCluster(cluster)
 registerDoSEQ()
 cat("random forest model completed")
