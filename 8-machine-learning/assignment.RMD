@@ -1,0 +1,148 @@
+---
+title: "Final Assignment"
+author: "Chris McKelt"
+date: "17 September 2017"
+output: 
+  html_document: 
+    keep_md: yes
+    theme: readable
+    toc: yes
+---
+# Introduction
+
+This is an analysis for final assignment of the Coursea course 'Practical Machine Learning'.
+
+http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har
+
+```{r, echo=FALSE, eval=FALSE, warning=FALSE, message=FALSE}
+suppressMessages(rm(list = ls()))
+suppressMessages(setwd("C:/dev/r-course/8-machine-learning"))
+source('c:/dev/r-course/include.r')
+using("sqldf")
+using("caret")
+using("randomForest")
+using("pROC")
+using("xgboost")
+set.seed(333)
+```
+
+# Background
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. 
+These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+The exercises were performed by six male participants aged between 20-28 years, with little weight lifting experience. 
+
+Class A corresponds to the specified execution of the exercise, while the other 4 classes correspond to common mistakes. 
+
+## Goal
+
+Predict the manner in which a participant did the exercise (class A - properly - or any other incorrect way)
+
+# Data
+## Obtaining Data
+The training data for this project are available here: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+```{r, cache=TRUE, message=FALSE, warning=FALSE}
+save_file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", "pml-training.csv")
+save_file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", "pml-testing.csv")
+
+```
+## Data Exploration
+
+The goal of this project is to predict the manner in which they did the exercise. 
+This is the "classe" variable in the training set, the last column. Let's have a look at the training data. 
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+dim(training)
+dim(testing)
+```
+
+Let us have a look at the possible targets. There are five possible classes.
+```{r}
+levels(train_data$classe)
+```
+
+```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3, echo=FALSE}
+library(ggplot2)
+ggplot(train_data, aes(classe)) + 
+        geom_bar(color = I("black"), fill = I("darkblue")) + 
+        labs(title = "Distribution of classes", x = "Classe", y = "Frequency")
+```
+
+## Cleaning Data
+We would like to have no missing values in our data and filter out the relevant columns. We do so with the the following commands. Note that we select the same variables for our test set as for our training set, except for our target.
+```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3}
+train_data <- train_data[, apply(train_data, 2, function(x) !any(is.na(x)))] 
+train_data <- train_data[,-c(1:7)]
+test_data <- test_data[,names(train_data[,-53])]
+
+tbl_df(train_data)
+tbl_df(test_data)
+```
+
+## Training and Validation Split
+To get a generalization error, the original test data is not enough with only 20 observations. We need te set aside an extra set to validate our error.
+```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3}
+library(caret)
+set.seed(100)
+inTrain <- createDataPartition(y=train_data$classe, p=0.70,list=F)
+validation_data <- train_data[inTrain,] 
+train_data <- train_data[-inTrain,] 
+data.frame(dim(train_data), dim(validation_data))
+```
+
+# Model Building
+## Building a Random Forest Model
+For this random forest model, we apply cross validation: the data is being splitted into five parts, each of them taking the role of a validation set once. A model is built five times on the remaining data, and the classification error is computed on the validation set. The average of these five error rates is our final error. This can all be implemented using the caret train function. We set the seed as the sampling happens randomly.
+```{r, cache=TRUE, message=FALSE, warning=FALSE}
+set.seed(100)
+rfmodel <- train(classe~.,data=train_data,method="rf",trControl=trainControl(method="cv",number=5),verbose=F)
+```
+
+Now we predict on the actual validation set in order to get the accuracy. We compute it by hand and extract it from the confusion matrix to see if it is correct.
+```{r, cache=TRUE, message=FALSE, warning=FALSE}
+rfpredictions <- predict(rfmodel, newdata=validation_data)
+accuracy = sum(rfpredictions == validation_data$classe) / length(validation_data$classe)
+accuracy
+confusionMatrix(rfpredictions, validation_data$classe)
+```
+
+## Building a Boosting Model
+Now we will do exactly the same, but use boosting instead of random forests. Getting the accuracy, predications... works with the same code.
+```{r, cache=TRUE, message=FALSE, warning=FALSE}
+set.seed(100)
+gbmmodel <- train(classe~.,data=train_data,method="gbm",trControl=trainControl(method="cv",number=5),verbose=F)
+```
+
+```{r, cache=TRUE, message=FALSE, warning=FALSE}
+gbmpredictions <- predict(gbmmodel, newdata=validation_data)
+accuracy = sum(gbmpredictions == validation_data$classe) / length(validation_data$classe)
+accuracy
+confusionMatrix(gbmpredictions, validation_data$classe)
+```
+Both the random forest and boosting model turn out to be really good, with accuracies of 98% and 95%. Let us build one more model.
+
+## Building a Decision Tree Model
+A third model we build, is a decision tree. Spoiler: this will be a really bad one.
+```{r, cache=TRUE, message=FALSE, warning=FALSE}
+set.seed(100)
+treemodel <- train(classe~.,data=train_data,method="rpart")
+```
+
+```{r, cache=TRUE, message=FALSE, warning=FALSE}
+treepredictions <- predict(treemodel, newdata=validation_data)
+accuracy = sum(treepredictions == validation_data$classe) / length(validation_data$classe)
+accuracy
+confusionMatrix(treepredictions, validation_data$classe)
+```
+Only half the time we get our predictions right. Still better than gambling (as there are five classes), but still not what you want. When choosing a model, we would go with the random forest model.
+
+# Test Predictions
+A part of the assignment is to predict 'classe' for 20 observations. The actual target values are unknown, so we use our best model - the random forest one - to estimate them.
+```{r, cache=TRUE, message=FALSE, warning=FALSE}
+# According to random forest model
+rfpredictions <- predict(rfmodel, newdata=test_data)
+rfpredictions
+```

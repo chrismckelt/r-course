@@ -4,7 +4,7 @@ using <- function(packageName) {
         install.packages(dput(packageName), dependencies = TRUE, quiet = FALSE)
     }
 
-   library(packageName, character.only = TRUE)
+   suppressWarnings(library(packageName, character.only = TRUE))
 }
 
 install_standard_packages <- function() {
