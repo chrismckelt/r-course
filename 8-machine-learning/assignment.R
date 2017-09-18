@@ -47,8 +47,8 @@ data.test <- data.training[-data.include,]
 cat("random forest model started")
 cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
-fitControl.rf <- trainControl(method = "cv",
-                           number = 3,
+fitControl.rf <- trainControl(method = "oob", 
+                           number = 5,
                            allowParallel = TRUE)
 timer.start <- Sys.time()
 model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl.rf, verbose = FALSE, na.action = na.omit)
@@ -63,7 +63,7 @@ confusion_matrix.rf <- confusionMatrix(prediction.rf, data.test$classe)
 
 ##############################################################################################################################################################
 # training - gradient boosted model
-fitControl.gbm <- trainControl(method = "cv", number = 5, allowParallel = TRUE)
+fitControl.gbm <- trainControl(method = "cv", number = 3, allowParallel = TRUE)
 cat("boosted model started")
 timer.start <- Sys.time()
 model.gbm <- train(classe ~ ., data = data.train, method = "gbm", trControl = fitControl.gbm, verbose = FALSE, na.action = na.omit)
@@ -73,3 +73,5 @@ paste("boosted took: ", timer.end - timer.start, attr(timer.end - timer.start, "
 cat("boosted predictions")
 prediction.gbm <- predict(model.gbm, data.test)
 confusion_matrix.gbm <- confusionMatrix(prediction.gbm, data.test$classe)
+
+confusion_matrix.gbm
