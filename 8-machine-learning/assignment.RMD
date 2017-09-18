@@ -2,10 +2,12 @@
 title: "Coursera Practical Machine Learning -  Prediction Assignment"
 author: "Chris McKelt"
 date: "17 September 2017"
-output: 
-  html_document: 
+output:
+  html_document:
     keep_md: yes
     theme: readable
+    toc: yes
+  pdf_document:
     toc: yes
 ---
 # Introduction
@@ -17,12 +19,26 @@ http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har
 ```{r, echo=FALSE, eval=FALSE, warning=FALSE, message=FALSE}
 suppressMessages(rm(list = ls()))
 suppressMessages(setwd("C:/dev/r-course/8-machine-learning"))
-source('c:/dev/r-course/include.r')
-using("sqldf")
+
+
+using <- function(packageName) {
+  if (!require(packageName, character.only = TRUE) && !(packageName %in%  installed.packages())) {
+      install.packages(dput(packageName), dependencies = TRUE, quiet = FALSE)
+  }
+  
+  library(packageName, character.only = TRUE)
+}
+
 using("caret")
+using("sqldf")
+using("readr")
 using("randomForest")
+using("ROCR")
 using("pROC")
-using("xgboost")
+using("parallel")
+using("doParallel")
+using("dplyr")
+
 set.seed(333)
 ```
 
@@ -52,14 +68,27 @@ The training data for this project are available here: https://d396qusza40orc.cl
 The test data are available here: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
 
 ```{r, cache=TRUE, message=FALSE, warning=FALSE}
+
+save_file = function(url, name) {
+    if (!file.exists(name)) {
+        library(downloader)
+        download(url, destfile = name)
+    }
+}
+
 save_file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", "pml-training.csv")
 save_file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", "pml-testing.csv")
-training <- readr::read_csv("pml-training.csv", col_names = TRUE, col_types = colString)
-testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types = colString)
-training <- as.data.frame(training)
-training <- training[, order(names(training))]
-testing <- testing[, order(names(testing))]
-set.seed(333)
+
+
+string40 <- "ncnnccnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+string80 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+string120 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+string160 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnc"
+colString <- paste(string40, string80, string120, string160, sep = "")
+
+data.training <- readr::read_csv("pml-training.csv", col_names = TRUE, col_types = colString)
+data.testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types = colString)
+data.training <- as.data.frame(data.training)
 
 ```
 ## Data Exploration
@@ -67,55 +96,47 @@ set.seed(333)
 The goal of this project is to predict the manner in which they did the exercise. 
 This is the "classe" variable in the training set, the last column. Let's have a look at the training data. 
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-dim(training)
-dim(testing)
-levels(training$classe)
-names(training)
-training$classe = as.factor(training$classe)
-```
-
-## “classe” variable is the one we are trying to predict
-```{r}
-levels(train_data$classe)
+data.training <- readr::read_csv("pml-training.csv", col_names = TRUE, col_types = colString)
+data.testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types = colString)
+data.training <- as.data.frame(data.training)
+dim(data.training)
+dim(data.testing)
 ```
 
 ```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3, echo=FALSE}
 library(ggplot2)
-ggplot(training, aes(classe)) + 
+ggplot(data.training, aes(classe)) + 
         geom_bar(color = I("blue"), fill = I("red")) + 
         labs(title = "Distribution of classe", x = "Classe", y = "Frequency")
 ```
 
 ## Cleaning Data
 #### remove columns where ALL values are NA --> https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na
-```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3}
-training <- training[, colSums(is.na(training)) == 0]
-testing <- testing[, colSums(is.na(testing)) == 0]
-dim(training)
-dim(testing)
+```{r, message=FALSE, warning=FALSE,echo=TRUE}
+data.training <- data.training[, colSums(is.na(data.training)) == 0]
+data.testing <- data.testing[, colSums(is.na(data.testing)) == 0]
 ```
 
 ## Training 
 #### split the original training set because original test set does not have enough observations
-```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3}
-data.include <- createDataPartition(training$classe, p = .70, list = FALSE)
-data.train <- training[data.include,]
-data.test <- training[-data.include,]
+```{r, cache=TRUE, message=FALSE, warning=FALSE,echo=TRUE}
+data.include <- createDataPartition(data.training$classe, p = .70, list = FALSE)
+data.train <- data.training[data.include,]
+data.test <- data.training[-data.include,]
 ```
 
 # Model build - Random Forest
-speed up randow forest --> see https: / / github.com / lgreski / datasciencectacontent / blob / master / markdown / pml - randomForestPerformance.md
 
 For this random forest model, we apply cross validation: the data is being splitted into five parts, each of them taking the role of a validation set once. A model is built five times on the remaining data, and the classification error is computed on the validation set. The average of these five error rates is our final error. This can all be implemented using the caret train function. We set the seed as the sampling happens randomly.
-```{r, cache=TRUE, message=FALSE, warning=FALSE}
+```{r, cache=TRUE, message=FALSE, warning=FALSE,echo=TRUE}
 cat("random forest model started")
 cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
-fitControl <- trainControl(method = "cv",
-                           number = 3,
+fitControl.rf <- trainControl(method = "cv",
+                           number = 5,
                            allowParallel = TRUE)
 timer.start <- Sys.time()
-model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = FALSE, na.action = na.omit)
+model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl.rf, verbose = FALSE, na.action = na.omit)
 timer.end <- Sys.time()
 stopCluster(cluster)
 registerDoSEQ()
@@ -124,33 +145,28 @@ paste("random forest took: ", timer.end - timer.start, attr(timer.end - timer.st
 ```
 
 # Prediction - Random Forest
-```{r, cache=TRUE, message=FALSE, warning=FALSE}
-prediction.rf <- predict(model.rf, training, probability = TRUE)
-confusion_matrix.rf <- confusionMatrix(prediction.rf, training$classe)
+```{r, cache=TRUE, message=FALSE, warning=FALSE,echo=TRUE}
+prediction.rf <- predict(model.rf, data.test)
+confusion_matrix.rf <- confusionMatrix(prediction.rf, data.test$classe)
+confusion_matrix.rf
 ```
 
 # Model build - Gradient Boosting Machine
 Now we will do exactly the same, but use boosting instead of random forests. Getting the accuracy, predications... works with the same code.
-```{r, cache=TRUE, message=FALSE, warning=FALSE}
+```{r, cache=TRUE, message=FALSE, warning=FALSE,echo=TRUE}
 cat("boosted model started")
+fitControl.gbm <- trainControl(method="cv",number=5,allowParallel=TRUE)
 timer.start <- Sys.time()
-model.gbm <- train(classe ~ ., data = data.train, method = "gbm", trControl = fitControl, verbose = FALSE, na.action = na.omit)
+model.gbm <- train(classe ~ ., data = data.train, method = "gbm", trControl = fitControl.gbm, verbose = FALSE, na.action = na.omit)
 timer.end <- Sys.time()
 paste("boosted took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
 ```
   
 # Prediction - Gradient Boosting Machine
-```{r, cache=TRUE, message=FALSE, warning=FALSE}
+```{r, cache=TRUE, message=FALSE, warning=FALSE,echo=TRUE}
 cat("boosted predictions")
-prediction.gbm <- predict(model.gbm, training, probability = TRUE)
-confusion_matrix.gbm <- confusionMatrix(prediction.gbm, training$classe)
+prediction.gbm <- predict(model.gbm, data.test)
+confusion_matrix.gbm <- confusionMatrix(prediction.gbm, data.test$classe)
+confusion_matrix.gbm
 ```
 
-# Test Predictions
-A part of the assignment is to predict 'classe' for 20 observations. The actual target values are unknown.
-Random Forest gave the best AUC so use that for predictions.
-
-```{r, cache=TRUE, message=FALSE, warning=FALSE}
-# According to random forest model
- 
-```
