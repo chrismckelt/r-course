@@ -170,3 +170,4 @@ confusion_matrix.gbm <- confusionMatrix(prediction.gbm, data.test$classe)
 confusion_matrix.gbm
 ```
 
+
