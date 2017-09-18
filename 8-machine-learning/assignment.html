@@ -133,7 +133,6 @@ $(document).ready(function () {
 <li><a href="#data">Data</a><ul>
 <li><a href="#obtaining-data">Obtaining Data</a></li>
 <li><a href="#data-exploration">Data Exploration</a></li>
-<li><a href="#classe-variable-is-the-one-we-are-trying-to-predict">“classe” variable is the one we are trying to predict</a></li>
 <li><a href="#cleaning-data">Cleaning Data</a></li>
 <li><a href="#training">Training</a></li>
 </ul></li>
@@ -170,269 +169,162 @@ $(document).ready(function () {
 <h2>Obtaining Data</h2>
 <p>The training data for this project are available here: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv" class="uri">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv</a></p>
 <p>The test data are available here: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv" class="uri">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</a></p>
-<pre class="r"><code>using &lt;- function(packageName) {
-    if (!require(packageName, character.only = TRUE) &amp;&amp; !(packageName %in% installed.packages())) {
-        install.packages(dput(packageName), dependencies = TRUE, quiet = FALSE)
-    }
-
-   library(packageName, character.only = TRUE)
-}
-
-save_file = function(url, name) {
+<pre class="r"><code>save_file = function(url, name) {
     if (!file.exists(name)) {
         library(downloader)
         download(url, destfile = name)
     }
 }
-using(&quot;sqldf&quot;)
-using(&quot;readr&quot;)
-using(&quot;caret&quot;)
-using(&quot;randomForest&quot;)
-using(&quot;ROCR&quot;)
-using(&quot;pROC&quot;)
-using(&quot;parallel&quot;)
-using(&quot;doParallel&quot;)
+
+save_file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;, &quot;pml-training.csv&quot;)
+save_file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;, &quot;pml-testing.csv&quot;)
+
+
 string40 &lt;- &quot;ncnnccnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn&quot;
 string80 &lt;- &quot;nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn&quot;
 string120 &lt;- &quot;nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn&quot;
 string160 &lt;- &quot;nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnc&quot;
 colString &lt;- paste(string40, string80, string120, string160, sep = &quot;&quot;)
 
-save_file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;, &quot;pml-training.csv&quot;)
-save_file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;, &quot;pml-testing.csv&quot;)
-training &lt;- readr::read_csv(&quot;pml-training.csv&quot;, col_names = TRUE, col_types = colString)
-testing &lt;- readr::read_csv(&quot;pml-testing.csv&quot;, col_names = TRUE, col_types = colString)
-training &lt;- as.data.frame(training)
-training &lt;- training[, order(names(training))]
-testing &lt;- testing[, order(names(testing))]
-set.seed(333)</code></pre>
+data.training &lt;- readr::read_csv(&quot;pml-training.csv&quot;, col_names = TRUE, col_types = colString)
+data.testing &lt;- readr::read_csv(&quot;pml-testing.csv&quot;, col_names = TRUE, col_types = colString)
+data.training &lt;- as.data.frame(data.training)</code></pre>
 </div>
 <div id="data-exploration" class="section level2">
 <h2>Data Exploration</h2>
 <p>The goal of this project is to predict the manner in which they did the exercise. This is the “classe” variable in the training set, the last column. Let’s have a look at the training data.</p>
-<pre class="r"><code>dim(training)</code></pre>
+<pre class="r"><code>data.training &lt;- readr::read_csv(&quot;pml-training.csv&quot;, col_names = TRUE, col_types = colString)
+data.testing &lt;- readr::read_csv(&quot;pml-testing.csv&quot;, col_names = TRUE, col_types = colString)
+data.training &lt;- as.data.frame(data.training)
+dim(data.training)</code></pre>
 <pre><code>## [1] 19622   160</code></pre>
-<pre class="r"><code>dim(testing)</code></pre>
+<pre class="r"><code>dim(data.testing)</code></pre>
 <pre><code>## [1]  20 160</code></pre>
-<pre class="r"><code>levels(training$classe)</code></pre>
-<pre><code>## NULL</code></pre>
-<pre class="r"><code>names(training)</code></pre>
-<pre><code>##   [1] &quot;accel_arm_x&quot;              &quot;accel_arm_y&quot;             
-##   [3] &quot;accel_arm_z&quot;              &quot;accel_belt_x&quot;            
-##   [5] &quot;accel_belt_y&quot;             &quot;accel_belt_z&quot;            
-##   [7] &quot;accel_dumbbell_x&quot;         &quot;accel_dumbbell_y&quot;        
-##   [9] &quot;accel_dumbbell_z&quot;         &quot;accel_forearm_x&quot;         
-##  [11] &quot;accel_forearm_y&quot;          &quot;accel_forearm_z&quot;         
-##  [13] &quot;amplitude_pitch_arm&quot;      &quot;amplitude_pitch_belt&quot;    
-##  [15] &quot;amplitude_pitch_dumbbell&quot; &quot;amplitude_pitch_forearm&quot; 
-##  [17] &quot;amplitude_roll_arm&quot;       &quot;amplitude_roll_belt&quot;     
-##  [19] &quot;amplitude_roll_dumbbell&quot;  &quot;amplitude_roll_forearm&quot;  
-##  [21] &quot;amplitude_yaw_arm&quot;        &quot;amplitude_yaw_belt&quot;      
-##  [23] &quot;amplitude_yaw_dumbbell&quot;   &quot;amplitude_yaw_forearm&quot;   
-##  [25] &quot;avg_pitch_arm&quot;            &quot;avg_pitch_belt&quot;          
-##  [27] &quot;avg_pitch_dumbbell&quot;       &quot;avg_pitch_forearm&quot;       
-##  [29] &quot;avg_roll_arm&quot;             &quot;avg_roll_belt&quot;           
-##  [31] &quot;avg_roll_dumbbell&quot;        &quot;avg_roll_forearm&quot;        
-##  [33] &quot;avg_yaw_arm&quot;              &quot;avg_yaw_belt&quot;            
-##  [35] &quot;avg_yaw_dumbbell&quot;         &quot;avg_yaw_forearm&quot;         
-##  [37] &quot;classe&quot;                   &quot;cvtd_timestamp&quot;          
-##  [39] &quot;gyros_arm_x&quot;              &quot;gyros_arm_y&quot;             
-##  [41] &quot;gyros_arm_z&quot;              &quot;gyros_belt_x&quot;            
-##  [43] &quot;gyros_belt_y&quot;             &quot;gyros_belt_z&quot;            
-##  [45] &quot;gyros_dumbbell_x&quot;         &quot;gyros_dumbbell_y&quot;        
-##  [47] &quot;gyros_dumbbell_z&quot;         &quot;gyros_forearm_x&quot;         
-##  [49] &quot;gyros_forearm_y&quot;          &quot;gyros_forearm_z&quot;         
-##  [51] &quot;kurtosis_picth_arm&quot;       &quot;kurtosis_picth_belt&quot;     
-##  [53] &quot;kurtosis_picth_dumbbell&quot;  &quot;kurtosis_picth_forearm&quot;  
-##  [55] &quot;kurtosis_roll_arm&quot;        &quot;kurtosis_roll_belt&quot;      
-##  [57] &quot;kurtosis_roll_dumbbell&quot;   &quot;kurtosis_roll_forearm&quot;   
-##  [59] &quot;kurtosis_yaw_arm&quot;         &quot;kurtosis_yaw_belt&quot;       
-##  [61] &quot;kurtosis_yaw_dumbbell&quot;    &quot;kurtosis_yaw_forearm&quot;    
-##  [63] &quot;magnet_arm_x&quot;             &quot;magnet_arm_y&quot;            
-##  [65] &quot;magnet_arm_z&quot;             &quot;magnet_belt_x&quot;           
-##  [67] &quot;magnet_belt_y&quot;            &quot;magnet_belt_z&quot;           
-##  [69] &quot;magnet_dumbbell_x&quot;        &quot;magnet_dumbbell_y&quot;       
-##  [71] &quot;magnet_dumbbell_z&quot;        &quot;magnet_forearm_x&quot;        
-##  [73] &quot;magnet_forearm_y&quot;         &quot;magnet_forearm_z&quot;        
-##  [75] &quot;max_picth_arm&quot;            &quot;max_picth_belt&quot;          
-##  [77] &quot;max_picth_dumbbell&quot;       &quot;max_picth_forearm&quot;       
-##  [79] &quot;max_roll_arm&quot;             &quot;max_roll_belt&quot;           
-##  [81] &quot;max_roll_dumbbell&quot;        &quot;max_roll_forearm&quot;        
-##  [83] &quot;max_yaw_arm&quot;              &quot;max_yaw_belt&quot;            
-##  [85] &quot;max_yaw_dumbbell&quot;         &quot;max_yaw_forearm&quot;         
-##  [87] &quot;min_pitch_arm&quot;            &quot;min_pitch_belt&quot;          
-##  [89] &quot;min_pitch_dumbbell&quot;       &quot;min_pitch_forearm&quot;       
-##  [91] &quot;min_roll_arm&quot;             &quot;min_roll_belt&quot;           
-##  [93] &quot;min_roll_dumbbell&quot;        &quot;min_roll_forearm&quot;        
-##  [95] &quot;min_yaw_arm&quot;              &quot;min_yaw_belt&quot;            
-##  [97] &quot;min_yaw_dumbbell&quot;         &quot;min_yaw_forearm&quot;         
-##  [99] &quot;new_window&quot;               &quot;num_window&quot;              
-## [101] &quot;pitch_arm&quot;                &quot;pitch_belt&quot;              
-## [103] &quot;pitch_dumbbell&quot;           &quot;pitch_forearm&quot;           
-## [105] &quot;raw_timestamp_part_1&quot;     &quot;raw_timestamp_part_2&quot;    
-## [107] &quot;roll_arm&quot;                 &quot;roll_belt&quot;               
-## [109] &quot;roll_dumbbell&quot;            &quot;roll_forearm&quot;            
-## [111] &quot;skewness_pitch_arm&quot;       &quot;skewness_pitch_dumbbell&quot; 
-## [113] &quot;skewness_pitch_forearm&quot;   &quot;skewness_roll_arm&quot;       
-## [115] &quot;skewness_roll_belt&quot;       &quot;skewness_roll_belt.1&quot;    
-## [117] &quot;skewness_roll_dumbbell&quot;   &quot;skewness_roll_forearm&quot;   
-## [119] &quot;skewness_yaw_arm&quot;         &quot;skewness_yaw_belt&quot;       
-## [121] &quot;skewness_yaw_dumbbell&quot;    &quot;skewness_yaw_forearm&quot;    
-## [123] &quot;stddev_pitch_arm&quot;         &quot;stddev_pitch_belt&quot;       
-## [125] &quot;stddev_pitch_dumbbell&quot;    &quot;stddev_pitch_forearm&quot;    
-## [127] &quot;stddev_roll_arm&quot;          &quot;stddev_roll_belt&quot;        
-## [129] &quot;stddev_roll_dumbbell&quot;     &quot;stddev_roll_forearm&quot;     
-## [131] &quot;stddev_yaw_arm&quot;           &quot;stddev_yaw_belt&quot;         
-## [133] &quot;stddev_yaw_dumbbell&quot;      &quot;stddev_yaw_forearm&quot;      
-## [135] &quot;total_accel_arm&quot;          &quot;total_accel_belt&quot;        
-## [137] &quot;total_accel_dumbbell&quot;     &quot;total_accel_forearm&quot;     
-## [139] &quot;user_name&quot;                &quot;var_accel_arm&quot;           
-## [141] &quot;var_accel_dumbbell&quot;       &quot;var_accel_forearm&quot;       
-## [143] &quot;var_pitch_arm&quot;            &quot;var_pitch_belt&quot;          
-## [145] &quot;var_pitch_dumbbell&quot;       &quot;var_pitch_forearm&quot;       
-## [147] &quot;var_roll_arm&quot;             &quot;var_roll_belt&quot;           
-## [149] &quot;var_roll_dumbbell&quot;        &quot;var_roll_forearm&quot;        
-## [151] &quot;var_total_accel_belt&quot;     &quot;var_yaw_arm&quot;             
-## [153] &quot;var_yaw_belt&quot;             &quot;var_yaw_dumbbell&quot;        
-## [155] &quot;var_yaw_forearm&quot;          &quot;X1&quot;                      
-## [157] &quot;yaw_arm&quot;                  &quot;yaw_belt&quot;                
-## [159] &quot;yaw_dumbbell&quot;             &quot;yaw_forearm&quot;</code></pre>
-<pre class="r"><code>training$classe = as.factor(training$classe)</code></pre>
-</div>
-<div id="classe-variable-is-the-one-we-are-trying-to-predict" class="section level2">
-<h2>“classe” variable is the one we are trying to predict</h2>
-<pre class="r"><code>levels(training$classe)</code></pre>
-<pre><code>## [1] &quot;A&quot; &quot;B&quot; &quot;C&quot; &quot;D&quot; &quot;E&quot;</code></pre>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 <div id="cleaning-data" class="section level2">
 <h2>Cleaning Data</h2>
 <div id="remove-columns-where-all-values-are-na-httpsstackoverflow.comquestions2643939remove-columns-from-dataframe-where-all-values-are-na" class="section level4">
 <h4>remove columns where ALL values are NA –&gt; <a href="https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na" class="uri">https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na</a></h4>
-<pre class="r"><code>training &lt;- training[, colSums(is.na(training)) == 0]
-testing &lt;- testing[, colSums(is.na(testing)) == 0]
-dim(training)</code></pre>
-<pre><code>## [1] 19622    60</code></pre>
-<pre class="r"><code>dim(testing)</code></pre>
-<pre><code>## [1] 20 60</code></pre>
+<pre class="r"><code>data.training &lt;- data.training[, colSums(is.na(data.training)) == 0]
+data.testing &lt;- data.testing[, colSums(is.na(data.testing)) == 0]</code></pre>
 </div>
 </div>
 <div id="training" class="section level2">
 <h2>Training</h2>
 <div id="split-the-original-training-set-because-original-test-set-does-not-have-enough-observations" class="section level4">
 <h4>split the original training set because original test set does not have enough observations</h4>
-<pre class="r"><code>data.include &lt;- createDataPartition(training$classe, p = .70, list = FALSE)
-data.train &lt;- training[data.include,]
-data.test &lt;- training[-data.include,]</code></pre>
+<pre class="r"><code>data.include &lt;- createDataPartition(data.training$classe, p = .70, list = FALSE)
+data.train &lt;- data.training[data.include,]
+data.test &lt;- data.training[-data.include,]</code></pre>
 </div>
 </div>
 </div>
 <div id="model-build---random-forest" class="section level1">
 <h1>Model build - Random Forest</h1>
-<p>speed up randow forest –&gt; see https: / / github.com / lgreski / datasciencectacontent / blob / master / markdown / pml - randomForestPerformance.md</p>
 <p>For this random forest model, we apply cross validation: the data is being splitted into five parts, each of them taking the role of a validation set once. A model is built five times on the remaining data, and the classification error is computed on the validation set. The average of these five error rates is our final error. This can all be implemented using the caret train function. We set the seed as the sampling happens randomly.</p>
 <pre class="r"><code>cat(&quot;random forest model started&quot;)</code></pre>
 <pre><code>## random forest model started</code></pre>
 <pre class="r"><code>cluster &lt;- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
-fitControl &lt;- trainControl(method = &quot;cv&quot;,
-                           number = 3,
+fitControl.rf &lt;- trainControl(method = &quot;cv&quot;,
+                           number = 5,
                            allowParallel = TRUE)
 timer.start &lt;- Sys.time()
-model.rf &lt;- train(classe ~ ., data = data.train, method = &quot;rf&quot;, trControl = fitControl, verbose = FALSE, na.action = na.omit)
+model.rf &lt;- train(classe ~ ., data = data.train, method = &quot;rf&quot;, trControl = fitControl.rf, verbose = FALSE, na.action = na.omit)
 timer.end &lt;- Sys.time()
 stopCluster(cluster)
 registerDoSEQ()
 paste(&quot;random forest took: &quot;, timer.end - timer.start, attr(timer.end - timer.start, &quot;units&quot;))</code></pre>
-<pre><code>## [1] &quot;random forest took:  1.75783733526866 mins&quot;</code></pre>
+<pre><code>## [1] &quot;random forest took:  3.10714268287023 mins&quot;</code></pre>
 </div>
 <div id="prediction---random-forest" class="section level1">
 <h1>Prediction - Random Forest</h1>
-<pre class="r"><code>prediction.rf &lt;- predict(model.rf, training, probability = TRUE)
-confusion_matrix.rf &lt;- confusionMatrix(prediction.rf, training$classe)
+<pre class="r"><code>prediction.rf &lt;- predict(model.rf, data.test)
+confusion_matrix.rf &lt;- confusionMatrix(prediction.rf, data.test$classe)
 confusion_matrix.rf</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 5579    0    0    0    0
-##          B    1 3796    0    0    0
-##          C    0    1 3422    0    0
-##          D    0    0    0 3216    0
-##          E    0    0    0    0 3607
+##          A 1674    1    0    0    0
+##          B    0 1138    0    0    0
+##          C    0    0 1026    0    0
+##          D    0    0    0  964    0
+##          E    0    0    0    0 1082
 ## 
 ## Overall Statistics
 ##                                      
-##                Accuracy : 0.9999     
-##                  95% CI : (0.9996, 1)
-##     No Information Rate : 0.2844     
+##                Accuracy : 0.9998     
+##                  95% CI : (0.9991, 1)
+##     No Information Rate : 0.2845     
 ##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
 ##                                      
-##                   Kappa : 0.9999     
+##                   Kappa : 0.9998     
 ##  Mcnemar's Test P-Value : NA         
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9998   0.9997   1.0000   1.0000   1.0000
-## Specificity            1.0000   0.9999   0.9999   1.0000   1.0000
-## Pos Pred Value         1.0000   0.9997   0.9997   1.0000   1.0000
-## Neg Pred Value         0.9999   0.9999   1.0000   1.0000   1.0000
-## Prevalence             0.2844   0.1935   0.1744   0.1639   0.1838
-## Detection Rate         0.2843   0.1935   0.1744   0.1639   0.1838
-## Detection Prevalence   0.2843   0.1935   0.1744   0.1639   0.1838
-## Balanced Accuracy      0.9999   0.9998   1.0000   1.0000   1.0000</code></pre>
+## Sensitivity            1.0000   0.9991   1.0000   1.0000   1.0000
+## Specificity            0.9998   1.0000   1.0000   1.0000   1.0000
+## Pos Pred Value         0.9994   1.0000   1.0000   1.0000   1.0000
+## Neg Pred Value         1.0000   0.9998   1.0000   1.0000   1.0000
+## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
+## Detection Rate         0.2845   0.1934   0.1743   0.1638   0.1839
+## Detection Prevalence   0.2846   0.1934   0.1743   0.1638   0.1839
+## Balanced Accuracy      0.9999   0.9996   1.0000   1.0000   1.0000</code></pre>
 </div>
 <div id="model-build---gradient-boosting-machine" class="section level1">
 <h1>Model build - Gradient Boosting Machine</h1>
 <p>Now we will do exactly the same, but use boosting instead of random forests. Getting the accuracy, predications… works with the same code.</p>
 <pre class="r"><code>cat(&quot;boosted model started&quot;)</code></pre>
 <pre><code>## boosted model started</code></pre>
-<pre class="r"><code>fitControl2 &lt;- trainControl(method=&quot;cv&quot;,number=5,allowParallel=TRUE)
+<pre class="r"><code>fitControl.gbm &lt;- trainControl(method=&quot;cv&quot;,number=5,allowParallel=TRUE)
 timer.start &lt;- Sys.time()
-model.gbm &lt;- train(classe ~ ., data = data.train, method = &quot;gbm&quot;, trControl = fitControl2, verbose = FALSE, na.action = na.omit)
+model.gbm &lt;- train(classe ~ ., data = data.train, method = &quot;gbm&quot;, trControl = fitControl.gbm, verbose = FALSE, na.action = na.omit)
 timer.end &lt;- Sys.time()
 paste(&quot;boosted took: &quot;, timer.end - timer.start, attr(timer.end - timer.start, &quot;units&quot;))</code></pre>
-<pre><code>## [1] &quot;boosted took:  5.409543800354 mins&quot;</code></pre>
+<pre><code>## [1] &quot;boosted took:  4.92309161822001 mins&quot;</code></pre>
 </div>
 <div id="prediction---gradient-boosting-machine" class="section level1">
 <h1>Prediction - Gradient Boosting Machine</h1>
 <pre class="r"><code>cat(&quot;boosted predictions&quot;)</code></pre>
 <pre><code>## boosted predictions</code></pre>
-<pre class="r"><code>prediction.gbm &lt;- predict(model.gbm, training, probability = TRUE)
-confusion_matrix.gbm &lt;- confusionMatrix(prediction.gbm, training$classe)
+<pre class="r"><code>prediction.gbm &lt;- predict(model.gbm, data.test)
+confusion_matrix.gbm &lt;- confusionMatrix(prediction.gbm, data.test$classe)
 confusion_matrix.gbm</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 5579    0    0    0    0
-##          B    1 3796    0    0    0
-##          C    0    1 3422    0    0
-##          D    0    0    0 3216    0
-##          E    0    0    0    0 3607
+##          A 1674    0    0    0    0
+##          B    0 1139    0    0    0
+##          C    0    0 1026    0    0
+##          D    0    0    0  964    1
+##          E    0    0    0    0 1081
 ## 
 ## Overall Statistics
 ##                                      
-##                Accuracy : 0.9999     
-##                  95% CI : (0.9996, 1)
-##     No Information Rate : 0.2844     
+##                Accuracy : 0.9998     
+##                  95% CI : (0.9991, 1)
+##     No Information Rate : 0.2845     
 ##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
 ##                                      
-##                   Kappa : 0.9999     
+##                   Kappa : 0.9998     
 ##  Mcnemar's Test P-Value : NA         
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            0.9998   0.9997   1.0000   1.0000   1.0000
-## Specificity            1.0000   0.9999   0.9999   1.0000   1.0000
-## Pos Pred Value         1.0000   0.9997   0.9997   1.0000   1.0000
-## Neg Pred Value         0.9999   0.9999   1.0000   1.0000   1.0000
-## Prevalence             0.2844   0.1935   0.1744   0.1639   0.1838
-## Detection Rate         0.2843   0.1935   0.1744   0.1639   0.1838
-## Detection Prevalence   0.2843   0.1935   0.1744   0.1639   0.1838
-## Balanced Accuracy      0.9999   0.9998   1.0000   1.0000   1.0000</code></pre>
+## Sensitivity            1.0000   1.0000   1.0000   1.0000   0.9991
+## Specificity            1.0000   1.0000   1.0000   0.9998   1.0000
+## Pos Pred Value         1.0000   1.0000   1.0000   0.9990   1.0000
+## Neg Pred Value         1.0000   1.0000   1.0000   1.0000   0.9998
+## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
+## Detection Rate         0.2845   0.1935   0.1743   0.1638   0.1837
+## Detection Prevalence   0.2845   0.1935   0.1743   0.1640   0.1837
+## Balanced Accuracy      1.0000   1.0000   1.0000   0.9999   0.9995</code></pre>
 </div>
 
 
