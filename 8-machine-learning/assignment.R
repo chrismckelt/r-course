@@ -5,11 +5,17 @@ suppressMessages(rm(list = ls()))
 suppressMessages(setwd("C:/dev/r-course/8-machine-learning"))
 source('c:/dev/r-course/include.r')
 using("sqldf")
+using("readr")
 using("caret")
 using("randomForest")
 using("pROC")
 using("parallel")
 using("doParallel")
+string40 <- "ncnnccnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+string80 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+string120 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+string160 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnc"
+colString <- paste(string40, string80, string120, string160, sep = "")
 
 #readme --> https://www.coursera.org/learn/practical-machine-learning/supplement/PvInj/course-project-instructions-read-first
 
@@ -49,7 +55,7 @@ fitControl <- trainControl(method = "oob",
                            number = 3,
                            allowParallel = TRUE)
 
-#model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = F, na.action = na.omit)
+model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = F, na.action = na.omit)
 stopCluster(cluster)
 registerDoSEQ()
 cat("random forest model completed")

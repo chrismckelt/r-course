@@ -7,6 +7,7 @@ using <- function(packageName) {
    suppressWarnings(library(packageName, character.only = TRUE))
 }
 
+
 install_standard_packages <- function() {
     ## setup - install missing packages and reference
     default.packages <- c("tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr", "readr")
