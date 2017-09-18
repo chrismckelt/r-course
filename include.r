@@ -4,13 +4,13 @@ using <- function(packageName) {
         install.packages(dput(packageName), dependencies = TRUE, quiet = FALSE)
     }
 
-   suppressWarnings(library(packageName, character.only = TRUE))
+   library(packageName, character.only = TRUE)
 }
 
 
 install_standard_packages <- function() {
     ## setup - install missing packages and reference
-    default.packages <- c("tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr", "readr")
+    default.packages <- c("tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr", "readr", "foreach")
     #new.packages <- default.packages[!(default.packages %in% installed.packages()[, "Package"])]
     for (pkg in default.packages) {
            using(pkg)
@@ -28,3 +28,9 @@ save_file = function(url, name) {
         download(url, destfile = name)
     }
 }
+
+string40 <- "ncnnccnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+string80 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+string120 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+string160 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnc"
+colString <- paste(string40, string80, string120, string160, sep = "")

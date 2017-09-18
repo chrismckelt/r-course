@@ -1,2 +1,6 @@
-library(MASS)
- 
+library(AppliedPredictiveModeling)
+data(segmentationOriginal)
+library(caret)
+install.packages("rattle")
+library(rattle)
+str(segmentationOriginal)

@@ -17,14 +17,10 @@ data <- sqldf("select WorkStream, sum(Points) as SummedPoints from csv where Wor
 data$StartDate <- Sys.Date()
 data$EndDate <- Sys.Date()
 
-by(dataFrame, 1:nrow(dataFrame), function(row) {
-    row$EndDate <- 
-})
-
 data <- data.frame(
-  id = 1:nrow(workstreams),
-  content = workstreams,
-  start = c("2016-01-10", "2016-01-11", "2016-01-20", "2016-02-14 15:00:00"),
-  end = c(NA, NA, "2016-02-04", NA)
+  id = 1:nrow(data),
+  content = data,
+  start = data$StartDate,
+  end = data$EndDate
 )
 timevis(data)

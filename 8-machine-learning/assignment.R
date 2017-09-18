@@ -8,14 +8,10 @@ using("sqldf")
 using("readr")
 using("caret")
 using("randomForest")
+using("ROCR")
 using("pROC")
 using("parallel")
 using("doParallel")
-string40 <- "ncnnccnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
-string80 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
-string120 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
-string160 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnc"
-colString <- paste(string40, string80, string120, string160, sep = "")
 
 #readme --> https://www.coursera.org/learn/practical-machine-learning/supplement/PvInj/course-project-instructions-read-first
 
@@ -32,17 +28,21 @@ dim(training)
 dim(testing)
 ## “classe” variable is the one we are trying to predict
 levels(training$classe)
+names(training)
 training$classe = as.factor(training$classe)
 
 # clean
 ## remove columns where ALL values are NA --> https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na
 training <- training[, colSums(is.na(training)) == 0]
 testing <- testing[, colSums(is.na(testing)) == 0]
-classe <- training$classe
+training$success <- sqldf("select case when classe = 'A' then 1 else 0 end from training")
+training$success <- as.numeric(training$success)
+
+
 
 # training 
 ## split the original training set because original test set does not have enough observations
-data.include <- createDataPartition(training$classe, p = .70, list = FALSE)
+data.include <- createDataPartition(training$success, p = .70, list = FALSE)
 data.train <- training[data.include,]
 data.test <- training[-data.include,]
 
@@ -60,7 +60,14 @@ timer.end <- Sys.time()
 stopCluster(cluster)
 registerDoSEQ()
 cat("random forest model completed")
-paste("random forest  took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
-prediction.rf <- predict(model.rf, training)
-confusionMatrix(prediction.rf, training$classe)
-plot(roc(test$y, predict(prediction.rf, test, type = "prob"), colorize = TRUE)
+
+paste("random forest took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
+
+cat("random forest predictions")
+prediction.rf <- predict(model.rf, training, probability = TRUE)
+cf <- confusionMatrix(prediction.rf, training$success)
+
+prediction.rf.training <- predict(model.rf, training, probability = TRUE)
+confusion_matrix <- confusionMatrix(prediction.rf, training$classe)
+
+ 
