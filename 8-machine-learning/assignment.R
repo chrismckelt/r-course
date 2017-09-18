@@ -22,8 +22,9 @@ set.seed(333)
 #explore
 training <- readr::read_csv("pml-training.csv", col_names = TRUE, col_types = colString)
 testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types = colString)
-#training <- training[, order(names(training))]
-#testing <- testing[, order(names(testing))]
+training <- as.data.frame(training)
+training <- training[, order(names(training))]
+testing <- testing[, order(names(testing))]
 dim(training)
 dim(testing)
 ## “classe” variable is the one we are trying to predict
@@ -35,39 +36,42 @@ training$classe = as.factor(training$classe)
 ## remove columns where ALL values are NA --> https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na
 training <- training[, colSums(is.na(training)) == 0]
 testing <- testing[, colSums(is.na(testing)) == 0]
-training$success <- sqldf("select case when classe = 'A' then 1 else 0 end from training")
-training$success <- as.numeric(training$success)
-
+#training$success <- sqldf("select case when classe = 'A' then 'true' else 'false' end from training")
 
 
 # training 
 ## split the original training set because original test set does not have enough observations
-data.include <- createDataPartition(training$success, p = .70, list = FALSE)
+data.include <- createDataPartition(training$classe, p = .70, list = FALSE)
 data.train <- training[data.include,]
 data.test <- training[-data.include,]
 
-
+##############################################################################################################################################################
 ## speed up randow forest --> see https: / / github.com / lgreski / datasciencectacontent / blob / master / markdown / pml - randomForestPerformance.md
 cat("random forest model started")
 cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
-fitControl <- trainControl(method = "oob",
+fitControl <- trainControl(method = "cv",
                            number = 3,
                            allowParallel = TRUE)
 timer.start <- Sys.time()
-model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = F, na.action = na.omit)
+model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = FALSE, na.action = na.omit)
 timer.end <- Sys.time()
 stopCluster(cluster)
 registerDoSEQ()
-cat("random forest model completed")
-
 paste("random forest took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
 
 cat("random forest predictions")
 prediction.rf <- predict(model.rf, training, probability = TRUE)
-cf <- confusionMatrix(prediction.rf, training$success)
+confusion_matrix.rf <- confusionMatrix(prediction.rf, training$classe)
 
-prediction.rf.training <- predict(model.rf, training, probability = TRUE)
-confusion_matrix <- confusionMatrix(prediction.rf, training$classe)
+##############################################################################################################################################################
 
- 
+cat("boosted model started")
+timer.start <- Sys.time()
+model.gbm <- train(classe ~ ., data = data.train, method = "gbm", trControl = fitControl, verbose = FALSE, na.action = na.omit)
+timer.end <- Sys.time()
+paste("boosted took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
+
+cat("boosted predictions")
+prediction.gbm <- predict(model.gbm, training, probability = TRUE)
+confusion_matrix.gbm <- confusionMatrix(prediction.gbm, training$classe)

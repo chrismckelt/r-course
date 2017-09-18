@@ -1,5 +1,5 @@
 ---
-title: "Final Assignment"
+title: "Coursera Practical Machine Learning -  Prediction Assignment"
 author: "Chris McKelt"
 date: "17 September 2017"
 output: 
@@ -26,6 +26,12 @@ using("xgboost")
 set.seed(333)
 ```
 
+#Executive summary
+
+A random forest model achieved the best prediction.
+
+The Random Forest algorithm is less susceptible to overfitting unlike the Gradient Boosting Machines (GBMs) algorithm.
+
 # Background
 
 Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. 
@@ -48,6 +54,12 @@ The test data are available here: https://d396qusza40orc.cloudfront.net/predmach
 ```{r, cache=TRUE, message=FALSE, warning=FALSE}
 save_file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", "pml-training.csv")
 save_file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", "pml-testing.csv")
+training <- readr::read_csv("pml-training.csv", col_names = TRUE, col_types = colString)
+testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types = colString)
+training <- as.data.frame(training)
+training <- training[, order(names(training))]
+testing <- testing[, order(names(testing))]
+set.seed(333)
 
 ```
 ## Data Exploration
@@ -57,92 +69,88 @@ This is the "classe" variable in the training set, the last column. Let's have a
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 dim(training)
 dim(testing)
+levels(training$classe)
+names(training)
+training$classe = as.factor(training$classe)
 ```
 
-Let us have a look at the possible targets. There are five possible classes.
+## “classe” variable is the one we are trying to predict
 ```{r}
 levels(train_data$classe)
 ```
 
 ```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3, echo=FALSE}
 library(ggplot2)
-ggplot(train_data, aes(classe)) + 
-        geom_bar(color = I("black"), fill = I("darkblue")) + 
-        labs(title = "Distribution of classes", x = "Classe", y = "Frequency")
+ggplot(training, aes(classe)) + 
+        geom_bar(color = I("blue"), fill = I("red")) + 
+        labs(title = "Distribution of classe", x = "Classe", y = "Frequency")
 ```
 
 ## Cleaning Data
-We would like to have no missing values in our data and filter out the relevant columns. We do so with the the following commands. Note that we select the same variables for our test set as for our training set, except for our target.
+#### remove columns where ALL values are NA --> https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na
 ```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3}
-train_data <- train_data[, apply(train_data, 2, function(x) !any(is.na(x)))] 
-train_data <- train_data[,-c(1:7)]
-test_data <- test_data[,names(train_data[,-53])]
-
-tbl_df(train_data)
-tbl_df(test_data)
+training <- training[, colSums(is.na(training)) == 0]
+testing <- testing[, colSums(is.na(testing)) == 0]
+dim(training)
+dim(testing)
 ```
 
-## Training and Validation Split
-To get a generalization error, the original test data is not enough with only 20 observations. We need te set aside an extra set to validate our error.
+## Training 
+#### split the original training set because original test set does not have enough observations
 ```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3}
-library(caret)
-set.seed(100)
-inTrain <- createDataPartition(y=train_data$classe, p=0.70,list=F)
-validation_data <- train_data[inTrain,] 
-train_data <- train_data[-inTrain,] 
-data.frame(dim(train_data), dim(validation_data))
+data.include <- createDataPartition(training$classe, p = .70, list = FALSE)
+data.train <- training[data.include,]
+data.test <- training[-data.include,]
 ```
 
-# Model Building
-## Building a Random Forest Model
+# Model build - Random Forest
+speed up randow forest --> see https: / / github.com / lgreski / datasciencectacontent / blob / master / markdown / pml - randomForestPerformance.md
+
 For this random forest model, we apply cross validation: the data is being splitted into five parts, each of them taking the role of a validation set once. A model is built five times on the remaining data, and the classification error is computed on the validation set. The average of these five error rates is our final error. This can all be implemented using the caret train function. We set the seed as the sampling happens randomly.
 ```{r, cache=TRUE, message=FALSE, warning=FALSE}
-set.seed(100)
-rfmodel <- train(classe~.,data=train_data,method="rf",trControl=trainControl(method="cv",number=5),verbose=F)
+cat("random forest model started")
+cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
+registerDoParallel(cluster)
+fitControl <- trainControl(method = "cv",
+                           number = 3,
+                           allowParallel = TRUE)
+timer.start <- Sys.time()
+model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = FALSE, na.action = na.omit)
+timer.end <- Sys.time()
+stopCluster(cluster)
+registerDoSEQ()
+paste("random forest took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
+
 ```
 
-Now we predict on the actual validation set in order to get the accuracy. We compute it by hand and extract it from the confusion matrix to see if it is correct.
+# Prediction - Random Forest
 ```{r, cache=TRUE, message=FALSE, warning=FALSE}
-rfpredictions <- predict(rfmodel, newdata=validation_data)
-accuracy = sum(rfpredictions == validation_data$classe) / length(validation_data$classe)
-accuracy
-confusionMatrix(rfpredictions, validation_data$classe)
+prediction.rf <- predict(model.rf, training, probability = TRUE)
+confusion_matrix.rf <- confusionMatrix(prediction.rf, training$classe)
 ```
 
-## Building a Boosting Model
+# Model build - Gradient Boosting Machine
 Now we will do exactly the same, but use boosting instead of random forests. Getting the accuracy, predications... works with the same code.
 ```{r, cache=TRUE, message=FALSE, warning=FALSE}
-set.seed(100)
-gbmmodel <- train(classe~.,data=train_data,method="gbm",trControl=trainControl(method="cv",number=5),verbose=F)
+cat("boosted model started")
+timer.start <- Sys.time()
+model.gbm <- train(classe ~ ., data = data.train, method = "gbm", trControl = fitControl, verbose = FALSE, na.action = na.omit)
+timer.end <- Sys.time()
+paste("boosted took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
 ```
-
+  
+# Prediction - Gradient Boosting Machine
 ```{r, cache=TRUE, message=FALSE, warning=FALSE}
-gbmpredictions <- predict(gbmmodel, newdata=validation_data)
-accuracy = sum(gbmpredictions == validation_data$classe) / length(validation_data$classe)
-accuracy
-confusionMatrix(gbmpredictions, validation_data$classe)
+cat("boosted predictions")
+prediction.gbm <- predict(model.gbm, training, probability = TRUE)
+confusion_matrix.gbm <- confusionMatrix(prediction.gbm, training$classe)
 ```
-Both the random forest and boosting model turn out to be really good, with accuracies of 98% and 95%. Let us build one more model.
-
-## Building a Decision Tree Model
-A third model we build, is a decision tree. Spoiler: this will be a really bad one.
-```{r, cache=TRUE, message=FALSE, warning=FALSE}
-set.seed(100)
-treemodel <- train(classe~.,data=train_data,method="rpart")
-```
-
-```{r, cache=TRUE, message=FALSE, warning=FALSE}
-treepredictions <- predict(treemodel, newdata=validation_data)
-accuracy = sum(treepredictions == validation_data$classe) / length(validation_data$classe)
-accuracy
-confusionMatrix(treepredictions, validation_data$classe)
-```
-Only half the time we get our predictions right. Still better than gambling (as there are five classes), but still not what you want. When choosing a model, we would go with the random forest model.
 
 # Test Predictions
-A part of the assignment is to predict 'classe' for 20 observations. The actual target values are unknown, so we use our best model - the random forest one - to estimate them.
+A part of the assignment is to predict 'classe' for 20 observations. The actual target values are unknown.
+Random Forest gave the best AUC so use that for predictions.
+
 ```{r, cache=TRUE, message=FALSE, warning=FALSE}
 # According to random forest model
-rfpredictions <- predict(rfmodel, newdata=test_data)
-rfpredictions
+ 
 ```
