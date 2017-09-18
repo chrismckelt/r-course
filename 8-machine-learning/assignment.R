@@ -54,10 +54,13 @@ registerDoParallel(cluster)
 fitControl <- trainControl(method = "oob",
                            number = 3,
                            allowParallel = TRUE)
-
+timer.start <- Sys.time()
 model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl, verbose = F, na.action = na.omit)
+timer.end <- Sys.time()
 stopCluster(cluster)
 registerDoSEQ()
 cat("random forest model completed")
- 
-
+paste("random forest  took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
+prediction.rf <- predict(model.rf, training)
+confusionMatrix(prediction.rf, training$classe)
+plot(roc(test$y, predict(prediction.rf, test, type = "prob"), colorize = TRUE)
