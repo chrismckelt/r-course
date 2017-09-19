@@ -55,7 +55,7 @@ These type of devices are part of the quantified self movement - a group of enth
 
 The exercises were performed by six male participants aged between 20-28 years, with little weight lifting experience. 
 
-Class A corresponds to the specified execution of the exercise, while the other 4 classes correspond to common mistakes. 
+
 
 ## Goal
 
@@ -95,12 +95,16 @@ data.training <- as.data.frame(data.training)
 
 The goal of this project is to predict the manner in which they did the exercise. 
 This is the "classe" variable in the training set, the last column. Let's have a look at the training data. 
+Both datasets have 160 rows with the rraining set having 160 observations and the testing having 20 observations.
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-data.training <- as.data.frame(data.training)
 dim(data.training)
 dim(data.testing)
 ```
 
+The 'classe' variable is the indicator of the training outcome.
+Classe 'A' corresponds to the specified execution of the exercise, while the other 4 classes correspond to common mistakes. 
+Below shows a plot of the distribution of this variable throughout the training set.
 ```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3, echo=FALSE}
 
 ggplot(data.training, aes(classe)) + 
@@ -109,7 +113,8 @@ ggplot(data.training, aes(classe)) +
 ```
 
 ## Cleaning Data
-#### remove columns where ALL values are NA --> https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na
+To clean up the data we remove columns where ALL values are NA
+
 ```{r, message=FALSE, warning=FALSE,echo=TRUE}
 data.training <- data.training[, colSums(is.na(data.training)) == 0]
 data.testing <- data.testing[, colSums(is.na(data.testing)) == 0]
@@ -127,7 +132,7 @@ data.test <- data.training[-data.include,]
 
 For this random forest model, we apply cross validation: the data is being splitted into five parts, each of them taking the role of a validation set once. A model is built five times on the remaining data, and the classification error is computed on the validation set. The average of these five error rates is our final error. This can all be implemented using the caret train function. We set the seed as the sampling happens randomly.
 ```{r, cache=TRUE, message=FALSE, warning=FALSE,echo=TRUE}
-cat("random forest model started")
+cat("Random Forest model started")
 cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
 fitControl.rf <- trainControl(method = "cv",
@@ -138,7 +143,7 @@ model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitC
 timer.end <- Sys.time()
 stopCluster(cluster)
 registerDoSEQ()
-paste("random forest took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
+paste("Random Forest took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
 
 ```
 
@@ -152,17 +157,17 @@ confusion_matrix.rf
 # Model build - Gradient Boosting Machine
 Now we will do exactly the same, but use boosting instead of random forests. Getting the accuracy, predications... works with the same code.
 ```{r, cache=TRUE, message=FALSE, warning=FALSE,echo=TRUE}
-cat("boosted model started")
+cat("Gradient Boosting Machine model started")
 fitControl.gbm <- trainControl(method="cv",number=5,allowParallel=TRUE)
 timer.start <- Sys.time()
 model.gbm <- train(classe ~ ., data = data.train, method = "gbm", trControl = fitControl.gbm, verbose = FALSE, na.action = na.omit)
 timer.end <- Sys.time()
-paste("boosted took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
+paste("Gradient Boosting Machine took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
 ```
   
 # Prediction - Gradient Boosting Machine
 ```{r, cache=TRUE, message=FALSE, warning=FALSE,echo=TRUE}
-cat("boosted predictions")
+cat("Gradient Boosting Machine predictions")
 prediction.gbm <- predict(model.gbm, data.test)
 confusion_matrix.gbm <- confusionMatrix(prediction.gbm, data.test$classe)
 confusion_matrix.gbm
