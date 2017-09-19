@@ -16,7 +16,7 @@ This is an analysis for final assignment of the Coursea course 'Practical Machin
 
 http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har
 
-```{r, echo=FALSE, eval=FALSE, warning=FALSE, message=FALSE}
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 suppressMessages(rm(list = ls()))
 suppressMessages(setwd("C:/dev/r-course/8-machine-learning"))
 
@@ -38,15 +38,15 @@ using("pROC")
 using("parallel")
 using("doParallel")
 using("dplyr")
+using("ggplot2")
 
 set.seed(333)
 ```
 
 #Executive summary
 
-A random forest model achieved the best prediction.
+The gradient boosted machine  (0.9998) achieved a better accuracy than the random forsest (0.9997)
 
-The Random Forest algorithm is less susceptible to overfitting unlike the Gradient Boosting Machines (GBMs) algorithm.
 
 # Background
 
@@ -67,7 +67,7 @@ The training data for this project are available here: https://d396qusza40orc.cl
 
 The test data are available here: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
 
-```{r, cache=TRUE, message=FALSE, warning=FALSE}
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE,echo=TRUE}
 
 save_file = function(url, name) {
     if (!file.exists(name)) {
@@ -96,15 +96,13 @@ data.training <- as.data.frame(data.training)
 The goal of this project is to predict the manner in which they did the exercise. 
 This is the "classe" variable in the training set, the last column. Let's have a look at the training data. 
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-data.training <- readr::read_csv("pml-training.csv", col_names = TRUE, col_types = colString)
-data.testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types = colString)
 data.training <- as.data.frame(data.training)
 dim(data.training)
 dim(data.testing)
 ```
 
 ```{r, cache=TRUE, message=FALSE, warning=FALSE, fig.height=2, fig.width=3, echo=FALSE}
-library(ggplot2)
+
 ggplot(data.training, aes(classe)) + 
         geom_bar(color = I("blue"), fill = I("red")) + 
         labs(title = "Distribution of classe", x = "Classe", y = "Frequency")

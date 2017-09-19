@@ -27,7 +27,7 @@ data.testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types =
 data.training <- as.data.frame(data.training)
 dim(data.training)
 dim(data.testing)
-## “classe” variable is the one we are trying to predict
+## ?classe? variable is the one we are trying to predict
 levels(data.training$classe)
 
 
@@ -47,7 +47,7 @@ data.test <- data.training[-data.include,]
 cat("random forest model started")
 cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
-fitControl.rf <- trainControl(method = "oob", 
+fitControl.rf <- trainControl(method = "cv", 
                            number = 5,
                            allowParallel = TRUE)
 timer.start <- Sys.time()
@@ -60,7 +60,8 @@ paste("random forest took: ", timer.end - timer.start, attr(timer.end - timer.st
 cat("random forest predictions")
 prediction.rf <- predict(model.rf, data.test)
 confusion_matrix.rf <- confusionMatrix(prediction.rf, data.test$classe)
-
+#accuracy.rf <- postResample(prediction.rf, data.test$classe)
+#accuracy.rf
 ##############################################################################################################################################################
 # training - gradient boosted model
 fitControl.gbm <- trainControl(method = "cv", number = 3, allowParallel = TRUE)
@@ -73,5 +74,5 @@ paste("boosted took: ", timer.end - timer.start, attr(timer.end - timer.start, "
 cat("boosted predictions")
 prediction.gbm <- predict(model.gbm, data.test)
 confusion_matrix.gbm <- confusionMatrix(prediction.gbm, data.test$classe)
-
-confusion_matrix.gbm
+#accuracy.gbm <- postResample(prediction.gbm, data.test$classe)
+#accuracy.gbm

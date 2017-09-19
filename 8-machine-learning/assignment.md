@@ -11,9 +11,8 @@ http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har
 
 #Executive summary
 
-A random forest model achieved the best prediction.
+The gradient boosted machine  (0.9998) achieved a better accuracy than the random forsest (0.9997)
 
-The Random Forest algorithm is less susceptible to overfitting unlike the Gradient Boosting Machines (GBMs) algorithm.
 
 # Background
 
@@ -63,8 +62,6 @@ The goal of this project is to predict the manner in which they did the exercise
 This is the "classe" variable in the training set, the last column. Let's have a look at the training data. 
 
 ```r
-data.training <- readr::read_csv("pml-training.csv", col_names = TRUE, col_types = colString)
-data.testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types = colString)
 data.training <- as.data.frame(data.training)
 dim(data.training)
 ```
@@ -127,7 +124,7 @@ paste("random forest took: ", timer.end - timer.start, attr(timer.end - timer.st
 ```
 
 ```
-## [1] "random forest took:  3.10714268287023 mins"
+## [1] "random forest took:  3.40847545067469 mins"
 ```
 
 # Prediction - Random Forest
@@ -143,33 +140,33 @@ confusion_matrix.rf
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1674    1    0    0    0
-##          B    0 1138    0    0    0
-##          C    0    0 1026    0    0
+##          A 1673    0    0    0    0
+##          B    1 1138    0    0    0
+##          C    0    1 1026    0    0
 ##          D    0    0    0  964    0
 ##          E    0    0    0    0 1082
 ## 
 ## Overall Statistics
 ##                                      
-##                Accuracy : 0.9998     
-##                  95% CI : (0.9991, 1)
+##                Accuracy : 0.9997     
+##                  95% CI : (0.9988, 1)
 ##     No Information Rate : 0.2845     
 ##     P-Value [Acc > NIR] : < 2.2e-16  
 ##                                      
-##                   Kappa : 0.9998     
+##                   Kappa : 0.9996     
 ##  Mcnemar's Test P-Value : NA         
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            1.0000   0.9991   1.0000   1.0000   1.0000
-## Specificity            0.9998   1.0000   1.0000   1.0000   1.0000
-## Pos Pred Value         0.9994   1.0000   1.0000   1.0000   1.0000
-## Neg Pred Value         1.0000   0.9998   1.0000   1.0000   1.0000
+## Sensitivity            0.9994   0.9991   1.0000   1.0000   1.0000
+## Specificity            1.0000   0.9998   0.9998   1.0000   1.0000
+## Pos Pred Value         1.0000   0.9991   0.9990   1.0000   1.0000
+## Neg Pred Value         0.9998   0.9998   1.0000   1.0000   1.0000
 ## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
-## Detection Rate         0.2845   0.1934   0.1743   0.1638   0.1839
-## Detection Prevalence   0.2846   0.1934   0.1743   0.1638   0.1839
-## Balanced Accuracy      0.9999   0.9996   1.0000   1.0000   1.0000
+## Detection Rate         0.2843   0.1934   0.1743   0.1638   0.1839
+## Detection Prevalence   0.2843   0.1935   0.1745   0.1638   0.1839
+## Balanced Accuracy      0.9997   0.9995   0.9999   1.0000   1.0000
 ```
 
 # Model build - Gradient Boosting Machine
@@ -244,4 +241,5 @@ confusion_matrix.gbm
 ## Detection Prevalence   0.2845   0.1935   0.1743   0.1640   0.1837
 ## Balanced Accuracy      1.0000   1.0000   1.0000   0.9999   0.9995
 ```
+
 
