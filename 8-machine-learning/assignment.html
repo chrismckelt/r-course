@@ -156,7 +156,6 @@ $(document).ready(function () {
 <h1>Background</h1>
 <p>Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har" class="uri">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset).</p>
 <p>The exercises were performed by six male participants aged between 20-28 years, with little weight lifting experience.</p>
-<p>Class A corresponds to the specified execution of the exercise, while the other 4 classes correspond to common mistakes.</p>
 <div id="goal" class="section level2">
 <h2>Goal</h2>
 <p>Predict the manner in which a participant did the exercise (class A - properly - or any other incorrect way)</p>
@@ -191,21 +190,18 @@ data.training &lt;- as.data.frame(data.training)</code></pre>
 </div>
 <div id="data-exploration" class="section level2">
 <h2>Data Exploration</h2>
-<p>The goal of this project is to predict the manner in which they did the exercise. This is the “classe” variable in the training set, the last column. Let’s have a look at the training data.</p>
-<pre class="r"><code>data.training &lt;- as.data.frame(data.training)
-dim(data.training)</code></pre>
+<p>The goal of this project is to predict the manner in which they did the exercise. This is the “classe” variable in the training set, the last column. Let’s have a look at the training data. Both datasets have 160 rows with the rraining set having 160 observations and the testing having 20 observations.</p>
+<pre class="r"><code>dim(data.training)</code></pre>
 <pre><code>## [1] 19622   160</code></pre>
 <pre class="r"><code>dim(data.testing)</code></pre>
 <pre><code>## [1]  20 160</code></pre>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>The ‘classe’ variable is the indicator of the training outcome. Classe ‘A’ corresponds to the specified execution of the exercise, while the other 4 classes correspond to common mistakes. Below shows a plot of the distribution of this variable throughout the training set. <img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 <div id="cleaning-data" class="section level2">
 <h2>Cleaning Data</h2>
-<div id="remove-columns-where-all-values-are-na-httpsstackoverflow.comquestions2643939remove-columns-from-dataframe-where-all-values-are-na" class="section level4">
-<h4>remove columns where ALL values are NA –&gt; <a href="https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na" class="uri">https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na</a></h4>
+<p>To clean up the data we remove columns where ALL values are NA</p>
 <pre class="r"><code>data.training &lt;- data.training[, colSums(is.na(data.training)) == 0]
 data.testing &lt;- data.testing[, colSums(is.na(data.testing)) == 0]</code></pre>
-</div>
 </div>
 <div id="training" class="section level2">
 <h2>Training</h2>
@@ -220,8 +216,8 @@ data.test &lt;- data.training[-data.include,]</code></pre>
 <div id="model-build---random-forest" class="section level1">
 <h1>Model build - Random Forest</h1>
 <p>For this random forest model, we apply cross validation: the data is being splitted into five parts, each of them taking the role of a validation set once. A model is built five times on the remaining data, and the classification error is computed on the validation set. The average of these five error rates is our final error. This can all be implemented using the caret train function. We set the seed as the sampling happens randomly.</p>
-<pre class="r"><code>cat(&quot;random forest model started&quot;)</code></pre>
-<pre><code>## random forest model started</code></pre>
+<pre class="r"><code>cat(&quot;Random Forest model started&quot;)</code></pre>
+<pre><code>## Random Forest model started</code></pre>
 <pre class="r"><code>cluster &lt;- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
 fitControl.rf &lt;- trainControl(method = &quot;cv&quot;,
@@ -232,8 +228,8 @@ model.rf &lt;- train(classe ~ ., data = data.train, method = &quot;rf&quot;, trC
 timer.end &lt;- Sys.time()
 stopCluster(cluster)
 registerDoSEQ()
-paste(&quot;random forest took: &quot;, timer.end - timer.start, attr(timer.end - timer.start, &quot;units&quot;))</code></pre>
-<pre><code>## [1] &quot;random forest took:  3.40847545067469 mins&quot;</code></pre>
+paste(&quot;Random Forest took: &quot;, timer.end - timer.start, attr(timer.end - timer.start, &quot;units&quot;))</code></pre>
+<pre><code>## [1] &quot;Random Forest took:  2.51922355095545 mins&quot;</code></pre>
 </div>
 <div id="prediction---random-forest" class="section level1">
 <h1>Prediction - Random Forest</h1>
@@ -275,19 +271,19 @@ confusion_matrix.rf</code></pre>
 <div id="model-build---gradient-boosting-machine" class="section level1">
 <h1>Model build - Gradient Boosting Machine</h1>
 <p>Now we will do exactly the same, but use boosting instead of random forests. Getting the accuracy, predications… works with the same code.</p>
-<pre class="r"><code>cat(&quot;boosted model started&quot;)</code></pre>
-<pre><code>## boosted model started</code></pre>
+<pre class="r"><code>cat(&quot;Gradient Boosting Machine model started&quot;)</code></pre>
+<pre><code>## Gradient Boosting Machine model started</code></pre>
 <pre class="r"><code>fitControl.gbm &lt;- trainControl(method=&quot;cv&quot;,number=5,allowParallel=TRUE)
 timer.start &lt;- Sys.time()
 model.gbm &lt;- train(classe ~ ., data = data.train, method = &quot;gbm&quot;, trControl = fitControl.gbm, verbose = FALSE, na.action = na.omit)
 timer.end &lt;- Sys.time()
-paste(&quot;boosted took: &quot;, timer.end - timer.start, attr(timer.end - timer.start, &quot;units&quot;))</code></pre>
-<pre><code>## [1] &quot;boosted took:  4.92309161822001 mins&quot;</code></pre>
+paste(&quot;Gradient Boosting Machine took: &quot;, timer.end - timer.start, attr(timer.end - timer.start, &quot;units&quot;))</code></pre>
+<pre><code>## [1] &quot;Gradient Boosting Machine took:  3.89540884892146 mins&quot;</code></pre>
 </div>
 <div id="prediction---gradient-boosting-machine" class="section level1">
 <h1>Prediction - Gradient Boosting Machine</h1>
-<pre class="r"><code>cat(&quot;boosted predictions&quot;)</code></pre>
-<pre><code>## boosted predictions</code></pre>
+<pre class="r"><code>cat(&quot;Gradient Boosting Machine predictions&quot;)</code></pre>
+<pre><code>## Gradient Boosting Machine predictions</code></pre>
 <pre class="r"><code>prediction.gbm &lt;- predict(model.gbm, data.test)
 confusion_matrix.gbm &lt;- confusionMatrix(prediction.gbm, data.test$classe)
 confusion_matrix.gbm</code></pre>
@@ -295,33 +291,33 @@ confusion_matrix.gbm</code></pre>
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1674    0    0    0    0
-##          B    0 1139    0    0    0
-##          C    0    0 1026    0    0
-##          D    0    0    0  964    1
-##          E    0    0    0    0 1081
+##          A 1673    0    0    0    0
+##          B    1 1138    0    0    0
+##          C    0    1 1026    0    0
+##          D    0    0    0  964    0
+##          E    0    0    0    0 1082
 ## 
 ## Overall Statistics
 ##                                      
-##                Accuracy : 0.9998     
-##                  95% CI : (0.9991, 1)
+##                Accuracy : 0.9997     
+##                  95% CI : (0.9988, 1)
 ##     No Information Rate : 0.2845     
 ##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
 ##                                      
-##                   Kappa : 0.9998     
+##                   Kappa : 0.9996     
 ##  Mcnemar's Test P-Value : NA         
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            1.0000   1.0000   1.0000   1.0000   0.9991
-## Specificity            1.0000   1.0000   1.0000   0.9998   1.0000
-## Pos Pred Value         1.0000   1.0000   1.0000   0.9990   1.0000
-## Neg Pred Value         1.0000   1.0000   1.0000   1.0000   0.9998
+## Sensitivity            0.9994   0.9991   1.0000   1.0000   1.0000
+## Specificity            1.0000   0.9998   0.9998   1.0000   1.0000
+## Pos Pred Value         1.0000   0.9991   0.9990   1.0000   1.0000
+## Neg Pred Value         0.9998   0.9998   1.0000   1.0000   1.0000
 ## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
-## Detection Rate         0.2845   0.1935   0.1743   0.1638   0.1837
-## Detection Prevalence   0.2845   0.1935   0.1743   0.1640   0.1837
-## Balanced Accuracy      1.0000   1.0000   1.0000   0.9999   0.9995</code></pre>
+## Detection Rate         0.2843   0.1934   0.1743   0.1638   0.1839
+## Detection Prevalence   0.2843   0.1935   0.1745   0.1638   0.1839
+## Balanced Accuracy      0.9997   0.9995   0.9999   1.0000   1.0000</code></pre>
 </div>
 
 

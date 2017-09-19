@@ -21,7 +21,7 @@ These type of devices are part of the quantified self movement - a group of enth
 
 The exercises were performed by six male participants aged between 20-28 years, with little weight lifting experience. 
 
-Class A corresponds to the specified execution of the exercise, while the other 4 classes correspond to common mistakes. 
+
 
 ## Goal
 
@@ -60,9 +60,10 @@ data.training <- as.data.frame(data.training)
 
 The goal of this project is to predict the manner in which they did the exercise. 
 This is the "classe" variable in the training set, the last column. Let's have a look at the training data. 
+Both datasets have 160 rows with the rraining set having 160 observations and the testing having 20 observations.
+
 
 ```r
-data.training <- as.data.frame(data.training)
 dim(data.training)
 ```
 
@@ -78,10 +79,14 @@ dim(data.testing)
 ## [1]  20 160
 ```
 
+The 'classe' variable is the indicator of the training outcome.
+Classe 'A' corresponds to the specified execution of the exercise, while the other 4 classes correspond to common mistakes. 
+Below shows a plot of the distribution of this variable throughout the training set.
 ![](assignment_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 ## Cleaning Data
-#### remove columns where ALL values are NA --> https://stackoverflow.com/questions/2643939/remove-columns-from-dataframe-where-all-values-are-na
+To clean up the data we remove columns where ALL values are NA
+
 
 ```r
 data.training <- data.training[, colSums(is.na(data.training)) == 0]
@@ -102,11 +107,11 @@ data.test <- data.training[-data.include,]
 For this random forest model, we apply cross validation: the data is being splitted into five parts, each of them taking the role of a validation set once. A model is built five times on the remaining data, and the classification error is computed on the validation set. The average of these five error rates is our final error. This can all be implemented using the caret train function. We set the seed as the sampling happens randomly.
 
 ```r
-cat("random forest model started")
+cat("Random Forest model started")
 ```
 
 ```
-## random forest model started
+## Random Forest model started
 ```
 
 ```r
@@ -120,11 +125,11 @@ model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitC
 timer.end <- Sys.time()
 stopCluster(cluster)
 registerDoSEQ()
-paste("random forest took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
+paste("Random Forest took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
 ```
 
 ```
-## [1] "random forest took:  3.40847545067469 mins"
+## [1] "Random Forest took:  2.51922355095545 mins"
 ```
 
 # Prediction - Random Forest
@@ -173,11 +178,11 @@ confusion_matrix.rf
 Now we will do exactly the same, but use boosting instead of random forests. Getting the accuracy, predications... works with the same code.
 
 ```r
-cat("boosted model started")
+cat("Gradient Boosting Machine model started")
 ```
 
 ```
-## boosted model started
+## Gradient Boosting Machine model started
 ```
 
 ```r
@@ -185,21 +190,21 @@ fitControl.gbm <- trainControl(method="cv",number=5,allowParallel=TRUE)
 timer.start <- Sys.time()
 model.gbm <- train(classe ~ ., data = data.train, method = "gbm", trControl = fitControl.gbm, verbose = FALSE, na.action = na.omit)
 timer.end <- Sys.time()
-paste("boosted took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
+paste("Gradient Boosting Machine took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
 ```
 
 ```
-## [1] "boosted took:  4.92309161822001 mins"
+## [1] "Gradient Boosting Machine took:  3.89540884892146 mins"
 ```
   
 # Prediction - Gradient Boosting Machine
 
 ```r
-cat("boosted predictions")
+cat("Gradient Boosting Machine predictions")
 ```
 
 ```
-## boosted predictions
+## Gradient Boosting Machine predictions
 ```
 
 ```r
@@ -213,33 +218,33 @@ confusion_matrix.gbm
 ## 
 ##           Reference
 ## Prediction    A    B    C    D    E
-##          A 1674    0    0    0    0
-##          B    0 1139    0    0    0
-##          C    0    0 1026    0    0
-##          D    0    0    0  964    1
-##          E    0    0    0    0 1081
+##          A 1673    0    0    0    0
+##          B    1 1138    0    0    0
+##          C    0    1 1026    0    0
+##          D    0    0    0  964    0
+##          E    0    0    0    0 1082
 ## 
 ## Overall Statistics
 ##                                      
-##                Accuracy : 0.9998     
-##                  95% CI : (0.9991, 1)
+##                Accuracy : 0.9997     
+##                  95% CI : (0.9988, 1)
 ##     No Information Rate : 0.2845     
 ##     P-Value [Acc > NIR] : < 2.2e-16  
 ##                                      
-##                   Kappa : 0.9998     
+##                   Kappa : 0.9996     
 ##  Mcnemar's Test P-Value : NA         
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity            1.0000   1.0000   1.0000   1.0000   0.9991
-## Specificity            1.0000   1.0000   1.0000   0.9998   1.0000
-## Pos Pred Value         1.0000   1.0000   1.0000   0.9990   1.0000
-## Neg Pred Value         1.0000   1.0000   1.0000   1.0000   0.9998
+## Sensitivity            0.9994   0.9991   1.0000   1.0000   1.0000
+## Specificity            1.0000   0.9998   0.9998   1.0000   1.0000
+## Pos Pred Value         1.0000   0.9991   0.9990   1.0000   1.0000
+## Neg Pred Value         0.9998   0.9998   1.0000   1.0000   1.0000
 ## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
-## Detection Rate         0.2845   0.1935   0.1743   0.1638   0.1837
-## Detection Prevalence   0.2845   0.1935   0.1743   0.1640   0.1837
-## Balanced Accuracy      1.0000   1.0000   1.0000   0.9999   0.9995
+## Detection Rate         0.2843   0.1934   0.1743   0.1638   0.1839
+## Detection Prevalence   0.2843   0.1935   0.1745   0.1638   0.1839
+## Balanced Accuracy      0.9997   0.9995   0.9999   1.0000   1.0000
 ```
 
 
