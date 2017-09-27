@@ -1,77 +1,227 @@
 <!DOCTYPE html>
 <!-- saved from url=(0022)http://127.0.0.1:6033/ -->
-<html class=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/web-socket-js/1.0.0/web_socket.min.js"></script>
-  
-  <script type="application/shiny-singletons">12b282b6c4e1ec3cee386f4ca6165aafc4731a84,ff180b64d1a06d9617a46073e3e76cf5ef50c911</script>
-  <script type="application/html-dependencies">json2[2014.02.04];jquery[1.12.4];shiny[1.0.3];htmlwidgets[0.8];leaflet[0.7.7];leafletfix[1.0.0];leaflet-label[0.2.2];Proj4Leaflet[0.7.2];leaflet-binding[1.1.0];bootstrap[3.3.7]</script>
-<script src="./assignment-1_files/json2-min.js.download"></script>
-<script src="./assignment-1_files/jquery.min.js.download"></script>
-<link href="./assignment-1_files/shiny.css" rel="stylesheet">
-<script src="./assignment-1_files/shiny.min.js.download"></script>
-<script src="./assignment-1_files/htmlwidgets.js.download"></script>
-<link href="./assignment-1_files/leaflet.css" rel="stylesheet">
-<script src="./assignment-1_files/leaflet.js.download"></script>
-<link href="./assignment-1_files/leafletfix.css" rel="stylesheet">
-<link href="./assignment-1_files/leaflet.label.css" rel="stylesheet">
-<script src="./assignment-1_files/leaflet.label.js.download"></script>
-<script src="./assignment-1_files/proj4-compressed.js.download"></script>
-<script src="./assignment-1_files/proj4leaflet.js.download"></script>
-<script src="./assignment-1_files/leaflet.js(1).download"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="./assignment-1_files/bootstrap.min.css" rel="stylesheet">
-<script src="./assignment-1_files/bootstrap.min.js.download"></script>
-<script src="./assignment-1_files/html5shiv.min.js.download"></script>
-<script src="./assignment-1_files/respond.min.js.download"></script>  <style>.shinyjs-hide { display: none !important; }</style>
-  <script>Shiny.addCustomMessageHandler('shinyjs-show', function(params) { shinyjs.debugMessage('shinyjs: calling function "show" with parameters:'); shinyjs.debugMessage(params); shinyjs.show(params);});
-Shiny.addCustomMessageHandler('shinyjs-hide', function(params) { shinyjs.debugMessage('shinyjs: calling function "hide" with parameters:'); shinyjs.debugMessage(params); shinyjs.hide(params);});
-Shiny.addCustomMessageHandler('shinyjs-toggle', function(params) { shinyjs.debugMessage('shinyjs: calling function "toggle" with parameters:'); shinyjs.debugMessage(params); shinyjs.toggle(params);});
-Shiny.addCustomMessageHandler('shinyjs-enable', function(params) { shinyjs.debugMessage('shinyjs: calling function "enable" with parameters:'); shinyjs.debugMessage(params); shinyjs.enable(params);});
-Shiny.addCustomMessageHandler('shinyjs-disable', function(params) { shinyjs.debugMessage('shinyjs: calling function "disable" with parameters:'); shinyjs.debugMessage(params); shinyjs.disable(params);});
-Shiny.addCustomMessageHandler('shinyjs-toggleState', function(params) { shinyjs.debugMessage('shinyjs: calling function "toggleState" with parameters:'); shinyjs.debugMessage(params); shinyjs.toggleState(params);});
-Shiny.addCustomMessageHandler('shinyjs-addClass', function(params) { shinyjs.debugMessage('shinyjs: calling function "addClass" with parameters:'); shinyjs.debugMessage(params); shinyjs.addClass(params);});
-Shiny.addCustomMessageHandler('shinyjs-removeClass', function(params) { shinyjs.debugMessage('shinyjs: calling function "removeClass" with parameters:'); shinyjs.debugMessage(params); shinyjs.removeClass(params);});
-Shiny.addCustomMessageHandler('shinyjs-toggleClass', function(params) { shinyjs.debugMessage('shinyjs: calling function "toggleClass" with parameters:'); shinyjs.debugMessage(params); shinyjs.toggleClass(params);});
-Shiny.addCustomMessageHandler('shinyjs-html', function(params) { shinyjs.debugMessage('shinyjs: calling function "html" with parameters:'); shinyjs.debugMessage(params); shinyjs.html(params);});
-Shiny.addCustomMessageHandler('shinyjs-onevent', function(params) { shinyjs.debugMessage('shinyjs: calling function "onevent" with parameters:'); shinyjs.debugMessage(params); shinyjs.onevent(params);});
-Shiny.addCustomMessageHandler('shinyjs-alert', function(params) { shinyjs.debugMessage('shinyjs: calling function "alert" with parameters:'); shinyjs.debugMessage(params); shinyjs.alert(params);});
-Shiny.addCustomMessageHandler('shinyjs-logjs', function(params) { shinyjs.debugMessage('shinyjs: calling function "logjs" with parameters:'); shinyjs.debugMessage(params); shinyjs.logjs(params);});
-Shiny.addCustomMessageHandler('shinyjs-runjs', function(params) { shinyjs.debugMessage('shinyjs: calling function "runjs" with parameters:'); shinyjs.debugMessage(params); shinyjs.runjs(params);});
-Shiny.addCustomMessageHandler('shinyjs-reset', function(params) { shinyjs.debugMessage('shinyjs: calling function "reset" with parameters:'); shinyjs.debugMessage(params); shinyjs.reset(params);});
-Shiny.addCustomMessageHandler('shinyjs-delay', function(params) { shinyjs.debugMessage('shinyjs: calling function "delay" with parameters:'); shinyjs.debugMessage(params); shinyjs.delay(params);});</script>
-  <script src="./assignment-1_files/shinyjs-default-funcs.js.download"></script>
-  <script>shinyjs.debug = false;</script>
-  <script>Shiny.addCustomMessageHandler('shinyjs-geoloc', function(params) { shinyjs.debugMessage('shinyjs: calling function "geoloc" with parameters:'); shinyjs.debugMessage(params); shinyjs.geoloc(params);});</script>
-  <script>
-shinyjs.geoloc = function() {
-    navigator.geolocation.getCurrentPosition(onSuccess, onError);
-    function onError (err) {
-        Shiny.onInputChange("geolocation", false);
-    }
-    function onSuccess (position) {
-        setTimeout(function () {
-            var coords = position.coords;
-            console.log(coords.latitude + ", " + coords.longitude);
-            Shiny.onInputChange("geolocation", true);
-            Shiny.onInputChange("lat", coords.latitude);
-            Shiny.onInputChange("long", coords.longitude);
-        }, 5)
-    }
-};
-</script>
+<html class="">
 
-<script src="./assignment-1_files/leaflet-providers.js.download"></script><script src="./assignment-1_files/leaflet-providers-plugin.js.download"></script></head>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web-socket-js/1.0.0/web_socket.min.js"></script>
+
+    <script type="application/shiny-singletons">12b282b6c4e1ec3cee386f4ca6165aafc4731a84,ff180b64d1a06d9617a46073e3e76cf5ef50c911</script>
+    <script type="application/html-dependencies">json2[2014.02.04];jquery[1.12.4];shiny[1.0.3];htmlwidgets[0.8];leaflet[0.7.7];leafletfix[1.0.0];leaflet-label[0.2.2];Proj4Leaflet[0.7.2];leaflet-binding[1.1.0];bootstrap[3.3.7]</script>
+    <script src="https://shiny.rstudio.com/lib/highlight.min.js"></script>
+    <script src="https://shiny.rstudio.com/lib/jquery-1.10.2.min.js"></script>
+    <script src="https://shiny.rstudio.com/lib/bootstrap/bootstrap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400" rel="stylesheet" type="text/css">
+    <link href="https://shiny.rstudio.com/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="/css/global.css" />
+    <script src="https://shiny.rstudio.com/lib/respond/respond.min.js"></script>
+    <script src="https://gallery.shinyapps.io/lego-viz/_w_f64f9cd0/shared/shiny.min.js"></script>
+    <script src="./assignment-1_files/htmlwidgets.js.download"></script>
+    <link href="./assignment-1_files/leaflet.css" rel="stylesheet">
+    <script src="./assignment-1_files/leaflet.js.download"></script>
+    <link href="./assignment-1_files/leafletfix.css" rel="stylesheet">
+    <link href="./assignment-1_files/leaflet.label.css" rel="stylesheet">
+    <script src="./assignment-1_files/leaflet.label.js.download"></script>
+    <script src="./assignment-1_files/proj4-compressed.js.download"></script>
+    <script src="./assignment-1_files/proj4leaflet.js.download"></script>
+    <script src="./assignment-1_files/leaflet.js(1).download"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./assignment-1_files/bootstrap.min.css" rel="stylesheet">
+    <script src="./assignment-1_files/bootstrap.min.js.download"></script>
+    <script src="https://daattali.com/shiny/shinyjs-demo/_w_e7be863a58cb15f783630e9ca1f3c8521e53593daf7a0ded/html5shiv.min.js"></script>
+    <script src="./assignment-1_files/respond.min.js.download"></script>
+    <style>
+        .shinyjs-hide {
+            display: none !important;
+        }
+    </style>
+    <script>
+        Shiny.addCustomMessageHandler('shinyjs-show', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "show" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.show(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-hide', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "hide" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.hide(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-toggle', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "toggle" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.toggle(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-enable', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "enable" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.enable(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-disable', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "disable" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.disable(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-toggleState', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "toggleState" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.toggleState(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-addClass', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "addClass" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.addClass(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-removeClass', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "removeClass" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.removeClass(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-toggleClass', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "toggleClass" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.toggleClass(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-html', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "html" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.html(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-onevent', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "onevent" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.onevent(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-alert', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "alert" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.alert(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-logjs', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "logjs" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.logjs(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-runjs', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "runjs" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.runjs(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-reset', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "reset" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.reset(params);
+        });
+        Shiny.addCustomMessageHandler('shinyjs-delay', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "delay" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.delay(params);
+        });
+    </script>
+    <script src="./assignment-1_files/shinyjs-default-funcs.js.download"></script>
+    <script>
+        shinyjs.debug = false;
+    </script>
+    <script>
+        Shiny.addCustomMessageHandler('shinyjs-geoloc', function(params) {
+            shinyjs.debugMessage('shinyjs: calling function "geoloc" with parameters:');
+            shinyjs.debugMessage(params);
+            shinyjs.geoloc(params);
+        });
+    </script>
+    <script>
+        shinyjs.geoloc = function() {
+            navigator.geolocation.getCurrentPosition(onSuccess, onError);
+
+            function onError(err) {
+                Shiny.onInputChange("geolocation", false);
+            }
+
+            function onSuccess(position) {
+                setTimeout(function() {
+                    var coords = position.coords;
+                    console.log(coords.latitude + ", " + coords.longitude);
+                    Shiny.onInputChange("geolocation", true);
+                    Shiny.onInputChange("lat", coords.latitude);
+                    Shiny.onInputChange("long", coords.longitude);
+                }, 5)
+            }
+        };
+    </script>
+
+    <script src="./assignment-1_files/leaflet-providers.js.download"></script>
+    <script src="./assignment-1_files/leaflet-providers-plugin.js.download"></script>
+</head>
 
 <body style="" cz-shortcut-listen="true">
-  <div class="container-fluid">
-    <h1>Coursera - Developing Data Products - Assignment 1</h1>
-    <h2>Author: Chris McKelt</h2>
-    <h2>27th September 2017</h2>
-    <br>
-    <button class="btn btn-default action-button btn btn-primary shiny-bound-input" id="geoloc" onclick="shinyjs.geoloc()" type="button">Localize me</button>
-    <div id="map" style="width: 100%; height: 600px; visibility: inherit; position: relative;" class="leaflet html-widget html-widget-output shiny-bound-output leaflet-container leaflet-fade-anim" tabindex="0"><div class="leaflet-map-pane" style="transform: translate3d(0px, 0px, 0px);"><div class="leaflet-tile-pane"><div class="leaflet-layer"><div class="leaflet-tile-container"></div><div class="leaflet-tile-container leaflet-zoom-animated"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2" style="height: 256px; width: 256px; left: 897px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1" style="height: 256px; width: 256px; left: 641px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(1)" style="height: 256px; width: 256px; left: 897px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(1)" style="height: 256px; width: 256px; left: 641px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(2)" style="height: 256px; width: 256px; left: 641px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3" style="height: 256px; width: 256px; left: 1153px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(3)" style="height: 256px; width: 256px; left: 641px; top: 556px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(1)" style="height: 256px; width: 256px; left: 1153px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(2)" style="height: 256px; width: 256px; left: 897px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(3)" style="height: 256px; width: 256px; left: 897px; top: 556px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0" style="height: 256px; width: 256px; left: 385px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(1)" style="height: 256px; width: 256px; left: 385px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(2)" style="height: 256px; width: 256px; left: 385px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(2)" style="height: 256px; width: 256px; left: 1153px; top: 556px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(3)" style="height: 256px; width: 256px; left: 1153px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(3)" style="height: 256px; width: 256px; left: 385px; top: 556px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3" style="height: 256px; width: 256px; left: 129px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(1)" style="height: 256px; width: 256px; left: 129px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(1)" style="height: 256px; width: 256px; left: 1409px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0" style="height: 256px; width: 256px; left: 1409px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(3)" style="height: 256px; width: 256px; left: 129px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(2)" style="height: 256px; width: 256px; left: 1409px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(2)" style="height: 256px; width: 256px; left: 129px; top: 556px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(3)" style="height: 256px; width: 256px; left: 1409px; top: 556px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(1)" style="height: 256px; width: 256px; left: 1665px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1" style="height: 256px; width: 256px; left: 1665px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(1)" style="height: 256px; width: 256px; left: -127px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2" style="height: 256px; width: 256px; left: -127px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(2)" style="height: 256px; width: 256px; left: -127px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(2)" style="height: 256px; width: 256px; left: 1665px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(3)" style="height: 256px; width: 256px; left: -127px; top: 556px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(3)" style="height: 256px; width: 256px; left: 1665px; top: 556px;"></div></div></div><div class="leaflet-objects-pane"><div class="leaflet-shadow-pane"></div><div class="leaflet-overlay-pane"></div><div class="leaflet-marker-pane"></div><div class="leaflet-popup-pane"></div></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="http://127.0.0.1:6033/#" title="Zoom in">+</a><a class="leaflet-control-zoom-out" href="http://127.0.0.1:6033/#" title="Zoom out">-</a></div></div><div class="leaflet-top leaflet-right"></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-attribution leaflet-control"><a href="http://leafletjs.com/" title="A JS library for interactive maps">Leaflet</a> | Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community</div></div></div></div>
-  </div>
+    <div class="container-fluid">
+        <h1>Coursera - Developing Data Products - Assignment 1</h1>
+        <h2>Author: Chris McKelt</h2>
+        <h2>27th September 2017</h2>
+        <br>
+        <button class="btn btn-default action-button btn btn-primary shiny-bound-input" id="geoloc" onclick="shinyjs.geoloc()" type="button">Localize me</button>
+        <div id="map" style="width: 100%; height: 600px; visibility: inherit; position: relative;" class="leaflet html-widget html-widget-output shiny-bound-output leaflet-container leaflet-fade-anim" tabindex="0">
+            <div class="leaflet-map-pane" style="transform: translate3d(0px, 0px, 0px);">
+                <div class="leaflet-tile-pane">
+                    <div class="leaflet-layer">
+                        <div class="leaflet-tile-container"></div>
+                        <div class="leaflet-tile-container leaflet-zoom-animated"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2" style="height: 256px; width: 256px; left: 897px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1" style="height: 256px; width: 256px; left: 641px; top: 44px;">
+                            <img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(1)" style="height: 256px; width: 256px; left: 897px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(1)" style="height: 256px; width: 256px; left: 641px; top: 300px;">
+                            <img
+                                class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(2)" style="height: 256px; width: 256px; left: 641px; top: -212px;">
+                                <img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3" style="height: 256px; width: 256px; left: 1153px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(3)" style="height: 256px; width: 256px; left: 641px; top: 556px;">
+                                <img
+                                    class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(1)" style="height: 256px; width: 256px; left: 1153px; top: 44px;">
+                                    <img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(2)" style="height: 256px; width: 256px; left: 897px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(3)"
+                                        style="height: 256px; width: 256px; left: 897px; top: 556px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0" style="height: 256px; width: 256px; left: 385px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded"
+                                        src="./assignment-1_files/0(1)" style="height: 256px; width: 256px; left: 385px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(2)" style="height: 256px; width: 256px; left: 385px; top: -212px;">
+                                    <img
+                                        class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(2)" style="height: 256px; width: 256px; left: 1153px; top: 556px;">
+                                        <img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(3)" style="height: 256px; width: 256px; left: 1153px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(3)"
+                                            style="height: 256px; width: 256px; left: 385px; top: 556px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3" style="height: 256px; width: 256px; left: 129px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded"
+                                            src="./assignment-1_files/3(1)" style="height: 256px; width: 256px; left: 129px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(1)" style="height: 256px; width: 256px; left: 1409px; top: 300px;">
+                                        <img
+                                            class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0" style="height: 256px; width: 256px; left: 1409px; top: 44px;">
+                                            <img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(3)" style="height: 256px; width: 256px; left: 129px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(2)"
+                                                style="height: 256px; width: 256px; left: 1409px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/3(2)" style="height: 256px; width: 256px; left: 129px; top: 556px;">
+                                            <img
+                                                class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/0(3)" style="height: 256px; width: 256px; left: 1409px; top: 556px;">
+                                                <img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(1)" style="height: 256px; width: 256px; left: 1665px; top: 300px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1"
+                                                    style="height: 256px; width: 256px; left: 1665px; top: 44px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(1)" style="height: 256px; width: 256px; left: -127px; top: 44px;">
+                                                <img
+                                                    class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2" style="height: 256px; width: 256px; left: -127px; top: 300px;">
+                                                    <img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(2)" style="height: 256px; width: 256px; left: -127px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(2)"
+                                                        style="height: 256px; width: 256px; left: 1665px; top: -212px;"><img class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/2(3)" style="height: 256px; width: 256px; left: -127px; top: 556px;">
+                                                    <img
+                                                        class="leaflet-tile leaflet-tile-loaded" src="./assignment-1_files/1(3)" style="height: 256px; width: 256px; left: 1665px; top: 556px;"></div>
+                    </div>
+                </div>
+                <div class="leaflet-objects-pane">
+                    <div class="leaflet-shadow-pane"></div>
+                    <div class="leaflet-overlay-pane"></div>
+                    <div class="leaflet-marker-pane"></div>
+                    <div class="leaflet-popup-pane"></div>
+                </div>
+            </div>
+            <div class="leaflet-control-container">
+                <div class="leaflet-top leaflet-left">
+                    <div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="http://127.0.0.1:6033/#" title="Zoom in">+</a><a class="leaflet-control-zoom-out" href="http://127.0.0.1:6033/#" title="Zoom out">-</a></div>
+                </div>
+                <div class="leaflet-top leaflet-right"></div>
+                <div class="leaflet-bottom leaflet-left"></div>
+                <div class="leaflet-bottom leaflet-right">
+                    <div class="leaflet-control-attribution leaflet-control"><a href="http://leafletjs.com/" title="A JS library for interactive maps">Leaflet</a> | Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 
-<div id="lo-engage-ext-container"><div data-reactroot=""></div></div><link rel="stylesheet" type="text/css" href="chrome-extension://liecbddmkiiihnedobmlmillhodjkdmb/css/content.css"></body></html>
+    <div id="lo-engage-ext-container">
+        <div data-reactroot=""></div>
+    </div>
+    <link rel="stylesheet" type="text/css" href="chrome-extension://liecbddmkiiihnedobmlmillhodjkdmb/css/content.css">
+</body>
+
+</html>
