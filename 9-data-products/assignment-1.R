@@ -8,7 +8,6 @@
 
 suppressMessages(rm(list = ls()))
 suppressMessages(setwd("C:/dev/r-course/9-data-products"))
-source('c:/dev/r-course/include.r')
 
 using("shiny")
 using("shinyjs")
