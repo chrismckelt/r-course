@@ -8,7 +8,7 @@
 
 suppressMessages(rm(list = ls()))
 suppressMessages(setwd("C:/dev/r-course/9-data-products"))
-
+source('c:/dev/r-course/include.r')
 using("shiny")
 using("shinyjs")
 using("leaflet")
@@ -70,9 +70,10 @@ ui <- fluidPage(
     h1("Coursera - Developing Data Products - Assignment 1"),
     h2("Author: Chris McKelt"),
     h2("27th September 2017"),
+    h3("https://github.com/chrismckelt/r-course/blob/master/9-data-products/assignment-1.R"),
 # One button and one map
     br(),
-    actionButton("geoloc", "Localize me", class = "btn btn-primary", onClick = "shinyjs.geoloc()"),
+    actionButton("geoloc", "", class = "btn btn-primary", onClick = "shinyjs.geoloc()"),
     leafletOutput("map", height = "600px")
 )
 
