@@ -24,6 +24,7 @@ set.seed(333)
 #explore
 data.training <- readr::read_csv("pml-training.csv", col_names = TRUE, col_types = colString)
 data.testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types = colString)
+data.training <- sqldf("SELECT *, CASE classe WHEN 'A' THEN 'TRUE' ELSE 'FALSE' END AS result FROM [data.training]")
 data.training <- as.data.frame(data.training)
 dim(data.training)
 dim(data.testing)
