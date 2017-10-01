@@ -82,14 +82,9 @@ prediction.gbm <- predict(model.gbm, data.test, type = 'prob')
 #accuracy.gbm <- postResample(prediction.gbm, data.test$classe)
 #accuracy.gbm
 
-
-predictions.rf <- predict(model.rf, data.train, type = "prob")
-
-pred.rf <- prediction(predictions.rf[,1], predictions.rf)
-perf <- performance(pred.rf, "tpr", "fpr")
-
-pred.gbm <- ROCR::prediction(prediction.gbm$yes, data.test$result)
+pred.gbm<- prediction(prediction.gbm[,2], data.test$labels)
 perf <- performance(pred.gbm, "tpr", "fpr")
 plot(perf)
+
 auc <- performance(pred.gbm, "auc")
 auc
