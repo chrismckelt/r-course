@@ -24,8 +24,9 @@ set.seed(333)
 #explore
 data.training <- readr::read_csv("pml-training.csv", col_names = TRUE, col_types = colString)
 data.testing <- readr::read_csv("pml-testing.csv", col_names = TRUE, col_types = colString)
-data.training <- sqldf("SELECT *, CASE classe WHEN 'A' THEN 'TRUE' ELSE 'FALSE' END AS result FROM [data.training]")
-data.training <- as.data.frame(data.training)
+data.training <- sqldf("SELECT *, CASE classe WHEN 'A' THEN 'yes' ELSE 'no' END AS result FROM [data.training]")
+data.training$result <- as.factor(data.training$result)
+data.training$labels <- as.factor(ifelse(data.training$result == 'yes', "1", "0"))
 dim(data.training)
 dim(data.testing)
 ## ?classe? variable is the one we are trying to predict
@@ -50,30 +51,45 @@ cluster <- makeCluster(detectCores() - 1) # convention to leave 1 core for OS
 registerDoParallel(cluster)
 fitControl.rf <- trainControl(method = "cv", 
                            number = 5,
-                           allowParallel = TRUE)
+                           allowParallel = TRUE, summaryFunction = twoClassSummary,
+                           classProbs = TRUE)
+
 timer.start <- Sys.time()
-model.rf <- train(classe ~ ., data = data.train, method = "rf", trControl = fitControl.rf, verbose = FALSE, na.action = na.omit)
+model.rf <- train(result ~ ., data = data.train, method = "rf", trControl = fitControl.rf, verbose = FALSE, na.action = na.omit, metric = "ROC")
 timer.end <- Sys.time()
 stopCluster(cluster)
 registerDoSEQ()
 paste("random forest took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
 
 cat("random forest predictions")
-prediction.rf <- predict(model.rf, data.test)
-confusion_matrix.rf <- confusionMatrix(prediction.rf, data.test$classe)
+prediction.rf <- predict(model.rf, data.test, type = 'prob')
+#confusion_matrix.rf <- confusionMatrix(prediction.rf, data.test$classe)
 #accuracy.rf <- postResample(prediction.rf, data.test$classe)
 #accuracy.rf
 ##############################################################################################################################################################
 # training - gradient boosted model
-fitControl.gbm <- trainControl(method = "cv", number = 3, allowParallel = TRUE)
+fitControl.gbm <- trainControl(method = "cv", number = 5, allowParallel = TRUE, summaryFunction = twoClassSummary,
+                     classProbs = TRUE)
 cat("boosted model started")
 timer.start <- Sys.time()
-model.gbm <- train(classe ~ ., data = data.train, method = "gbm", trControl = fitControl.gbm, verbose = FALSE, na.action = na.omit)
+model.gbm <- train(result ~ ., data = data.train, method = "gbm", trControl = fitControl.gbm, verbose = FALSE, na.action = na.omit, metric = "ROC")
 timer.end <- Sys.time()
 paste("boosted took: ", timer.end - timer.start, attr(timer.end - timer.start, "units"))
 
 cat("boosted predictions")
-prediction.gbm <- predict(model.gbm, data.test)
-confusion_matrix.gbm <- confusionMatrix(prediction.gbm, data.test$classe)
+prediction.gbm <- predict(model.gbm, data.test, type = 'prob')
+#confusion_matrix.gbm <- confusionMatrix(prediction.gbm, data.test$classe)
 #accuracy.gbm <- postResample(prediction.gbm, data.test$classe)
 #accuracy.gbm
+
+
+predictions.rf <- predict(model.rf, data.train, type = "prob")
+
+pred.rf <- prediction(predictions.rf[,1], predictions.rf)
+perf <- performance(pred.rf, "tpr", "fpr")
+
+pred.gbm <- ROCR::prediction(prediction.gbm$yes, data.test$result)
+perf <- performance(pred.gbm, "tpr", "fpr")
+plot(perf)
+auc <- performance(pred.gbm, "auc")
+auc
