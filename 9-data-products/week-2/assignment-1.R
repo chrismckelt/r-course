@@ -7,7 +7,7 @@
 #Your webpage must contain the date that you created the document, and it must contain a map created with Leaflet. We would love to see you show off your creativity!
 
 suppressMessages(rm(list = ls()))
-suppressMessages(setwd("C:/dev/r-course/9-data-products"))
+suppressMessages(setwd("C:/dev/r-course/9-data-products/week-2"))
 source('c:/dev/r-course/include.r')
 using("shiny")
 using("shinyjs")
