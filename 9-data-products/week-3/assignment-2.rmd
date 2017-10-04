@@ -1,0 +1,39 @@
+---
+title: "<b>Developing Data Products: Week 3 Assignment</b>"
+subtitle: "Use the arrow keys to navigate slides"
+author: "Chris McKelt"
+date: "October 2017"
+output:
+  revealjs::revealjs_presentation:
+    theme: solarized
+    highlight: pygments
+    center: true
+---
+
+```{r setup, include=FALSE}
+suppressMessages(rm(list = ls()))
+suppressMessages(setwd("C:/dev/r-course/9-data-products/week-3"))
+source("c:/dev/r-course/include.r")
+using("dplyr")
+using("devtools")
+
+```
+
+## What is a sine wave?
+A sine wave or sinusoid is a mathematical curve that describes a smooth repetitive oscillation. A sine wave is a continuous wave. It is named after the function sine, of which it is the graph. 
+It occurs often in pure and applied mathematics, as well as physics, engineering, signal processing and many other fields.  
+
+## Plot a sine wave in R
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+t = seq(0, 10, 0.1)
+y = sin(t)
+p <- plot(t, y, type = "l", xlab = "time", ylab = "Sine wave")
+p
+```
+
+
+## References
+
+[Wikipedia](https://en.wikipedia.org/wiki/Sine_wave)</br>
+[Coursera](https://www.coursera.org/learn/data-products/peer/a1Uy9/r-markdown-presentation-plotly)</br>
+[StackOverflow](https://stackoverflow.com/questions/32111941/r-how-to-generate-a-noisy-sine-function)</br>
