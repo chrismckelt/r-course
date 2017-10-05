@@ -13,13 +13,12 @@ source("c:/dev/r-course/include.r")
 using("dplyr")
 using("devtools")
 devtools::install_github("ropensci/plotly")
-using("htmlwidgets")
-using("dygraphs")
+
+library(plotly)
 
 Sys.setenv("plotly_username" = "chrismckelt")
 Sys.setenv("plotly_api_key" = "M6S961nyr6MaEAwtNAM0")
-p <- plotly(username = "chrismckelt", key = "M6S961nyr6MaEAwtNAM0")
+#p <- plotly(username = "chrismckelt", key = "M6S961nyr6MaEAwtNAM0")
 
-d1 <- plot_ly(z = ~volcano, type = "surface")
-
-saveWidget(d1, file = "widget_file.html", selfcontained = FALSE)
+ 
+###rmarkdown::render('C:/dev/r-course/9-data-products/week-3/assignment-2.Rmd')

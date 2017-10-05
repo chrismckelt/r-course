@@ -16,7 +16,10 @@ suppressMessages(setwd("C:/dev/r-course/9-data-products/week-3"))
 source("c:/dev/r-course/include.r")
 using("dplyr")
 using("devtools")
-
+using("plotly")
+Sys.setenv("plotly_username" = "chrismckelt")
+Sys.setenv("plotly_api_key" = "M6S961nyr6MaEAwtNAM0")
+p <- plotly(username = "chrismckelt", key = "M6S961nyr6MaEAwtNAM0")
 ```
 
 ## What is a sine wave?
@@ -25,9 +28,38 @@ It occurs often in pure and applied mathematics, as well as physics, engineering
 
 ## Plot a sine wave in R
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-t = seq(0, 10, 0.1)
-y = sin(t)
-p <- plot(t, y, type = "l", xlab = "time", ylab = "Sine wave")
+x <- seq(0, 10, length.out = 1000)
+
+# create data
+aval <- list()
+for (step in 1:11) {
+    aval[[step]] <- list(visible = FALSE,
+                      name = paste0('v = ', step),
+                      x = x,
+                      y = sin(step * x))
+}
+aval[3][[1]]$visible = TRUE
+
+# create steps and plot all traces
+steps <- list()
+p <- plot_ly()
+for (i in 1:11) {
+    p <- add_lines(p, x = aval[i][[1]]$x, y = aval[i][[1]]$y, visible = aval[i][[1]]$visible,
+                 name = aval[i][[1]]$name, type = 'scatter', mode = 'lines', hoverinfo = 'name',
+                 line = list(color = '00CED1'), showlegend = FALSE)
+
+    step <- list(args = list('visible', rep(FALSE, length(aval))),
+               method = 'restyle')
+    step$args[[2]][i] = TRUE
+    steps[[i]] = step
+}
+
+# add slider control to plot
+p <- p %>%
+  layout(sliders = list(list(active = 3,
+                             currentvalue = list(prefix = "Frequency: "),
+                             steps = steps)))
+
 p
 ```
 
@@ -37,3 +69,5 @@ p
 [Wikipedia](https://en.wikipedia.org/wiki/Sine_wave)</br>
 [Coursera](https://www.coursera.org/learn/data-products/peer/a1Uy9/r-markdown-presentation-plotly)</br>
 [StackOverflow](https://stackoverflow.com/questions/32111941/r-how-to-generate-a-noisy-sine-function)</br>
+
+

@@ -1,6 +1,13 @@
-library(AppliedPredictiveModeling)
-data(segmentationOriginal)
-library(caret)
-install.packages("rattle")
-library(rattle)
-str(segmentationOriginal)
+library(ROCR)
+data(ROCR.simple)
+head(cbind(ROCR.simple$predictions, ROCR.simple$labels), 5)
+
+pred <- prediction(ROCR.simple$predictions, ROCR.simple$labels)
+class(pred)
+slotNames(pred)
+sn = slotNames(pred)
+
+
+roc.perf = performance(pred, measure = "tpr", x.measure = "fpr")
+plot(roc.perf)
+abline(a = 0, b = 1)
