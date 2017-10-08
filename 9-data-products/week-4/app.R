@@ -53,17 +53,20 @@ data.loan_amount_by_grade <- sqldf("select sum(loan_amnt) as total_loan_amount, 
 server <- function(input, output) {
    
     output$chartLoanAmount <- renderPlotly({
-        p <- plot_ly(data.loan_amount_by_grade, x = ~grade, y = ~total_loan_amount, colors = TRUE, type = 'bar')
-        print(p)
+        p <- plot_ly(data.loan_amount_by_grade, x = ~grade, y = ~total_loan_amount, colors = TRUE, type = 'bar',
+        marker = list(color = 'rgb(158,202,225)', line = list(color = 'rgb(8,48,107)', width = 1.5))) %>%
+        layout(title = "Loan amounts by credit grade quality",
+            xaxis = list(title = "Credit grade quality"),
+            yaxis = list(title = "Total loan amount"))
         return(p)
         })
 
 }
 
 ui = htmlTemplate("www/index.html",
-                    aboutTag = h3("aaa"), #includeMarkdown("about.md"),
+                    aboutTag = includeMarkdown("about.md"),
                     footerTag = h3(format(Sys.Date(), format = "%a - %d %B, %Y")),
-                    chartLoanAmount = plotlyOutput("chartLoanAmount", width = "600px", height = "800px")
+                    chartLoanAmount = plotlyOutput("chartLoanAmount")
                 )
 
 shinyApp(ui, server)

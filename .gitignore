@@ -5,3 +5,5 @@
 .httr-oauth
 me/settings.R
 cacert.pem
+/9-data-products/week-4/data/loan.csv
+/9-data-products/week-4/data/LCDataDictionary.xlsx
