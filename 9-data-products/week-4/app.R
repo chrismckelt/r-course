@@ -54,10 +54,14 @@ server <- function(input, output) {
    
     output$chartLoanAmount <- renderPlotly({
         p <- plot_ly(data.loan_amount_by_grade, x = ~grade, y = ~total_loan_amount, colors = TRUE, type = 'bar',
-        marker = list(color = 'rgb(158,202,225)', line = list(color = 'rgb(8,48,107)', width = 1.5))) %>%
-        layout(title = "Loan amounts by credit grade quality",
-            xaxis = list(title = "Credit grade quality"),
-            yaxis = list(title = "Total loan amount"))
+        marker = list(color = 'rgb(158,202,225)', line = list(color = 'rgb(8,48,107)', width = 1.5))) %>% 
+       layout(title = "Loan amounts by credit grade quality",
+              autosize = F, 
+              width = 500, 
+              height = 500,
+              xaxis = list(title = "Credit grade quality"),
+              yaxis = list(title = "Total loan amount")
+            )
         return(p)
         })
 
