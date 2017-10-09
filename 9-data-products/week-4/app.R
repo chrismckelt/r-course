@@ -58,7 +58,7 @@ server <- function(input, output) {
        layout(title = "Loan amounts by credit grade quality",
               autosize = F, 
               width = 500, 
-              height = 500,
+              height = 350,
               xaxis = list(title = "Credit grade quality"),
               yaxis = list(title = "Total loan amount")
             )
