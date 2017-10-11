@@ -1,23 +1,6 @@
 // A $( document ).ready() block.
 $(document).ready(function() {
     console.log("app started");
-    var badge = 5;
-    var favicon = new Favico({
-        animation: 'popFade'
-    });
-    $('#plusOne').bind('click', function() {
-        badge = badge + 1;
-        favicon.badge(badge);
-    });
-    $('#minusOne').bind('click', function() {
-        badge = (badge - 1 < 0) ? 0 : (badge - 1);
-        favicon.badge(badge);
-    });
-    $('#reset').bind('click', function() {
-        favicon.reset();
-    });
-    //intial value
-    favicon.badge(badge);
 
     // Blue skin
     $('.s-skin-1').click(function() {
@@ -27,6 +10,16 @@ $(document).ready(function() {
     });
 
     showDiv(1);
+
+    // This recieves messages of type "testmessage" from the server.
+    // See http://shiny.rstudio.com/gallery/server-to-client-custom-messages.html
+    // for details
+    Shiny.addCustomMessageHandler("testmessage",
+        function(message) {
+            alert(JSON.stringify(message));
+        }
+    );
+
 });
 
 function showDiv(divId) {

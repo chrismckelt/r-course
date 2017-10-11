@@ -1,4 +1,4 @@
-## app.R ##
+## SETUP ##
 suppressMessages(rm(list = ls()))
 suppressMessages(setwd("C:/dev/r-course/9-data-products/week-4"))
 source("c:/dev/r-course/include.r")
@@ -50,12 +50,17 @@ data.amount <- loanbook %>%
 
 data.loan_amount_by_grade <- sqldf("select sum(loan_amnt) as total_loan_amount, grade from [loanbook] group by grade")
 #data.loan_amount_by_month_year <- sqldf("select sum(loan_amnt) as total_loan_amount, issue_d from [loanbook] group by issue_d")
-server <- function(input, output) {
+
+
+
+## SHINY START
+
+server <- function(input, output, session) {
    
     output$chartLoanAmount <- renderPlotly({
         p <- plot_ly(data.loan_amount_by_grade, x = ~grade, y = ~total_loan_amount, colors = TRUE, type = 'bar',
         marker = list(color = 'rgb(158,202,225)', line = list(color = 'rgb(8,48,107)', width = 1.5))) %>% 
-       layout(title = "Loan amounts by credit grade quality",
+        layout(title = "Loan amounts by credit grade quality",
               autosize = F, 
               width = 500, 
               height = 350,
@@ -64,6 +69,12 @@ server <- function(input, output) {
             )
         return(p)
         })
+    
+    
+    observeEvent(input$do, {
+      session$sendCustomMessage(type = 'testmessage',
+                                message = 'Thank you for clicking')
+    })
 
 }
 
