@@ -66,6 +66,7 @@
         </nav>
 
         <div id="page-wrapper" class="gray-bg">
+
             <div class="row border-bottom">
                 <nav class="navbar navbar-static-top white-bg" role="navigation" style="margin-bottom: 0">
                     <div class="navbar-header">
@@ -75,6 +76,7 @@
                     </div>
                 </nav>
             </div>
+
             <div id="div1" class="wrapper wrapper-content animated fadeInRight">
                 <div class="row">
                     <div class="col-lg-12">
@@ -84,25 +86,26 @@
                                 {{ aboutTag }}
                             </div>
                         </div>
-                    </div>
-                </div>
-                <hr/>
-                <div id="div2" class="wrapper wrapper-content animated fadeInRight" style="display:none;" onclick="javascript: showDiv(2);">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="text-center m-t-lg">
-                                <h1>
-                                    Analysis
-                                </h1>
-                                <small>break down of loan book.</small>
-                            </div>
-                        </div>
                         <div class="col-xs-4 col-xs-offset-4">
                             <div class="pull-right">{{ chartLoanAmount }}</div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div id="div2" class="wrapper wrapper-content animated fadeInRight" style="display:none;" onclick="javascript: showDiv(2);">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="text-center m-t-lg">
+                            <h1>
+                                Analysis by grade
+                            </h1>
+                            <small>break down of loan book.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="div3" class="wrapper wrapper-content animated fadeInRight" style="display:none;">
                 <div class="row">
                     <div class="col-lg-12">
@@ -115,18 +118,19 @@
                     </div>
                 </div>
             </div>
-            <div class="footer">
-                <div class="pull-right">
-                    {{footerTag}}
-                </div>
-                <div>
-                    <small>Developing Data Products --> Course 9 in Coursera Data Science Certificate</small>
-                </div>
-            </div>
 
         </div>
-    </div>
 
+        <div class="footer">
+            <div class="pull-right">
+                {{footerTag}}
+            </div>
+            <div>
+                <small>Developing Data Products --> Course 9 in Coursera Data Science Certificate</small>
+            </div>
+        </div>
+
+    </div>
     <!-- Mainly scripts -->
     <script src="js/jquery-2.1.1.js"></script>
     <script src="js/bootstrap.min.js"></script>

@@ -76,6 +76,12 @@ server <- function(input, output, session) {
                                 message = 'Thank you for clicking')
     })
 
+    observe({
+      session$sendCustomMessage(type = 'testmessage',
+                                message = list(a = 1, b = 'text',
+                                               controller = input$controller))
+    })
+    
 }
 
 ui = htmlTemplate("www/index.html",
