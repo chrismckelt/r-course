@@ -81,13 +81,19 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="text-left m-t-lg">
-                            {{ actionButton("do", "Click Me") }}
                             <div>
-                                {{ aboutTag }}
+                                {{ tag_about }}
                             </div>
                         </div>
-                        <div class="col-xs-4 col-xs-offset-4">
-                            <div class="pull-right">{{ chartLoanAmount }}</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="text-left m-t-lg">
+                            <h2>Variables available in the dataset</h2>
+                            <div>
+                                {{ tag_view_names }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -98,10 +104,13 @@
                     <div class="col-lg-12">
                         <div class="text-center m-t-lg">
                             <h1>
-                                Analysis by grade
+                                Analysis by selected variable
                             </h1>
-                            <small>break down of loan book.</small>
+                            <small>Choose a variable to compare against loan amount.</small>
                         </div>
+                    </div>
+                    <div class="col-xs-4 col-xs-offset-4">
+                        <div class="pull-right">{{ chart_loan_amount }}</div>
                     </div>
                 </div>
             </div>
@@ -123,7 +132,7 @@
 
         <div class="footer">
             <div class="pull-right">
-                {{footerTag}}
+                {{tag_footer}}
             </div>
             <div>
                 <small>Developing Data Products --> Course 9 in Coursera Data Science Certificate</small>

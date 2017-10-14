@@ -7,3 +7,5 @@ me/settings.R
 cacert.pem
 /9-data-products/week-4/data/loan.csv
 /9-data-products/week-4/data/LCDataDictionary.xlsx
+/9-data-products/week-4/data/database.sqlite
+/9-data-products/week-4/data/lending-club-loan-data.zip
