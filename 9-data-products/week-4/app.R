@@ -72,9 +72,7 @@ view.loan_amount_by_grade <- sqldf("select sum(loan_amnt) as total_loan_amount, 
 
 server <- function(input, output, session) {
    
-    output$view_names <- renderDataTable({
-        datatable(view_names, options = list(orderClasses = TRUE, lengthMenu = c(5, 10, 30), pageLength = 5))
-    })
+    output$view_names <- renderDataTable(view_names)
    # session$selected.names <- renderDataTable(view_names)
 
     output$chartLoanAmount <- renderPlotly({
