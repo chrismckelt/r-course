@@ -9,7 +9,7 @@ $(document).ready(function() {
         $("body").addClass("skin-1");
     });
 
-    //showDiv(1);
+    showDiv(1);
 
     // This recieves messages of type "testmessage" from the server.
     // See http://shiny.rstudio.com/gallery/server-to-client-custom-messages.html

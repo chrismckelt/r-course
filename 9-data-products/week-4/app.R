@@ -33,32 +33,24 @@ db <- dbConnect(SQLite(), dbname = connection_string, loadable.extensions = TRUE
 
 data.tables = dbListTables(db)
 data.loanbook <- sqldf("select * from loan LIMIT 100", connection = db)
-
+dbDisconnect(db)
 #loanbook <- read.csv.sql(file, sql = "select top 100 * from file", header = TRUE, sep = ",")
 ## load the state names
 data(state.regions)
 # merge the loan book with the state names
-loanbook <- merge(data.loanbook, state.regions, by.x = "addr_state", by.y = "abb")
+data.loanbook <- merge(data.loanbook, state.regions, by.x = "addr_state", by.y = "abb")
 
 ## clean
 excel_file <- paste0(getwd(), "/data/LCdatadictionary.xlsx")
 data.dictionary <- read_excel(excel_file)
 data.dictionary <- sqldf("select * from [data.dictionary] where LoanStatNew != 'NA'")
-### fields available in the data dictionary
-dd_names <- as.character(na.omit(data.dictionary$LoanStatNew))
-### fields available in the loan book
-view_names <- names(data.loanbook)
-### show the fields described in data dictionary but not in the loan book
-setdiff(dd_names, view_names)
+
 ### fix dates
 data.loanbook$issue_d <- as.Date(gsub("^", "01-", data.loanbook$issue_d), format = "%d-%b-%Y")
 data.loanbook$grade <- as.factor(data.loanbook$grade)
 
-### show the fields described in data dictionary but not in the loan book
-setdiff(dd_names, view_names)
-
-# snapshot data  tag_view_names
-view.amount <- loanbook %>%
+# snapshot data  tag_data_dictionary
+view.amount <- data.loanbook %>%
   select(issue_d, loan_amnt) %>%
   group_by(issue_d) %>%
   summarise(Amount = sum(loan_amnt))
@@ -66,14 +58,22 @@ view.amount <- loanbook %>%
 view.loan_amount_by_grade <- sqldf("select sum(loan_amnt) as total_loan_amount, grade from [data.loanbook] group by grade")
 #data.loan_amount_by_month_year <- sqldf("select sum(loan_amnt) as total_loan_amount, issue_d from [loanbook] group by issue_d")
 
+# SHINY S
 
-
-## SHINY START
-
+#' SERVER
+#'
+#' @param input
+#' @param output
+#' @param session
+#'
+#' @return
+#' @export
+#'
+#' @examples 
 server <- function(input, output, session) {
-   
-    output$view_names <- renderDataTable(DT::datatable(view_names))
-   # session$selected.names <- renderDataTable(view_names)
+
+    output$data_dictionary <- renderPrint(data.dictionary)
+   # session$selected.names <- renderDataTable(data_dictionary)
 
     output$chartLoanAmount <- renderPlotly({
     p <- plot_ly(view.loan_amount_by_grade, x = ~grade, y = ~total_loan_amount, colors = TRUE, type = 'bar',
@@ -90,25 +90,28 @@ server <- function(input, output, session) {
     
     
     observeEvent(input$do, {
-      session$sendCustomMessage(type = 'testmessage',
-                                message = 'Thank you for clicking')
+      session$sendCustomMessage(type = 'getColNames',
+                                message = renderPrint(data_dictionary))
     })
 
-    observe({
-      session$sendCustomMessage(type = 'testmessage',
-                                message = list(a = 1, b = 'text',
-                                               controller = input$controller))
+    #observe({
+      #session$sendCustomMessage(type = 'testmessage',
+                                #message = list(a = 1, b = 'text',
+                                               #controller = input$controller))
 
-     on.exit(dbDisconnect(db), add = TRUE)
-    })
+     #on.exit(dbDisconnect(db), add = TRUE)
+    #})
     
 }
 
+
+#' UI
+#'
 ui = htmlTemplate("www/index.html",
                     tag_about = includeMarkdown("about.md"),
                     tag_footer = h3(format(Sys.Date(), format = "%a - %d %B, %Y")),
                     chart_loan_amount = plotlyOutput("chartLoanAmount"),
-                    tag_view_names = dataTableOutput("view_names")
+                    tag_data_dictionary = verbatimTextOutput("data_dictionary")
                 )
 
 shinyApp(ui, server)

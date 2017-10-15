@@ -16,9 +16,7 @@
     <link href="css/shiny.css" rel="stylesheet" />
     <link href="css/animate.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-    
-    ript>
-    
+
 </head>
 
 <body>
@@ -32,9 +30,9 @@
                         <div class="dropdown profile-element">
                             <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                                 <span class="clear">
-                                <span class="block m-t-xs">
-                                    <strong class="font-bold">Chris McKelt</strong>
-                                </span> <span class="text-muted text-xs block">@chris_mckelt<b class="caret"></b></span>
+                                    <span class="block m-t-xs">
+                                        <strong class="font-bold">Chris McKelt</strong>
+                                    </span> <span class="text-muted text-xs block">@chris_mckelt<b class="caret"></b></span>
                                 </span>
                             </a>
                             <ul class="dropdown-menu animated fadeInRight m-t-xs">
@@ -93,15 +91,15 @@
                     <div class="col-lg-12">
                         <div class="text-left m-t-lg">
                             <h2>Variables available in the dataset</h2>
-                            <div>
-                                {{ tag_view_names }}
+                            <div class="pre-scrollable pull-right">
+                                {{ tag_data_dictionary }}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="div2" class="wrapper wrapper-content animated fadeInRight" style="display:none;" onclick="javascript: showDiv(2);">
+            <div id="div2" class="wrapper wrapper-content animated fadeInRight" onclick="javascript: showDiv(2);">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="text-center m-t-lg">
@@ -112,12 +110,14 @@
                         </div>
                     </div>
                     <div class="col-xs-4 col-xs-offset-4">
-                        <div class="pull-right">{{ chart_loan_amount }}</div>
+                        <div class="pull-right">
+                            {{ chart_loan_amount }}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div id="div3" class="wrapper wrapper-content animated fadeInRight" style="display:none;">
+            <div id="div3" class="wrapper wrapper-content animated fadeInRight" onclick="javascript: showDiv(3);">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="text-center m-t-lg">
@@ -129,7 +129,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <div class="footer">
@@ -150,7 +149,7 @@
     <script src="js/json2-min.js"></script>
     <script src="js/shiny.min.js"></script>
     <script src="js/htmlwidgets.js"></script>
-    
+
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
     <script src="js/datatables.js"></script>
