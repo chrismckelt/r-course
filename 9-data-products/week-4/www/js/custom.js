@@ -20,6 +20,13 @@ $(document).ready(function() {
         }
     );
 
+    //$(document).on('shiny:value', function (event) {
+    //    event.preventDefault();
+    //});
+
+    //$(document).on("shiny:connected", function (event) {
+    //    Shiny.onInputChange("divChanged", "");
+    //});
 });
 
 function showDiv(divId) {
@@ -36,6 +43,12 @@ function showDiv(divId) {
         $("#div2").hide();
         $("#div3").show();
     }
+}
 
-
+function flushApp() {
+    Shiny.addCustomMessageHandler("flush",
+        function (message) {
+            console.log(JSON.stringify(message));
+        }
+    );
 }
