@@ -1,56 +1,23 @@
-
 switch(Sys.info()[['sysname']],
        Windows= {suppressMessages(setwd("C:/dev/r-course/9-data-products/week-4"))},
-       Linux  = {suppressMessages(setwd("~/week-4"))},
+     #  Linux  = {suppressMessages(setwd("~/"))},
        Darwin = {print("I'm a Mac.")})
 
 options(shiny.error = browser)
 options(shiny.reactlog = TRUE)
-using <- function(packageName) {
-  if (!require(packageName, character.only = TRUE) && !(packageName %in% installed.packages())) {
-    install.packages(dput(packageName), dependencies = TRUE, quiet = FALSE)
-  }
-  
-  library(packageName, character.only = TRUE)
-}
-
-using("pacman")
-
-install_standard_packages <- function() {
-  ## setup - install missing packages and reference
-  packs <- c("tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr", "ggplot2", "lubridate")
-  p_load("foreach")
-  foreach(n = 1:length(packs)) %do%  using(packs[n])
-}
-
-#' download and save file
-save_file = function(url, name) {
-  if (!file.exists(name)) {
-    library(downloader)
-    download(url, destfile = name)
-  }
-}
-
-colString <- function() {
-  string40 <- "ncnnccnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
-  string80 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
-  string120 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
-  string160 <- "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnc"
-  colString <- paste(string40, string80, string120, string160, sep = "")
-}
-
+library("pacman")
 install_standard_packages()
-using("RSQLite")
-using("shiny")
-using("shinyjs")
-using("choroplethr")
-using("choroplethrMaps")
-using("DescTools")
-using("readxl")
-using("devtools")
-using("ggplot2")
-using("plotly")
-using("DT")
+p_load("RSQLite")
+p_load("shiny")
+p_load("shinyjs")
+p_load("choroplethr")
+p_load("choroplethrMaps")
+p_load("DescTools")
+p_load("readxl")
+p_load("devtools")
+p_load("ggplot2")
+p_load("plotly")
+p_load("DT")
 
 Sys.setenv("plotly_username" = "chrismckelt")
 Sys.setenv("plotly_api_key" = "M6S961nyr6MaEAwtNAM0")
@@ -59,18 +26,11 @@ options(DT.autoHideNavigation = FALSE)
 options(scipen = 999)
 set.seed(3333)
 
-
-if (!file.exists("./data/lending-club-loan-data.zip")) {
-    download.file("https://www.kaggle.com/wendykan/lending-club-loan-data/downloads/lending-club-loan-data.zip", "./data/lending-club-loan-data.zip")
-    unzip("./lending-club-loan-data.zip")
-}
-
 connection_string <- paste(getwd(), '/data/database.sqlite', sep = '')
 db <- RSQLite::dbConnect(SQLite(), dbname = connection_string, loadable.extensions = TRUE, cache_size = NULL, synchronous = "off", flags = SQLITE_RWC, vfs = NULL)
 
 data.tables = dbListTables(db)
-data_loanbook <- sqldf("select * from loan LIMIT 100", connection = db)
-
+data_loanbook <- sqldf("select * from loan", connection = db)
 
 ## clean
 excel_file <- paste0(getwd(), "/data/LCdatadictionary.xlsx")
@@ -141,8 +101,6 @@ server <- function(input, output, session) {
             query2_by = unlist(selected_item[1])
             query2_desc = unlist(selected_item[2])
 
-      
-
             output$chartLoanAmount <- renderPlotly({
                 p <- plot_ly(query.data(query2_by), x = ~get(query2_by), y = ~total_loan_amount, colors = TRUE, type = 'bar',
                                 marker = list(color = 'rgb(158,202,225)', line = list(color = 'rgb(8,48,107)'))) %>%
@@ -180,8 +138,6 @@ server <- function(input, output, session) {
                                         )
         return(p)
     })
-
-
 
     observeEvent(input$stop, {
         shiny::stopApp()
