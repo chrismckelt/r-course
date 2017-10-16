@@ -49,7 +49,7 @@
                             </a>
                             <ul class="dropdown-menu animated fadeInRight m-t-xs">
                                 <li>
-
+                                    {{tag_footer}}
                                 </li>
                             </ul>
                         </div>
@@ -88,7 +88,7 @@
                 <nav class="navbar navbar-static-top white-bg" role="navigation" style="margin-bottom: 0">
                     <div class="navbar-header">
                         <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#">
-                            <i class="fa fa-bars"></i>
+                            <i class="fa fa-bars">&nbsp;&nbsp;&nbsp;&nbsp; Developing Data Products --> Course 9 in Coursera Data Science Certificate</i>
                         </a>
                     </div>
                 </nav>
@@ -107,12 +107,18 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="text-left m-t-lg">
-                            <h2>Select a variable to compare by loan amount</h2>
+                            <h2>Click on a row below to compare against total loan amount</h2>
+                          
                             <div class="pre-scrollable">
                                 {{ tag_data_dictionary }}
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="text-center">
+                    <h3>Choose a variable to compare</h3>
+                </div>
+                <div class="row" class="text-center">
                     <div class="col-xs-4 col-xs-offset-4">
                         <div class="pull-right">{{ chart_loan_amount }}</div>
                     </div>
@@ -133,22 +139,11 @@
             </div>
 
             <div id="div3" class="wrapper wrapper-content animated fadeInRight">
-                <iframe src="http://www.mckelt.com/bio" width="80%" height="800" align = "middle" frameborder = "0"></iframe>
+                <iframe src="http://www.mckelt.com/bio" width="80%" height="800" align="middle" frameborder="0"></iframe>
             </div>
         </div>
 
-        <div class="footer">
-            <div class="pull-right">
-                {{tag_footer}}
-            </div>
-            <div>
-                <small>Developing Data Products --> Course 9 in Coursera Data Science Certificate</small>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Custom -->
+    </div> 
     <script src="js/custom.js"></script>
 </body>
 

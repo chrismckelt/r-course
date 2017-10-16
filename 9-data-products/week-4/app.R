@@ -1,6 +1,6 @@
 source("c:/dev/r-course/include.r")
 install_standard_packages()
-source("./global.R")
+suppressMessages(setwd("C:/dev/r-course/9-data-products/week-4"))
 using("RSQLite")
 using("shiny")
 using("shinyjs")
@@ -32,26 +32,43 @@ db <- RSQLite::dbConnect(SQLite(), dbname = connection_string, loadable.extensio
 data.tables = dbListTables(db)
 data_loanbook <- sqldf("select * from loan LIMIT 100", connection = db)
 
-#loanbook <- read.csv.sql(file, sql = "select top 100 * from file", header = TRUE, sep = ",")
-## load the state names
-data(state.regions)
-# merge the loan book with the state names
-data_loanbook <- merge(data_loanbook, state.regions, by.x = "addr_state", by.y = "abb")
 
 ## clean
 excel_file <- paste0(getwd(), "/data/LCdatadictionary.xlsx")
 data_dictionary <- read_excel(excel_file)
-data_dictionary <- sqldf("select * from [data_dictionary] where LoanStatNew != 'NA'")
+data_dictionary <- sqldf("select LoanStatNew as Variable_name, description from [data_dictionary] where LoanStatNew != 'NA'")
+data_dictionary$Id <- seq.int(nrow(data_dictionary))
+
+### keep only columns in data dictionary
+cols_to_keep <- data_dictionary[[1]]
+data_loanbook <- data_loanbook[, which(names(data_loanbook) %in% cols_to_keep)]
 
 ### fix dates
 data_loanbook$issue_d <- as.Date(gsub("^", "01-", data_loanbook$issue_d), format = "%d-%b-%Y")
 data_loanbook$grade <- as.factor(data_loanbook$grade)
 
-selected_query_by <- "grade"
-query_for <- function(query_by) {
-    sql <- paste("select sum(loan_amnt) as total_loan_amount, ", query_by, " from [data_loanbook] group by ", query_by)
-    query <- sqldf(sql)
+## load the state names
+data(state.regions)
+# merge the loan book with the state names
+data_loanbook <- merge(data_loanbook, state.regions, by.x = "addr_state", by.y = "abb")
+
+#' takes a variable name to filter and group the data (vs total loan amount)
+#'
+#' @param by
+#'
+#' @return
+#' @export
+#'
+#' @examples
+query.data <- function(by) {
+    if (length(by) < 1) {
+        by <- "grade"
+    }
+    sql <- paste("select sum(loan_amnt) as total_loan_amount, ", by, " from [data_loanbook] group by ", by)
+    print(sql)
+    return(sqldf(sql))
 }
+
 
 #stop("stopping")
 
@@ -70,44 +87,62 @@ query_for <- function(query_by) {
 server <- function(input, output, session) {
 
     #on.exit(dbDisconnect(db), add = TRUE)
+    query_by = "grade"
+    query_desc = "credit grade"
 
-    query_choosen <- reactiveValues()
-    query_choosen <- selected_query_by
-
-    output$data_dictionary <- renderDataTable(data_dictionary, options = list(pageLength = 25, server = TRUE, selection = list(mode = "single", target = "cell")))
     observe({
-        print(input$data_dictionary_rows_selected)
-        query_choosen <- "emp_length"# data_dictionary[input$data_dictionary_rows_selected[0]]
+
+        index_choosen <- as.numeric(input$data_dictionary_rows_selected[[1]])
+        print(paste("index_choosen", index_choosen))
+        if (length(index_choosen) > 0) {
+            index_choosen <- as.numeric(length(input$data_dictionary_rows_selected)) # issue with multiple selects on UI grid - just get last item selected
+            sql <- paste("select * from data_dictionary where Id =", index_choosen)
+        
+            selected_item <- sqldf(sql)
+            query2_by = unlist(selected_item[1])
+            query2_desc = unlist(selected_item[2])
+
+      
+
+            output$chartLoanAmount <- renderPlotly({
+                p <- plot_ly(query.data(query2_by), x = ~get(query2_by), y = ~total_loan_amount, colors = TRUE, type = 'bar',
+                                marker = list(color = 'rgb(158,202,225)', line = list(color = 'rgb(8,48,107)'))) %>%
+                                layout(title = paste("Loan amounts by ", ~ get(query2_desc)),
+                                        autosize = F,
+                                        width = 600,
+                                        height = 400,
+                                        xaxis = list(title = ~get(query2_by)),
+                                        yaxis = list(title = "Total loan amount")
+                                    )
+                return(p)
+            })
+        }
+    })
+
+    # initial load vals are null
+    if (query_by == "") {
+        query_by <- "grade"
+        query_desc <- "credit grade"
+    }
+
+    dataset <- reactive({ query.data(query_by) })
+     
+    output$data_dictionary <- renderDataTable(data_dictionary, options = list(pageLength = 25, server = FALSE, selection = list(mode = "single", target = "cell")))
+
+    output$chartLoanAmount <- renderPlotly({
+        p <- plot_ly(dataset(), x = ~get(query_by), y = ~total_loan_amount, colors = TRUE, type = 'bar', environment = environment(),
+                                    marker = list(color = 'rgb(158,202,225)', line = list(color = 'rgb(8,48,107)'))) %>%
+                                    layout(title = paste("Loan amounts by ", ~ get(query_by)),
+                                            autosize = F,
+                                            width = 600,
+                                            height = 400,
+                                            xaxis = list(title = ~get(query_by)),
+                                            yaxis = list(title = "Total loan amount")
+                                        )
+        return(p)
     })
 
 
-    #output$chartLoanAmount <- reactive({
-        #renderPlotly({
-            #p <- plot_ly(query_for(selected_query_by), x = ~grade, y = ~total_loan_amount, colors = TRUE, type = 'bar',
-                        #marker = list(color = 'rgb(158,202,225)', line = list(color = 'rgb(8,48,107)', width = 1.5))) %>%
-                        #layout(title = paste("Loan amounts by ", selected_query_by),
-                              #autosize = F,
-                              #width = 500,
-                              #height = 350,
-                              #xaxis = list(title = "Credit grade quality"),
-                              #yaxis = list(title = "Total loan amount")
-                            #)
-            #return(p)
-        #})
-    #})
-
-    output$chartLoanAmount <-  renderPlotly({
-                    p <- plot_ly(query_for(query_choosen), x = ~grade, y = ~total_loan_amount, colors = TRUE, type = 'bar',
-                                    marker = list(color = 'rgb(158,202,225)', line = list(color = 'rgb(8,48,107)', width = 1.5))) %>%
-                                    layout(title = paste("Loan amounts by ", query_choosen),
-                                            autosize = F,
-                                            width = 500,
-                                            height = 350,
-                                            xaxis = list(title = "Credit grade quality"),
-                                            yaxis = list(title = "Total loan amount")
-                                        )
-                    return(p)
-                })
 
     observeEvent(input$stop, {
         shiny::stopApp()
@@ -125,10 +160,10 @@ server <- function(input, output, session) {
         values$lastAction <- input$submit;
     })
 
-    observeEvent(input$divChanged, {
-        cat("divChanged")
-        session$sendCustomMessage(type = 'divChanged', shiny:::flushReact())
-    })
+    #observeEvent(input$divChanged, {
+    #cat("divChanged")
+    #session$sendCustomMessage(type = 'divChanged', shiny:::flushReact())
+    #})
 
 
     outputOptions(output, 'chartLoanAmount', suspendWhenHidden = FALSE)
@@ -140,8 +175,9 @@ server <- function(input, output, session) {
 ui = htmlTemplate("www/index.html",
                     tag_about = includeMarkdown("about.md"),
                     tag_footer = h3(format(Sys.Date(), format = "%a - %d %B, %Y")),
-                    chart_loan_amount = plotlyOutput("chartLoanAmount", height = "auto"),
+                    chart_loan_amount = plotlyOutput("chartLoanAmount"),
                     tag_data_dictionary = DT::dataTableOutput("data_dictionary")
+     
                 )
 
 shinyApp(ui, server)
