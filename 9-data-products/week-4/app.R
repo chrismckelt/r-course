@@ -1,31 +1,32 @@
+options(encoding = "UTF-8")
+#options(shiny.error = browser)
+options(shiny.reactlog = TRUE)
+
 switch(Sys.info()[['sysname']],
        Windows= {suppressMessages(setwd("C:/dev/r-course/9-data-products/week-4"))},
      #  Linux  = {suppressMessages(setwd("~/"))},
        Darwin = {print("I'm a Mac.")})
 
-options(shiny.error = browser)
-options(shiny.reactlog = TRUE)
-library("pacman")
-
-install_standard_packages <- function() {
-  ## setup - install missing packages and reference
-  packs <- c("tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr", "ggplot2", "lubridate")
-  p_load("foreach")
-  foreach(n = 1:length(packs)) %do%  using(packs[n])
-}
-
-install_standard_packages()
-p_load("RSQLite")
-p_load("shiny")
-p_load("shinyjs")
-p_load("choroplethr")
-p_load("choroplethrMaps")
-p_load("DescTools")
-p_load("readxl")
-p_load("devtools")
-p_load("ggplot2")
-p_load("plotly")
-p_load("DT")
+library(pacman)
+library(tidyverse)
+library(knitr)
+library(markdown)
+library(data.table)
+library(sqldf)
+library(ggplot2)
+library(lubridate)
+library(foreach)
+library(RSQLite)
+library(shiny)
+library(shinyjs)
+library(choroplethr)
+library(choroplethrMaps)
+library(DescTools)
+library(readxl)
+library(devtools)
+library(ggplot2)
+library(plotly)
+library(DT)
 
 Sys.setenv("plotly_username" = "chrismckelt")
 Sys.setenv("plotly_api_key" = "M6S961nyr6MaEAwtNAM0")

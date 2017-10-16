@@ -1,3 +1,4 @@
+var colnames = [];
 // A $( document ).ready() block.
 $(document).ready(function() {
     console.log("app started");
@@ -14,19 +15,11 @@ $(document).ready(function() {
     // This recieves messages of type "testmessage" from the server.
     // See http://shiny.rstudio.com/gallery/server-to-client-custom-messages.html
     // for details
-    Shiny.addCustomMessageHandler("testmessage",
+    Shiny.addCustomMessageHandler("getColNames",
         function(message) {
             alert(JSON.stringify(message));
         }
     );
-
-    //$(document).on('shiny:value', function (event) {
-    //    event.preventDefault();
-    //});
-
-    //$(document).on("shiny:connected", function (event) {
-    //    Shiny.onInputChange("divChanged", "");
-    //});
 });
 
 function showDiv(divId) {
@@ -43,12 +36,4 @@ function showDiv(divId) {
         $("#div2").hide();
         $("#div3").show();
     }
-}
-
-function flushApp() {
-    Shiny.addCustomMessageHandler("flush",
-        function (message) {
-            console.log(JSON.stringify(message));
-        }
-    );
 }
