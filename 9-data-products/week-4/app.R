@@ -1,10 +1,11 @@
+suppressMessages(rm(list = ls()))
 options(encoding = "UTF-8")
 #options(shiny.error = browser)
 options(shiny.reactlog = TRUE)
 
 switch(Sys.info()[['sysname']],
        Windows= {suppressMessages(setwd("C:/dev/r-course/9-data-products/week-4"))},
-     #  Linux  = {suppressMessages(setwd("~/"))},
+     #  Linux  = {suppressMessages(setwd("~/srv/connect/apps/loan_book_analyser"))},
        Darwin = {print("I'm a Mac.")})
 
 library(pacman)
@@ -36,9 +37,17 @@ options(scipen = 999)
 set.seed(3333)
 
 if (!file.exists("./data/lending-club-loan-data.zip")) {
-  download.file("https://www.kaggle.com/wendykan/lending-club-loan-data/downloads/lending-club-loan-data.zip", "./data/lending-club-loan-data.zip")
-  unzip("./data/lending-club-loan-data.zip")
+  ### original file = "https://www.kaggle.com/wendykan/lending-club-loan-data/downloads/lending-club-loan-data.zip"
+  ### requires authentication
+  ### for this exercise most to server with no Auth for download
+  save_file("http://www.mckelt.com/lending-club-loan-data.zip", "/data/lending-club-loan-data.zip")
+  outdir <- paste0(trimws(getwd()), "/data")
+  outdir
+  zippedFile <- paste0(trimws(outdir), "/lending-club-loan-data.zip")
+  zippedFile
+  unzip(zipfile=zippedFile,exdir = outdir)
 }
+
 
 connection_string <- paste(getwd(), '/data/database.sqlite', sep = '')
 db <- RSQLite::dbConnect(SQLite(), dbname = connection_string, loadable.extensions = TRUE, cache_size = NULL, synchronous = "off", flags = SQLITE_RWC, vfs = NULL)
@@ -47,8 +56,8 @@ data.tables = dbListTables(db)
 data_loanbook <- sqldf("select * from loan", connection = db)
 
 ## clean
-excel_file <- paste0(getwd(), "/data/LCdatadictionary.xlsx")
-data_dictionary <- read_excel(excel_file)
+#excel_file <- paste0(getwd(), "/data/LCdatadictionary.xlsx")
+data_dictionary <- read_excel("data/LCDataDictionary.xlsx")
 data_dictionary <- sqldf("select LoanStatNew as Variable_name, description from [data_dictionary] where LoanStatNew != 'NA'")
 data_dictionary$Id <- seq.int(nrow(data_dictionary))
 
