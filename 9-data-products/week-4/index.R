@@ -13,3 +13,4 @@ rsconnect::setAccountInfo(name = 'chrismckelt',
 
 
 rsconnect::deployApp(appTitle = "data-products-1", appDir = "C:/dev/r-course/9-data-products/week-4")
+

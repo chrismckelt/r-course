@@ -5,6 +5,6 @@ account: chrismckelt
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 225993
-bundleId: 1030225
+bundleId: 1030726
 url: https://chrismckelt.shinyapps.io/data-products-1/
-when: 1508223002.86286
+when: 1508249567.27161
