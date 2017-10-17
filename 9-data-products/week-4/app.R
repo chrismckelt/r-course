@@ -36,15 +36,25 @@ options(DT.autoHideNavigation = FALSE)
 options(scipen = 999)
 set.seed(3333)
 
-if (!file.exists("./data/lending-club-loan-data.zip")) {
+#' download and save file
+save_file = function(url, name) {
+  if (!file.exists(name)) {
+    library(downloader)
+    download(url, destfile = name)
+  }
+}
+
+outdir <- paste0(trimws(getwd()), "/data")
+outdir
+zippedFile <- paste0(trimws(outdir), "/lending-club-loan-data.zip")
+zippedFile
+
+if (!file.exists(zippedFile)) {
   ### original file = "https://www.kaggle.com/wendykan/lending-club-loan-data/downloads/lending-club-loan-data.zip"
   ### requires authentication
   ### for this exercise most to server with no Auth for download
-  save_file("http://www.mckelt.com/lending-club-loan-data.zip", "/data/lending-club-loan-data.zip")
-  outdir <- paste0(trimws(getwd()), "/data")
-  outdir
-  zippedFile <- paste0(trimws(outdir), "/lending-club-loan-data.zip")
-  zippedFile
+  save_file("http://www.mckelt.com/lending-club-loan-data.zip", zippedFile)
+ 
   unzip(zipfile=zippedFile,exdir = outdir)
 }
 
