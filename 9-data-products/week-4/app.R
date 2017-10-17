@@ -35,6 +35,11 @@ options(DT.autoHideNavigation = FALSE)
 options(scipen = 999)
 set.seed(3333)
 
+if (!file.exists("./data/lending-club-loan-data.zip")) {
+  download.file("https://www.kaggle.com/wendykan/lending-club-loan-data/downloads/lending-club-loan-data.zip", "./data/lending-club-loan-data.zip")
+  unzip("./data/lending-club-loan-data.zip")
+}
+
 connection_string <- paste(getwd(), '/data/database.sqlite', sep = '')
 db <- RSQLite::dbConnect(SQLite(), dbname = connection_string, loadable.extensions = TRUE, cache_size = NULL, synchronous = "off", flags = SQLITE_RWC, vfs = NULL)
 

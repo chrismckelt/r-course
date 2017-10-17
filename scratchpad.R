@@ -1,13 +1,9 @@
-library(ROCR)
-data(ROCR.simple)
-head(cbind(ROCR.simple$predictions, ROCR.simple$labels), 5)
+switch(Sys.info()[['sysname']],
+       Windows = { suppressMessages(setwd("C:/dev/r-course/9-data-products/pitch")) },
+#  Linux  = {suppressMessages(setwd("~/"))},
+       Darwin = { print("I'm a Mac.") })
 
-pred <- prediction(ROCR.simple$predictions, ROCR.simple$labels)
-class(pred)
-slotNames(pred)
-sn = slotNames(pred)
-
-
-roc.perf = performance(pred, measure = "tpr", x.measure = "fpr")
-plot(roc.perf)
-abline(a = 0, b = 1)
+if (!file.exists("./data/lending-club-loan-data.zip")) {
+    download.file("https://www.kaggle.com/wendykan/lending-club-loan-data/downloads/lending-club-loan-data.zip", "./data/lending-club-loan-data.zip")
+    unzip("./data/lending-club-loan-data.zip")
+}
