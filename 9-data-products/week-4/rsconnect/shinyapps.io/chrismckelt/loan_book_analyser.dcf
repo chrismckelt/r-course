@@ -1,0 +1,12 @@
+name: loan_book_analyser
+title: Loan book analyser
+username:
+account: chrismckelt
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 225934
+bundleId: 1029806
+url: https://chrismckelt.shinyapps.io/loan_book_analyser/
+when: 1508201593.21382
+asMultiple: FALSE
+asStatic: FALSE
