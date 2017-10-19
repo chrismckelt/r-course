@@ -39,11 +39,17 @@ set.seed(3333)
 
 ## What is this application?
 
-### Stage 1 
-Analysis over the Lending Clubs loan book data.  It allows the contrast of a dataset variable against the aggregated loan amount.
+This ShinyApp built with R will contract variables in the Lending Clubs loan book with the total loan amount.
 
-### Stage 2 (to be done post investment)
-Application will take a loan application and predict its probability of default and a maximum loanable amount according to the applicants credit grade.
+[https://chrismckelt.shinyapps.io/data-products-1/](https://chrismckelt.shinyapps.io/data-products-1/)</br>
+
+Comparisions against credit grade, zip code, homeownership and interest rate give insight into the quality of the book.
+
+### How to use
+ 
+ Click on a row item and the chart will automatically update
+
+   <img src="https://user-images.githubusercontent.com/662868/31750771-9c20e4b6-b4b4-11e7-9767-b401845660d5.png" alt="Click on a row to change the chart" width="400" height="400" />
 
 ## Overview of the Lending Club dataset
 
@@ -81,14 +87,8 @@ wordcloud(data_loanbook.corpus,
           colors = brewer.pal(8, "Paired"))
 ```
 
-## Where to from here?
-
-
-
-
 ## References
 
 [Kaggle](https://www.kaggle.com/wendykan/lending-club-loan-data)</br>
+[Coursera](https://www.coursera.org/learn/data-products)</br>
 
-
-###rmarkdown::render('C:/dev/r-course/9-data-products/pitch/pitch.Rmd')
