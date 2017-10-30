@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Title: analysis.R</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<h1>Title: analysis.R</h1>
+
+<h1>Description: <a href="https://www.coursera.org/learn/exploratory-data-analysis/peer/b5Ecl/course-project-2">https://www.coursera.org/learn/exploratory-data-analysis/peer/b5Ecl/course-project-2</a></h1>
+
+<p>####packages and setup</p>
+
+<p>rm(list = ls()) # clear vars
+setwd(&ldquo;C:\dev\r-course\course-4\project-2&rdquo;)</p>
+
+<p>#&mdash;&mdash;
+####install missing packages and reference
+list.of.packages &lt;- c(&ldquo;dplyr&rdquo;, &ldquo;tidyr&rdquo;,&ldquo;ggplot2&rdquo;, &ldquo;knitr&rdquo;, &ldquo;markdown&rdquo;)
+new.packages &lt;- list.of.packages[!(list.of.packages %in% installed.packages()[, &ldquo;Package&rdquo;])]
+if (length(new.packages))
+    install.packages(new.packages)
+sapply(sapply(list.of.packages, library, character.only = TRUE, quietly = FALSE), require, character.only = TRUE, quietly = FALSE)</p>
+
+<p>path &lt;- getwd()
+path</p>
+
+<p>####create results folder for output if required
+results_folder &lt;- &ldquo;results&rdquo;</p>
+
+<p>if (!file.exists(results_folder)) {
+    print(&ldquo;create results folder&rdquo;)
+    dir.create(results_folder)
+}</p>
+
+<p>#&mdash;&mdash;
+#functions start</p>
+
+<p>####download zip and extract to folder
+download_project_files &lt;- function(url) {
+    filename &lt;- &ldquo;Dataset.zip&rdquo;
+    if (!file.exists(path)) {
+        dir.create(path)
+    }
+    zip_file &lt;- file.path(path, filename)
+    download.file(url, zip_file)
+    unzip(zip_file, exdir = path)
+}</p>
+
+<p>####read extract and convert it to a data.frame
+get_tables &lt;- function(filename, cols = NULL) {
+    print(paste(&ldquo;Getting table:&rdquo;, filename))
+    f &lt;- paste(data_folder, filename, sep = &ldquo;/&rdquo;)
+    data &lt;- data.frame()
+    if (is.null(cols)) {
+        data &lt;- read.table(f, sep = &ldquo;&rdquo;, stringsAsFactors = F)
+    } else {
+        data &lt;- read.table(f, sep = &ldquo;&rdquo;, stringsAsFactors = F, col.names = cols)
+    }
+    data
+}</p>
+
+<p>####save to results folder ./results
+save_results &lt;- function(data, name) {
+    print(paste(&ldquo;saving results&rdquo;, name))
+    file &lt;- paste(results_folder, &ldquo;/&rdquo;, name, &ldquo;.csv&rdquo;, sep = &ldquo;&rdquo;)
+    write.csv(data, file)
+}</p>
+
+<p>#&mdash;&mdash;
+#step 1 - load in data</p>
+
+<p>NEI &lt;- readRDS(&ldquo;summarySCC_PM25.rds&rdquo;)
+SCC &lt;- readRDS(&ldquo;Source_Classification_Code.rds&rdquo;)</p>
+
+<p>#&mdash;&mdash;
+#&mdash;&mdash;
+##Have total emissions from PM2.5 decreased in the United States from 1999 to 2008? Using the base plotting system, make a plot showing the total PM2.5 emission from all sources for each of the years 1999, 2002, 2005, and 2008.</p>
+
+<p>#&mdash;&mdash;</p>
+
+<p>####output codebook.md
+library(knitr)
+library(markdown)
+rmd &lt;- file.path(getwd(), &ldquo;analysis.r&rdquo;)
+knit(rmd, output = &ldquo;codebook.md&rdquo;, encoding = &ldquo;ISO8859-1&rdquo;, quiet = FALSE)
+markdownToHTML(&ldquo;codebook.md&rdquo;, &ldquo;codebook.html&rdquo;)</p>
+
+</body>
+
+</html>
