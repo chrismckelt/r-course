@@ -40,10 +40,10 @@ data.twitter <- read_file("final/en_US/en_US.twitter.txt")
 
 path.src <- "c:/dev/r-course/10-capstone/final/en_US/"
 
-sample.blogs <- sample(data.frame(text = unlist(sapply(data.blogs, `[`, "content")), stringsAsFactors = F), 80)
-sample.news <- sample(data.frame(text = unlist(sapply(data.news, `[`, "content")), stringsAsFactors = F), 80)
-sample.twitter <- sample(data.frame(text = unlist(sapply(data.twitter, `[`, "content")), stringsAsFactors = F), 80)
-sample.all <- c(sample.blogs, sample.news, sample.twitter)
+sample.blogs <- sample(data.frame(text = unlist(sapply(data.blogs, `[`, "content")), stringsAsFactors = F), 20000)
+sample.news <- sample(data.frame(text = unlist(sapply(data.news, `[`, "content")), stringsAsFactors = F), 20000)
+sample.twitter <- sample(data.frame(text = unlist(sapply(data.twitter, `[`, "content")), stringsAsFactors = F), 20000)
+sample.all <- sample(c(sample.blogs, sample.news, sample.twitter),10000, replace = T)
 
 #data.all <- c(data.blogs, data.news, data.twitter)
 
