@@ -28,40 +28,61 @@ read_file <- function(path) {
     con <- file(path, encoding = "UTF-8" )
     data <- readLines(con)
     close(con)
-    rm(con)
+    #rm(con)
     data
 }
 
 
 #download_zip_files()
+# read files and adjust for encoding
 data.blogs <- read_file("final/en_US/en_US.blogs.txt")
 data.news <- read_file("final/en_US/en_US.news.txt")
 data.twitter <- read_file("final/en_US/en_US.twitter.txt")
+#data.all <- c(data.blogs, data.news, data.twitter)
+  
 
-path.src <- "c:/dev/r-course/10-capstone/final/en_US/"
-
+#sample data to speed things up
 sample.blogs <- sample(data.frame(text = unlist(sapply(data.blogs, `[`, "content")), stringsAsFactors = F), 20000)
 sample.news <- sample(data.frame(text = unlist(sapply(data.news, `[`, "content")), stringsAsFactors = F), 20000)
 sample.twitter <- sample(data.frame(text = unlist(sapply(data.twitter, `[`, "content")), stringsAsFactors = F), 20000)
-sample.all <- sample(c(sample.blogs, sample.news, sample.twitter),10000, replace = T)
+sample.all <- sample(c(sample.blogs, sample.news, sample.twitter), size = 10000, replace = TRUE)
 
-#data.all <- c(data.blogs, data.news, data.twitter)
 
-corpus <- Corpus(VectorSource(list(sample.all)))
+# build corpus
+corpus <- Corpus(VectorSource(list(sample.blogs, sample.news, sample.twitter)))
 
-corpus <- tm_map(corpus, content_transformer(tolower))
+#workspace cleanup
+#workspace cleanup
+remove(data.blogs)
+remove(data.news)
+remove(data.twitter)
+remove(sample.blogs)
+remove(sample.news)
+remove(sample.twitter)
+gc()
+
+# clean 
+corpus <- tm_map(corpus, tolower)
 corpus <- tm_map(corpus, removePunctuation)
 corpus <- tm_map(corpus, removeNumbers)
 corpus <- tm_map(corpus, removeWords, stopwords("english"))
-corpus <- tm_map(corpus, stripWhitespace) # Remove extra white space
-corpus <- tm_map(corpus, toEmpty, "#\\w+") # Hashtags (#justsaying)
-corpus <- tm_map(corpus, toEmpty, "(\\b\\S+\\@\\S+\\..{1,3}(\\s)?\\b)") # Email addresses and shout outs (e.g. foo@demo.net)
-corpus <- tm_map(corpus, toEmpty, "@\\w+") # shout outs (e.g. @yoyo)
-corpus <- tm_map(corpus, toEmpty, "http[^[:space:]]*") #- only removes things starting with http
-corpus <- tm_map(corpus, toSpace, "/|@|\\|") # slashes
+corpus <- tm_map(corpus, stripWhitespace)  
+corpus <- tm_map(corpus, toEmpty, "#\\w+")  
+corpus <- tm_map(corpus, toEmpty, "(\\b\\S+\\@\\S+\\..{1,3}(\\s)?\\b)")  
+corpus <- tm_map(corpus, toEmpty, "@\\w+")  
+corpus <- tm_map(corpus, toEmpty, "http[^[:space:]]*")  
+corpus <- tm_map(corpus, toSpace, "/|@|\\|")
 
-# Remove all non english characters as they cause issues down the road
-#data.blogs <- iconv(data.blogs, "latin1", "ASCII", sub = "")
-#data.news <- iconv(data.news, "latin1", "ASCII", sub = "")
-#data.twitter <- iconv(data.twitter, "latin1", "ASCII", sub = "")
+writeCorpus(corpus, filenames = "corpus.txt")
+
+#Tokenize sample into Unigrams, Bigrams and Trigrams
+tokenizer.uni <- function(x) NGramTokenizer(x, Weka_control(min = 1, max = 1))
+tokenizer.bi <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
+tokenizer.tri <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
+
+matrix.uni <- TermDocumentMatrix(corpus, control = list(tokenize = tokenizer.uni))
+matrix.bi <- TermDocumentMatrix(corpus, control = list(tokenize = tokenizer.bi))
+matrix.uni <- TermDocumentMatrix(corpus, control = list(tokenize = tokenizer.tri))
+
+freqTerms <- findFreqTerms(uniGramMatrix, lowfreq = 2000)
  
