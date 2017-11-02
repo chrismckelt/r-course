@@ -2,7 +2,7 @@
 title: "<b>Milestone Report</b>"
 subtitle: "Use the arrow keys to navigate slides"
 author: "Chris McKelt"
-date: "October 2017"
+date: "November 2017"
 output:
   revealjs::revealjs_presentation:
     theme: solarized
@@ -29,6 +29,7 @@ p_load("cluster")
 p_load("quanteda")
 p_load("Rgraphviz")
 p_load("Rcpp")
+p_load("stringi")
  
 suppressMessages(setwd("c:/dev/r-course/10-capstone/"))
 
@@ -55,7 +56,6 @@ read_file <- function(path) {
     con <- file(path, encoding = "UTF-8" )
     data <- readLines(con)
     close(con)
-    rsm(con)
     data
 }
 
@@ -70,8 +70,16 @@ sample.blogs <- sample(data.blogs, 20000)
 sample.news <- sample(data.news, 20000)
 sample.twitter <- sample(data.twitter, 20000)
 sample.all <- sample(c(sample.blogs, sample.news, sample.twitter), size = 10000, replace = TRUE)
+
 ```
 
+# Data overview
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+    data_summary <- data.frame(
+    Blogs=c((summary(nchar(data.blogs)))),News =c((summary(nchar(data.news)))),
+    Twitter =c((summary(nchar(data.twitter)))))
+    kable(data_summary)
+```
 
 ## Build and clean the corpus
 Create a corpus document from the given texts and clean up to create a NGram model we can analyse.
@@ -93,54 +101,63 @@ Create a corpus document from the given texts and clean up to create a NGram mod
     corpus.data <- tm_map(corpus.data, toEmpty, "@\\w+")  
     corpus.data <- tm_map(corpus.data, toEmpty, "http[^[:space:]]*")  
     corpus.data <- tm_map(corpus.data, toSpace, "/|@|\\|")
-``` 
 
-## Explore the data
-
-Create a DocumentTermMatrix and show the number of documents (3) and the total terms.
- 
-```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
     dtm <- DocumentTermMatrix(corpus.data)
+    ###Total documents
     nDocs(dtm)
+    ###Total terms
     nTerms(dtm)
 ``` 
 
+## Explore the data
+ 
 Tokenize the sample to get with Uni and Bigrams to perform an N-grams analysis.  
 This will allow us to see the most used words and expressions. 
  
-```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+```{r, echo=FALSE,eval=TRUE, warning=FALSE, message=FALSE}
    
     tokenizer.uni <- function(x) NGramTokenizer(x, Weka_control(min = 1, max = 1))
     tokenizer.bi <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
-    
+    tokenizer.tri <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
+
     matrix.uni <- DocumentTermMatrix(corpus.data, control = list(tokenize = tokenizer.uni))
     matrix.bi <- DocumentTermMatrix(corpus.data, control = list(tokenize = tokenizer.bi))
+    matrix.tri <- DocumentTermMatrix(corpus.data, control = list(tokenize = tokenizer.tri))
 
-    freq.terms <- findFreqTerms(matrix.uni, 10)
-    freq.terms
-    freq.expressions <- findFreqTerms(matrix.bi, 10)
-    sfreq.expressions
-    plot(dtm, terms = freq.terms[1:5], corThreshold = 0.5)
+    freq.uni <- findFreqTerms(matrix.uni, 5,5)
+    freq.bi <- findFreqTerms(matrix.bi,  5,5)
+    freq.tri <- findFreqTerms(matrix.bi,  5,5)
+
 ``` 
-Below we show the top 5 words used in the blogs,news and twitter texts.
 
-```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-    #https://stackoverflow.com/questions/17294824/counting-words-in-a-single-document-from-corpus-in-r-and-putting-it-in-dataframe
+## Below we show the top 5 words used in the blogs,news and twitter texts.
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
     df <- as.data.frame(as.matrix(dtm))
-    # and transpose for plotting
     df <- data.frame(t(df))
     setDT(df, keep.rownames = TRUE)[]
 
     cols <- c("word", "blog_count", "news_count", "twitter_count")
     colnames(df) <- cols
-    top.blogwords <- sqldf("select word, blog_count from df order by blog_count desc limit 5")
-    top.newswords <- sqldf("select word, news_count from df order by news_count desc limit 5")
-    top.twitterwords <- sqldf("select word,twitter_count from df order by twitter_count desc limit 5")
+    top.blogwords <- sqldf("select word, blog_count from df order by blog_count desc limit 3")
+    top.newswords <- sqldf("select word, news_count from df order by news_count desc limit 3")
+    top.twitterwords <- sqldf("select word,twitter_count from df order by twitter_count desc limit 3")
+``` 
+Top 3 words for blog,news and twitter documents
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 
-    # Top blog words
+    ### Top blog words
     top.blogwords
-    # Top news words
+    ### Top news words
     top.newswords
-    # Top twitter words
+    ### Top twitter words
     top.twitterwords
+``` 
+## Wordcloud
+Analyse via a wordcloud can illustrate word frequencies very effectively as Unigram, Bigram, Trigram and Tetragram is as follows respectively:-
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+
+    par(mfrow=c(1,1))
+    wordcloud(matrix.uni, freq.uni, scale=c(9,1), max.words=40, 
+    random.order=FALSE, colors=brewer.pal(7, "Dark2"))
 ``` 
