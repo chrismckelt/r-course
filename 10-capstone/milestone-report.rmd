@@ -157,7 +157,7 @@ Top 3 words for blog,news and twitter documents
 Analyse via a wordcloud can illustrate word frequencies very effectively as Unigram, Bigram, Trigram and Tetragram is as follows respectively:-
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 
-    par(mfrow=c(1,1))
-    wordcloud(matrix.uni, freq.uni, scale=c(9,1), max.words=40, 
-    random.order=FALSE, colors=brewer.pal(7, "Dark2"))
+   # par(mfrow=c(1,1))
+    #wordcloud(matrix.uni, freq.uni, scale=c(9,1), max.words=40, 
+    #random.order=FALSE, colors=brewer.pal(7, "Dark2"))
 ``` 
