@@ -17,10 +17,6 @@ install_standard_packages <- function() {
     foreach(n = 1:length(packs)) %do%  using(packs[n])
 }
 
-install_extra_packages <- function(packs) {
-    p_load("foreach")
-    foreach(n = 1:length(packs)) %do%  using(packs[n])
-}
 
 #' download and save file
 save_file = function(url, name) {

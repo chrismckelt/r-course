@@ -13,6 +13,11 @@ p_load("igraph")
 p_load("fpc")
 p_load("biclust")
 p_load("cluster")
+p_load("quanteda")
+p_load("Rgraphviz")
+p_load("Rcpp")
+p_load("tidytext")
+using("revealjs")
  
 suppressMessages(setwd("c:/dev/r-course/10-capstone/"))
 
@@ -39,50 +44,77 @@ data.blogs <- read_file("final/en_US/en_US.blogs.txt")
 data.news <- read_file("final/en_US/en_US.news.txt")
 data.twitter <- read_file("final/en_US/en_US.twitter.txt")
 #data.all <- c(data.blogs, data.news, data.twitter)
-  
+
+ 
 
 #sample data to speed things up
-sample.blogs <- sample(data.frame(text = unlist(sapply(data.blogs, `[`, "content")), stringsAsFactors = F), 20000)
-sample.news <- sample(data.frame(text = unlist(sapply(data.news, `[`, "content")), stringsAsFactors = F), 20000)
-sample.twitter <- sample(data.frame(text = unlist(sapply(data.twitter, `[`, "content")), stringsAsFactors = F), 20000)
+sample.blogs <- sample(data.blogs, 20000)
+sample.news <- sample(data.news, 20000)
+sample.twitter <- sample(data.twitter, 20000)
 sample.all <- sample(c(sample.blogs, sample.news, sample.twitter), size = 10000, replace = TRUE)
 
+sample.data <- bind_rows(sample.blogs %>%
+                      mutate(x = "blogs"),
+                        sample.news %>%
+                        mutate(x = "news"),
+                        sample.twitter %>%
+                      mutate(x = "twitter")
+                      )
 
+#stop()
 # build corpus
-corpus <- Corpus(VectorSource(list(sample.blogs, sample.news, sample.twitter)))
+lst <- list(sample.blogs, sample.news, sample.twitter)
+corpus.data <- Corpus(VectorSource(lst))
+inspect(corpus.data)
+ 
 
-#workspace cleanup
-#workspace cleanup
-remove(data.blogs)
-remove(data.news)
-remove(data.twitter)
-remove(sample.blogs)
-remove(sample.news)
-remove(sample.twitter)
-gc()
 
-# clean 
-corpus <- tm_map(corpus, tolower)
-corpus <- tm_map(corpus, removePunctuation)
-corpus <- tm_map(corpus, removeNumbers)
-corpus <- tm_map(corpus, removeWords, stopwords("english"))
-corpus <- tm_map(corpus, stripWhitespace)  
-corpus <- tm_map(corpus, toEmpty, "#\\w+")  
-corpus <- tm_map(corpus, toEmpty, "(\\b\\S+\\@\\S+\\..{1,3}(\\s)?\\b)")  
-corpus <- tm_map(corpus, toEmpty, "@\\w+")  
-corpus <- tm_map(corpus, toEmpty, "http[^[:space:]]*")  
-corpus <- tm_map(corpus, toSpace, "/|@|\\|")
 
-writeCorpus(corpus, filenames = "corpus.txt")
+##  custom content transformers
+toEmpty <- content_transformer(function(x, pattern) gsub(pattern, "", x, fixed = TRUE))
+toSpace <- content_transformer(function(x, pattern) gsub(pattern, " ", x, fixed = TRUE))
+
+corpus.data <- tm_map(corpus.data, tolower)
+corpus.data <- tm_map(corpus.data, removePunctuation)
+corpus.data <- tm_map(corpus.data, removeNumbers)
+corpus.data <- tm_map(corpus.data, removeWords, stopwords("english"))
+corpus.data <- tm_map(corpus.data, stripWhitespace)  
+corpus.data <- tm_map(corpus.data, toEmpty, "#\\w+")  
+corpus.data <- tm_map(corpus.data, toEmpty, "(\\b\\S+\\@\\S+\\..{1,3}(\\s)?\\b)")  
+corpus.data <- tm_map(corpus.data, toEmpty, "@\\w+")  
+corpus.data <- tm_map(corpus.data, toEmpty, "http[^[:space:]]*")  
+corpus.data <- tm_map(corpus.data, toSpace, "/|@|\\|")
+
+dtm <- DocumentTermMatrix(corpus.data)
+nDocs(dtm)
+nTerms(dtm)
 
 #Tokenize sample into Unigrams, Bigrams and Trigrams
 tokenizer.uni <- function(x) NGramTokenizer(x, Weka_control(min = 1, max = 1))
 tokenizer.bi <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
-tokenizer.tri <- function(x) NGramTokenizer(x, Weka_control(min = 3, max = 3))
-
-matrix.uni <- TermDocumentMatrix(corpus, control = list(tokenize = tokenizer.uni))
-matrix.bi <- TermDocumentMatrix(corpus, control = list(tokenize = tokenizer.bi))
-matrix.uni <- TermDocumentMatrix(corpus, control = list(tokenize = tokenizer.tri))
-
-freqTerms <- findFreqTerms(uniGramMatrix, lowfreq = 2000)
  
+matrix.uni <- DocumentTermMatrix(corpus.data, control = list(tokenize = tokenizer.uni))
+matrix.bi <- DocumentTermMatrix(corpus.data, control = list(tokenize = tokenizer.bi))
+
+freq.terms <- findFreqTerms(matrix.uni, 10)
+freq.expressions <- findFreqTerms(matrix.bi, 10)
+
+plot(dtm, terms = freq.terms[1:5], corThreshold = 0.5)
+
+#https://stackoverflow.com/questions/17294824/counting-words-in-a-single-document-from-corpus-in-r-and-putting-it-in-dataframe
+df <- as.data.frame(as.matrix(dtm))
+# and transpose for plotting
+df <- data.frame(t(df))
+setDT(df, keep.rownames = TRUE)[]
+
+cols <- c("word", "blog_count", "news_count", "twitter_count")
+colnames(df) <- cols
+top.blogwords <- sqldf("select word, blog_count from df order by blog_count desc limit 5")
+top.newswords <- sqldf("select word, news_count from df order by news_count desc limit 5")
+top.twitterwords <- sqldf("select word,twitter_count from df order by twitter_count desc limit 5")
+
+
+
+df %>%
+    count(df$word) %>%
+    with(wordcloud(df$word, n, max.words = 100))
