@@ -35,7 +35,7 @@ suppressMessages(setwd("c:/dev/r-course/10-capstone/"))
 
 ```
 
-## Overview
+# Overview
 
 This is a milestone report for the Coursera Data Science unit to build predictive model for text input.
 
@@ -49,7 +49,17 @@ The texts inside the zip file we will analyse are under the 'en_US' folder
 
 ![image](https://user-images.githubusercontent.com/662868/32357634-a02e21c4-c079-11e7-9136-8277964e9f8b.png)
 
-## Gather the data
+# Summary
+
+The milestone reports purpose is to identify the initial steps taken to produce the overall capstone project, a Natural Language Processing word prediction alogrithm website that will take input from the user and predict the next word.
+
+This report will outline the following:
+1. How we retrieve the data
+2. How we clean up the data
+3. The tokenizing functions used to find the most frequently used word (unigrams), word expressions (bigrams,trigrams,n-grams)
+4. Exploratory analyse of the data
+
+## Retrieve the data
 
 ```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 
@@ -69,14 +79,18 @@ read_file <- function(path) {
 }
 
 download_zip_files()
+
 ```
 
+Having downloaded and extracted the zip file, we then read the files and adjust for encoding.  
+A sample of each text is taken to optimise performance of the analyse.
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-### Read files and adjust for encoding
+
 data.blogs <- read_file("final/en_US/en_US.blogs.txt")
 data.news <- read_file("final/en_US/en_US.news.txt")
 data.twitter <- read_file("final/en_US/en_US.twitter.txt")
-### Sample the data to speed up execution
+
 sample.blogs <- sample(data.blogs, 20000)
 sample.news <- sample(data.news, 20000)
 sample.twitter <- sample(data.twitter, 20000)
@@ -84,7 +98,8 @@ sample.all <- sample(c(sample.blogs, sample.news, sample.twitter), size = 10000,
 
 ```
 
-# Data overview
+# Overview of the original data
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
     data_summary <- data.frame(
     Blogs=c((summary(nchar(data.blogs)))),News =c((summary(nchar(data.news)))),

@@ -492,40 +492,21 @@ document.getElementsByTagName('head')[0].appendChild(style);
     <h3 class="date">November 2017</h3>
 </section>
 
-<section id="overview" class="slide level2">
-<h2>Overview</h2>
-<p>This is a milestone report for the Coursera Data Science unit to build predictive model for text input. The predictive model could be a combination of probabilistic models (N-grams, others), and rule-based models</p>
-</section>
-<section id="gather-the-data" class="slide level2">
-<h2>Gather the data</h2>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">download_zip_files &lt;-<span class="st"> </span>function() {
-    url &lt;-<span class="st"> &quot;https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip&quot;</span>
-    if (!<span class="kw">file.exists</span>(<span class="st">&quot;data.zip&quot;</span>)) {
-        <span class="kw">save_file</span>(url, <span class="st">&quot;data.zip&quot;</span>)
-        <span class="kw">unzip</span>(<span class="dt">zipfile =</span> <span class="st">&quot;c:/dev/r-course/10-capstone/data.zip&quot;</span>, <span class="dt">exdir =</span> <span class="st">&quot;c:/dev/r-course/10-capstone/final/&quot;</span>)
-    }
-}
-
-read_file &lt;-<span class="st"> </span>function(path) {
-    con &lt;-<span class="st"> </span><span class="kw">file</span>(path, <span class="dt">encoding =</span> <span class="st">&quot;UTF-8&quot;</span> )
-    data &lt;-<span class="st"> </span><span class="kw">readLines</span>(con)
-    <span class="kw">close</span>(con)
-    data
-}
-
-<span class="kw">download_zip_files</span>()
-
-### Read files and adjust for encoding
-data.blogs &lt;-<span class="st"> </span><span class="kw">read_file</span>(<span class="st">&quot;final/en_US/en_US.blogs.txt&quot;</span>)
+<section><section id="overview" class="titleslide slide level1"><h1>Overview</h1></section></section>
+<section><section id="summary" class="titleslide slide level1"><h1>Summary</h1></section><section id="retrieve-the-data" class="slide level2">
+<h2>Retrieve the data</h2>
+<p>Having downloaded and extracted the zip file, we then read the files and adjust for encoding.<br />
+A sample of each text is taken to optimise performance of the analyse.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">data.blogs &lt;-<span class="st"> </span><span class="kw">read_file</span>(<span class="st">&quot;final/en_US/en_US.blogs.txt&quot;</span>)
 data.news &lt;-<span class="st"> </span><span class="kw">read_file</span>(<span class="st">&quot;final/en_US/en_US.news.txt&quot;</span>)
 data.twitter &lt;-<span class="st"> </span><span class="kw">read_file</span>(<span class="st">&quot;final/en_US/en_US.twitter.txt&quot;</span>)
-### Sample the data to speed up execution
+
 sample.blogs &lt;-<span class="st"> </span><span class="kw">sample</span>(data.blogs, <span class="dv">20000</span>)
 sample.news &lt;-<span class="st"> </span><span class="kw">sample</span>(data.news, <span class="dv">20000</span>)
 sample.twitter &lt;-<span class="st"> </span><span class="kw">sample</span>(data.twitter, <span class="dv">20000</span>)
 sample.all &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="kw">c</span>(sample.blogs, sample.news, sample.twitter), <span class="dt">size =</span> <span class="dv">10000</span>, <span class="dt">replace =</span> <span class="ot">TRUE</span>)</code></pre></div>
-</section>
-<section><section id="data-overview" class="titleslide slide level1"><h1>Data overview</h1></section><section id="build-and-clean-the-corpus" class="slide level2">
+</section></section>
+<section><section id="overview-of-the-original-data" class="titleslide slide level1"><h1>Overview of the original data</h1></section><section id="build-and-clean-the-corpus" class="slide level2">
 <h2>Build and clean the corpus</h2>
 <p>Create a corpus document from the given texts and clean up to create a NGram model we can analyse.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    lst &lt;-<span class="st"> </span><span class="kw">list</span>(sample.blogs, sample.news, sample.twitter)
@@ -550,44 +531,44 @@ sample.all &lt;-<span class="st"> </span><span class="kw">sample</span>(<span cl
 <pre><code>## [1] 3</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    ###Total terms
     <span class="kw">nTerms</span>(dtm)</code></pre></div>
-<pre><code>## [1] 75217</code></pre>
+<pre><code>## [1] 75105</code></pre>
 </section><section id="explore-the-data" class="slide level2">
 <h2>Explore the data</h2>
 <p>Tokenize the sample to get with Uni and Bigrams to perform an N-grams analysis.<br />
 This will allow us to see the most used words and expressions.</p>
 </section><section id="below-we-show-the-top-5-words-used-in-the-blogsnews-and-twitter-texts." class="slide level2">
 <h2>Below we show the top 5 words used in the blogs,news and twitter texts.</h2>
-<pre><code>##               rn X1 X2 X3
-##     1:  aaaaaaah  1  0  0
-##     2:     aaaah  1  0  0
-##     3:      aaah  3  0  0
-##     4:     aaahh  1  0  0
-##     5:      aadg  2  0  0
-##    ---                   
-## 75213:       zym  0  0  1
-## 75214:     zynga  0  0  1
-## 75215:       zzs  0  0  1
-## 75216: Ã³natsxswi  0  0  1
-## 75217:      Ã¼ber  0  0  1</code></pre>
+<pre><code>##                   rn X1 X2 X3
+##     1:     aaaaaaaaa  1  0  0
+##     2:      aaaaaagh  1  0  0
+##     3:      aaaaaand  2  0  0
+##     4:           aac  2  0  0
+##     5:          aacc  1  0  0
+##    ---                       
+## 75101:         zubaz  0  0  1
+## 75102:         zwack  0  0  1
+## 75103:    zygodactyl  0  0  1
+## 75104: zygodactylous  0  0  1
+## 75105:        zygote  0  0  1</code></pre>
 <p>Top 3 words for blog,news and twitter documents</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    ### Top blog words
     top.blogwords</code></pre></div>
 <pre><code>##   word blog_count
-## 1  one       2832
-## 2  can       2487
-## 3 like       2231</code></pre>
+## 1  one       2911
+## 2  can       2357
+## 3 like       2242</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    ### Top news words
     top.newswords</code></pre></div>
 <pre><code>##   word news_count
-## 1 said       4938
-## 2  one       1712
-## 3  new       1356</code></pre>
+## 1 said       4932
+## 2  one       1664
+## 3  new       1380</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">    ### Top twitter words
     top.twitterwords</code></pre></div>
 <pre><code>##   word twitter_count
-## 1 just          1208
-## 2 like          1077
-## 3  get          1007</code></pre>
+## 1 just          1284
+## 2 like          1035
+## 3  get           945</code></pre>
 </section><section id="wordcloud" class="slide level2">
 <h2>Wordcloud</h2>
 <p>Analyse via a wordcloud can illustrate word frequencies very effectively as Unigram, Bigram, Trigram and Tetragram is as follows respectively:-</p>

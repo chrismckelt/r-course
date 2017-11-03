@@ -12,7 +12,7 @@ using("pacman")
 
 install_standard_packages <- function() {
     ## setup - install missing packages and reference
-    packs <- c("tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr", "ggplot2", "lubridate")
+    packs <- c("devtools", "tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr", "ggplot2", "lubridate")
     p_load("foreach")
     foreach(n = 1:length(packs)) %do%  using(packs[n])
 }
