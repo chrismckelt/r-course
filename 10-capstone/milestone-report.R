@@ -45,7 +45,6 @@ data.news <- read_file("final/en_US/en_US.news.txt")
 data.twitter <- read_file("final/en_US/en_US.twitter.txt")
 #data.all <- c(data.blogs, data.news, data.twitter)
 
- 
 
 #sample data to speed things up
 sample.blogs <- sample(data.blogs, 20000)
@@ -53,13 +52,7 @@ sample.news <- sample(data.news, 20000)
 sample.twitter <- sample(data.twitter, 20000)
 sample.all <- sample(c(sample.blogs, sample.news, sample.twitter), size = 10000, replace = TRUE)
 
-sample.data <- bind_rows(sample.blogs %>%
-                      mutate(x = "blogs"),
-                        sample.news %>%
-                        mutate(x = "news"),
-                        sample.twitter %>%
-                      mutate(x = "twitter")
-                      )
+
 
 #stop()
 # build corpus
@@ -96,7 +89,7 @@ tokenizer.bi <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
 matrix.uni <- DocumentTermMatrix(corpus.data, control = list(tokenize = tokenizer.uni))
 matrix.bi <- DocumentTermMatrix(corpus.data, control = list(tokenize = tokenizer.bi))
 
-freq.terms <- findFreqTerms(matrix.uni, 10)
+freq.terms <- findFreqTerms(matrix.uni, 3,3)
 freq.expressions <- findFreqTerms(matrix.bi, 10)
 
 plot(dtm, terms = freq.terms[1:5], corThreshold = 0.5)

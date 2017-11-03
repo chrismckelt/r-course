@@ -38,11 +38,20 @@ suppressMessages(setwd("c:/dev/r-course/10-capstone/"))
 ## Overview
 
 This is a milestone report for the Coursera Data Science unit to build predictive model for text input.
+
 The predictive model could be a combination of probabilistic models (N-grams, others), and rule-based models 
 
+The data for analysis to be used is from
+
+https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip
+
+The texts inside the zip file we will analyse are under the 'en_US' folder
+
+![image](https://user-images.githubusercontent.com/662868/32357634-a02e21c4-c079-11e7-9136-8277964e9f8b.png)
 
 ## Gather the data
-```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 
 download_zip_files <- function() {
     url <- "https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip"
@@ -60,7 +69,9 @@ read_file <- function(path) {
 }
 
 download_zip_files()
+```
 
+```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 ### Read files and adjust for encoding
 data.blogs <- read_file("final/en_US/en_US.blogs.txt")
 data.news <- read_file("final/en_US/en_US.news.txt")
