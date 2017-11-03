@@ -12,11 +12,13 @@
 
 ##```{r setup, include=FALSE}
 suppressMessages(rm(list = ls()))
-Sys.setenv(JAVA_HOME = 'C:\\Program Files\\Java\\jre1.8.0_151\\bin')
+Sys.setenv(JAVA_HOME = 'C:\\Program Files\\Java\\jre1.8.0_151\\')
 source('c:/dev/r-course/10-capstone/include.r')
 library(pacman)
 install_standard_packages()
 using("tm")
+using("rJava")
+using("RWeka")
 using("RWeka")
 using("stringi")
 using("NLP")
@@ -81,6 +83,9 @@ download_zip_files()
 data.blogs <- read_file("final/en_US/en_US.blogs.txt")
 data.news <- read_file("final/en_US/en_US.news.txt")
 data.twitter <- read_file("final/en_US/en_US.twitter.txt")
+data.blogs = iconv(data.blogs, "latin1", "ASCII", sub = "")
+data.news = iconv(data.news, "latin1", "ASCII", sub = "")
+data.twitter = iconv(data.twitter, "latin1", "ASCII", sub = "")
 
 sample.blogs <- sample(data.blogs, 20000)
 sample.news <- sample(data.news, 20000)
@@ -130,8 +135,8 @@ options(mc.cores = 1)
 #```{r, echo=FALSE,eval=TRUE, warning=FALSE, message=FALSE}
     delim <- " \\r\\n\\t.,;:\"()?!"
     gram1Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 1, max = 1)) }
-    gram2Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 2, max = 2)) }
-    gram3Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 3, max = 3)) }
+    gram2Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 2, max = 2), delim = delim) }
+    gram3Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 3, max = 3), delim = delim) }
 
     tdm1 <- TermDocumentMatrix(corpus.data, control = list(tokenize = gram1Tokenizer))
     tdm2 <- TermDocumentMatrix(corpus.data, control = list(tokenize = gram2Tokenizer))
@@ -152,20 +157,16 @@ data.graph <-    data.frame(gram1 = gram1freq$word[1:10], gram2 = gram2freq$word
 
 
 #```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
-par(mfrow = c(1, 1))
-#
-barplot(tdm.uni, names.arg = freq.uni, cex.names = .7, col = heat.colors(40), main = c("Frequency of one word"), las = 2)
+ 
+g1 <- ggplot(data.graph[0], aes(x = reorder(word, freq), y = freq)) +
+    geom_bar(stat = "identity", fill = "red") +
+    ggtitle("1-gram") +
+    xlab("1-grams") + ylab("Frequency")
+g1
 #``` 
 
 ## Wordcloud
 #Analyse via a wordcloud can illustrate word frequencies very effectively as Unigram, Bigram, Trigram and Tetragram is as follows respectively:-
 #```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-
-par(mfrow=c(3,1))
-wordcloud(data.graph$gram1, scale = c(9, 1), max.words = 40, random.order = FALSE, colors = brewer.pal(7, "Dark2"))
-
-wordcloud(data.graph$gram2, scale = c(9, 1), max.words = 40, random.order = FALSE, colors = brewer.pal(7, "Dark2"))
-
-wordcloud(data.graph$gram3, scale = c(9, 1), max.words = 40, random.order = FALSE, colors = brewer.pal(7, "Dark2"))
-
+ 
 #``` 
