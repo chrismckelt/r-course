@@ -143,30 +143,49 @@ options(mc.cores = 1)
     tdm3 <- TermDocumentMatrix(corpus.data, control = list(tokenize = gram3Tokenizer))
 
     gram1freq <- data.frame(word = tdm1$dimnames$Terms, freq = rowSums(sparseMatrix(i = tdm1$i, j = tdm1$j, x = tdm1$v)))
-    gram1freq <- arrange(gram1freq, desc(freq))
+    gram1freq <- as.data.frame(sqldf("select * from gram1freq where freq > 4000 order by freq desc"))
 
     gram2freq <- data.frame(word = tdm2$dimnames$Terms, freq = rowSums(sparseMatrix(i = tdm2$i, j = tdm2$j, x = tdm2$v)))
-    gram2freq <- arrange(gram2freq, desc(freq))
+    gram2freq <- sqldf("select * from gram2freq where freq > 4000 order by freq desc")
 
     gram3freq <- data.frame(word = tdm3$dimnames$Terms, freq = rowSums(sparseMatrix(i = tdm3$i, j = tdm3$j, x = tdm3$v)))
-    gram3freq <- arrange(gram3freq, desc(freq))
+    gram3freq <- sqldf("select * from gram3freq where freq > 4000 order by freq desc")
 
 #``` 
 
-data.graph <-    data.frame(gram1 = gram1freq$word[1:10], gram2 = gram2freq$word[1:10], gram3 = gram3freq$word[1:10])
+
 
 
 #```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
  
-g1 <- ggplot(data.graph[0], aes(x = reorder(word, freq), y = freq)) +
+g1 <- ggplot(gram1freq, aes(x = word, y = freq)) +
     geom_bar(stat = "identity", fill = "red") +
     ggtitle("1-gram") +
     xlab("1-grams") + ylab("Frequency")
 g1
+
+
+g2 <- ggplot(gram2freq, aes(x = word, y = freq)) +
+    geom_bar(stat = "identity", fill = "yellow") +
+    ggtitle("2-gram") +
+    xlab("2-grams") + ylab("Frequency")
+g2
+
+g3 <- ggplot(gram3freq, aes(x = word, y = freq)) +
+    geom_bar(stat = "identity", fill = "blue") +
+    ggtitle("3-gram") +
+    xlab("3-grams") + ylab("Frequency")
+g3
+
 #``` 
 
 ## Wordcloud
 #Analyse via a wordcloud can illustrate word frequencies very effectively as Unigram, Bigram, Trigram and Tetragram is as follows respectively:-
 #```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
- 
+wordcloud(gram1freq$word, gram1freq$freq,  max.words = 200, random.order = FALSE, rot.per = 0.35, colors = brewer.pal(8, "Set1"))
+
+wordcloud(gram2freq$word, gram2freq$freq, max.words = 200, random.order = FALSE, rot.per = 0.35, colors = brewer.pal(8, "Set2"))
+
+wordcloud(gram3freq$word, gram3freq$freq, max.words = 200, random.order = FALSE, rot.per = 0.35, colors = brewer.pal(8, "Set3"))
+
 #``` 
