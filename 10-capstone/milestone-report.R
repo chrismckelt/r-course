@@ -66,9 +66,13 @@ download_zip_files <- function() {
     }
 }
 
+smaller <- function(x) {
+    x <- sample(x, length(x) * 0.0009999)
+}
+
 read_file <- function(path) {
-    con <- file(path, "rb", encoding = "UTF-8")
-    data <- readLines(con)
+    con <- file(path, open = "rb")
+    data <- readLines(con, skipNul = TRUE, encoding = "UTF-8")
     close(con)
     data
 }
@@ -87,10 +91,10 @@ data.blogs = iconv(data.blogs, "latin1", "ASCII", sub = "")
 data.news = iconv(data.news, "latin1", "ASCII", sub = "")
 data.twitter = iconv(data.twitter, "latin1", "ASCII", sub = "")
 
-sample.blogs <- sample(data.blogs, 20000)
-sample.news <- sample(data.news, 20000)
-sample.twitter <- sample(data.twitter, 20000)
-sample.all <- sample(c(sample.blogs, sample.news, sample.twitter), size = 10000, replace = TRUE)
+sample.blogs <- smaller(data.blogs)
+sample.news <- smaller(data.news)
+sample.twitter <- smaller(data.twitter)
+sample.all <- smaller(c(sample.blogs, sample.news, sample.twitter))
 
 #```
 
@@ -108,22 +112,31 @@ sample.all <- sample(c(sample.blogs, sample.news, sample.twitter), size = 10000,
 
 #```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 
-    lst <- list(sample.blogs, sample.news, sample.twitter)
-    corpus.data <- Corpus(VectorSource(lst))
-    toEmpty <- content_transformer(function(x, pattern) gsub(pattern, "", x, fixed = TRUE))
-    toSpace <- content_transformer(function(x, pattern) gsub(pattern, " ", x, fixed = TRUE))
 
-    corpus.data <- tm_map(corpus.data, tolower)
-    corpus.data <- tm_map(corpus.data, removePunctuation)
-    corpus.data <- tm_map(corpus.data, removeNumbers)
-    corpus.data <- tm_map(corpus.data, removeWords, stopwords("english"))
-    corpus.data <- tm_map(corpus.data, stripWhitespace)
-    corpus.data <- tm_map(corpus.data, PlainTextDocument)
-    corpus.data <- tm_map(corpus.data, toEmpty, "#\\w+")  
-    corpus.data <- tm_map(corpus.data, toEmpty, "(\\b\\S+\\@\\S+\\..{1,3}(\\s)?\\b)")  
-    corpus.data <- tm_map(corpus.data, toEmpty, "@\\w+")  
-    corpus.data <- tm_map(corpus.data, toEmpty, "http[^[:space:]]*")  
-    corpus.data <- tm_map(corpus.data, toSpace, "/|@|\\|")
+group_texts <- list(sample.blogs, sample.news, sample.twitter)
+group_texts <- tolower(group_texts)
+group_texts <- removeNumbers(group_texts)
+group_texts <- removePunctuation(group_texts, preserve_intra_word_dashes = TRUE)
+group_texts <- gsub("http[[:alnum:]]*", "", group_texts)
+group_texts <- stripWhitespace(group_texts)
+group_texts <- gsub("\u0092", "'", group_texts)
+group_texts <- gsub("\u0093|\u0094", "", group_texts)
+
+corpus.data <- VCorpus(VectorSource(group_texts))
+toEmpty <- content_transformer(function(x, pattern) gsub(pattern, "", x, fixed = TRUE))
+toSpace <- content_transformer(function(x, pattern) gsub(pattern, " ", x, fixed = TRUE))
+corpus.data <- tm_map(corpus.data, toEmpty, "#\\w+")
+corpus.data <- tm_map(corpus.data, toEmpty, "(\\b\\S+\\@\\S+\\..{1,3}(\\s)?\\b)")
+corpus.data <- tm_map(corpus.data, toEmpty, "@\\w+")
+corpus.data <- tm_map(corpus.data, toEmpty, "http[^[:space:]]*")
+corpus.data <- tm_map(corpus.data, toSpace, "/|@|\\|")
+
+save_file("https://goo.gl/To9w5B", "bad_word_list.txt")
+bad_words <- readLines("./bad_word_list.txt")
+corpus.data <- tm_map(corpus.data, removeWords, bad_words)
+ 
+corpus.data <- tm_map(corpus.data, stemDocument)
+  
 #``` 
 
 ## Explore the data
@@ -131,29 +144,27 @@ sample.all <- sample(c(sample.blogs, sample.news, sample.twitter), size = 10000,
 #Tokenize the sample to get with Uni and Bigrams to perform an N-grams analysis.  
 
 #This will allow us to see the most used words and expressions. 
-options(mc.cores = 1)
+    options(mc.cores = 1)
 #```{r, echo=FALSE,eval=TRUE, warning=FALSE, message=FALSE}
-    delim <- " \\r\\n\\t.,;:\"()?!"
+ 
     gram1Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 1, max = 1)) }
-    gram2Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 2, max = 2), delim = delim) }
-    gram3Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 3, max = 3), delim = delim) }
+    gram2Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 2, max = 2)) }
+    gram3Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 3, max = 3))}
 
     tdm1 <- TermDocumentMatrix(corpus.data, control = list(tokenize = gram1Tokenizer))
     tdm2 <- TermDocumentMatrix(corpus.data, control = list(tokenize = gram2Tokenizer))
     tdm3 <- TermDocumentMatrix(corpus.data, control = list(tokenize = gram3Tokenizer))
 
     gram1freq <- data.frame(word = tdm1$dimnames$Terms, freq = rowSums(sparseMatrix(i = tdm1$i, j = tdm1$j, x = tdm1$v)))
-    gram1freq <- as.data.frame(sqldf("select * from gram1freq where freq > 4000 order by freq desc"))
+    gram1freq <- as.data.frame(sqldf("select * from gram1freq order by freq desc limit 10"))
 
     gram2freq <- data.frame(word = tdm2$dimnames$Terms, freq = rowSums(sparseMatrix(i = tdm2$i, j = tdm2$j, x = tdm2$v)))
-    gram2freq <- sqldf("select * from gram2freq where freq > 4000 order by freq desc")
+    gram2freq <- sqldf("select * from gram2freq order by freq desc limit 10")
 
     gram3freq <- data.frame(word = tdm3$dimnames$Terms, freq = rowSums(sparseMatrix(i = tdm3$i, j = tdm3$j, x = tdm3$v)))
-    gram3freq <- sqldf("select * from gram3freq where freq > 4000 order by freq desc")
+    gram3freq <- sqldf("select * from gram3freq order by freq desc limit 10")
 
 #``` 
-
-
 
 
 #```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
@@ -182,10 +193,18 @@ g3
 ## Wordcloud
 #Analyse via a wordcloud can illustrate word frequencies very effectively as Unigram, Bigram, Trigram and Tetragram is as follows respectively:-
 #```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
-wordcloud(gram1freq$word, gram1freq$freq,  max.words = 200, random.order = FALSE, rot.per = 0.35, colors = brewer.pal(8, "Set1"))
-
-wordcloud(gram2freq$word, gram2freq$freq, max.words = 200, random.order = FALSE, rot.per = 0.35, colors = brewer.pal(8, "Set2"))
-
-wordcloud(gram3freq$word, gram3freq$freq, max.words = 200, random.order = FALSE, rot.per = 0.35, colors = brewer.pal(8, "Set3"))
+create_wordcloud <- function(tdm, palette = "Dark2") {
+    mtx = as.matrix(tdm)
+    # get word counts in decreasing order
+    word_freqs = sort(rowSums(mtx), decreasing = TRUE)
+    # create a data frame with words and their frequencies
+    dm = data.frame(word = names(word_freqs), freq = word_freqs)
+    dm <- sqldf("select * from dm limit 100")
+    # plot wordcloud
+    wordcloud(dm$word, dm$freq, random.order = FALSE, colors = brewer.pal(8, palette))
+}
+create_wordcloud(tdm1, "Set1")
+create_wordcloud(tdm2, "Set2")
+create_wordcloud(tdm3, "Set3")
 
 #``` 
