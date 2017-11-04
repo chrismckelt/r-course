@@ -40,15 +40,21 @@ options(stringsAsFactors = FALSE)
 
 # Overview
 
-This is a milestone report for the Coursera Data Science unit to build predictive model for text input.
+Alan Turing (1950) opening statement "I propose to consider the
+question, 'Can machines think?'" (p. 433) in his article "Computing Machinery and Intelligence".
+The Turing Test has become a basis of natural language processing. 
 
-The goal of the Capstone project is to create an application that uses NLP techniques and predictive analytics, and like SwiftKey's applications, takes in a word phrase and returns next-word choices. 
+The essence of the Capstone project is to create an application that uses NLP techniques and predictive analytics, and like SwiftKey's applications, takes in a word phrase and returns next-predicted word.
 
 The project is developed in partnership with SwiftKey as the company well known for their predictive text analytics. As of March 1, 2016, SwiftKey became part of the Microsoft family of products. SwiftKey applications are used on Android and iOS anticipating and providing next-word choices while keyboard typing through Natural Language Processing (NLP) techniques. Microsoft's Word Flow Technology is another example of NLP in action.
 
 The milestone reports purpose is to identify the initial steps taken to produce the overall capstone project, a Natural Language Processing word prediction alogrithm application. 
+
+Additionally, the work presented in this project follows the
+tenets of reproducible research and all code is available in an open-source repository to enable readers to review the approach, reproduce the results, and collaborate to enhance the model.
+
  
-# Introduction
+# Summary
 
 The data for analysis to be used is from
 
@@ -168,10 +174,13 @@ sample.all <- c(sample.blogs, sample.news, sample.twitter)
  
 ``` 
 
+## Explore the data through N-Grams
 
+Jurafsky and Martin (2000) provide a seminal work within the domain of NLP. The authors present a key approach
+for building prediction models called the N-Gram, which relies on knowledge of word sequences from (N – 1) prior
+words. It is a type of language model based on counting words in the corpora to establish probabilities about next
+words
 
-## Explore the data
- 
 Tokenize the sample to get with Uni and Bigrams to perform an N-grams analysis.  
 This will allow us to see the most used words and expressions. 
  
@@ -249,9 +258,24 @@ create_wordcloud(tdm3, "Set3")
 
 ##  Observations from the analysis
 
-- The data needs more cleaning to deal with encodings and foreign language characters
-- Bias may exist in twitter text as it is a shorter form than news/blog text. Need to account for this and nullify it.
-- Stemming appears useful as bi/tri grams are made of short words that have a better frequence for matching when stemmed.
+
+1. Case: corpora words will not be case-sensitive. Although important for spelling correction and part of
+text analysis, the words themselves - not their case - are important for prediction.
+2. Stopwords: similarly, unlike classification and clustering applications, all words will be included in the
+model as they represent more than just the primary carriers of the message.
+3. Wordform: stemming will be used as N-Grams are typically based on wordforms Stemming appears useful as bi/tri grams are made of short words that have a better frequence for matching when stemmed.
+4. Punctuation: Is removed because tweets are rarely correctly punctuated
+5. Bias may exist in twitter text as it is a shorter form than news/blog text. Need to account for this and nullify it.
+6. Numbers: there is no intuition based on the research that numbers will have a great impact on a predication
+model and they will be removed
+7. Sparse Words: all words will be retained. A key concept from Jurafsky and Martin is the idea that even
+bigram models are quite sparse; however, rather than eliminating those wordforms, they become clues to
+the "probability of unseen N-Grams" (p. 209, 2000). They include as their fourth of eight key concepts
+Things Seen Once and recommend using the count of wordforms seen a single time to provide a basis to
+estimate those things not seen in the training set and will likely appear in a test set
+MODSIM World 2015
+8. Whitespace: this was not discussed directly by Jurafsky and Martin. The intuition is that whitespace has
+little to do with context and excess whitespace will be removed
 
 ## Future plans for creating a prediction algorithm and Shiny app
 
