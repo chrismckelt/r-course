@@ -63,15 +63,17 @@ https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip
 This analysis is based on three text files containing internet blogs, news feeds, and Twitter tweets from HCCorpora.   
 
 This report will outline the process for:
-1. Retrieving the data
-2. Cleaning up the data
-3. The tokenizing functions used to find the most frequently used word (unigrams), word expressions (bigrams,trigrams,n-grams)
-4. Exploratory analyse of the data
-5. Future plans for a prediction application
+
+1.  Retrieving the data
+2.  Cleaning up the data
+3.  The tokenizing functions used to find the most frequently used word (unigrams), word expressions (bigrams,trigrams,n-grams)
+4.  Exploratory analyse of the data
+5.  Future plans for a prediction application
+
 
  
 
-## Retrieve the data
+# Retrieve the data
 
 ```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 
@@ -123,14 +125,16 @@ sample.all <- c(sample.blogs, sample.news, sample.twitter)
 
 ![image](https://user-images.githubusercontent.com/662868/32357634-a02e21c4-c079-11e7-9136-8277964e9f8b.png)
 
+### Characters in each file
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
     data_summary <- data.frame(
-    Blogs=c((summary(nchar(data.blogs)))),News =c((summary(nchar(data.news)))),
-    Twitter =c((summary(nchar(data.twitter)))))
+    Blogs=c((length(nchar(data.blogs)))),News =c((length(nchar(data.news)))),
+    Twitter =c((length(nchar(data.twitter)))))
     kable(data_summary)
 ```
 
-## Clean the text to create a corpus we can use to build a model
+# Clean the text to create a corpus we can use to build a model
 
 #### Remove numbers, urls, whitespace, punctuation, and non-useful text (eg lines '-----')
 
@@ -177,11 +181,11 @@ sample.all <- c(sample.blogs, sample.news, sample.twitter)
 ## Explore the data through N-Grams
 
 Jurafsky and Martin (2000) provide a seminal work within the domain of NLP. The authors present a key approach
-for building prediction models called the N-Gram, which relies on knowledge of word sequences from (N – 1) prior
+for building prediction models called the N-Gram, which relies on knowledge of word sequences from (N-1) prior
 words. It is a type of language model based on counting words in the corpora to establish probabilities about next
-words
+words.
 
-Tokenize the sample to get with Uni and Bigrams to perform an N-grams analysis.  
+Here we will tokenize the sample texts to generate uni/bi/tri grams.  
 This will allow us to see the most used words and expressions. 
  
 ```{r, echo=FALSE,eval=TRUE, warning=FALSE, message=FALSE}
@@ -205,7 +209,8 @@ This will allow us to see the most used words and expressions.
 
 ``` 
  
- Uni-grams - frequent single words
+### Uni-grams - frequency of single words
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 	
 	g1 <- ggplot(gram1freq, aes(x = word, y = freq)) +
@@ -214,8 +219,10 @@ This will allow us to see the most used words and expressions.
 		xlab("1-grams") + ylab("Frequency")
 	g1
 
-``` 
-Bi-gram - two words phrases
+```
+
+### Bi-gram -  frequency of two words phrases
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 	g2 <- ggplot(gram2freq, aes(x = word, y = freq)) +
 		geom_bar(stat = "identity", fill = "yellow") +
@@ -223,7 +230,9 @@ Bi-gram - two words phrases
 		xlab("2-grams") + ylab("Frequency")
 	g2
 ``` 
-Tri-gram - three words phrases
+
+### Tri-gram -  frequency of three words phrases
+
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 	g3 <- ggplot(gram3freq, aes(x = word, y = freq)) +
 		geom_bar(stat = "identity", fill = "blue") +
@@ -235,7 +244,8 @@ Tri-gram - three words phrases
 
 ## Wordcloud
 
-Following is a wordcloud of unigrams and distributions of 2- and 3-gram phrases. These are calculated from combining 100 samples from each of the three text files into one corpus. Numbers, stopwords, whitespace, punctuation, and derogatory items have been removed. Although, it appears there remains extraneous characters yet to be cleaned.
+Following is a wordcloud of unigrams and distributions of 2- and 3-gram phrases. These are calculated from taking 100 samples from each of the three N-Grams analysis. 
+The more pronounced the word / phrase, the more frequent its appearance in the texts.
 
 ```{r, echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
 
@@ -245,7 +255,7 @@ create_wordcloud <- function(tdm, palette = "Dark2") {
     word_freqs = sort(rowSums(mtx), decreasing = TRUE)
     # create a data frame with words and their frequencies
     dm = data.frame(word = names(word_freqs), freq = word_freqs)
-	dm <- sqldf("select * from dm limit 100")
+	  dm <- sqldf("select * from dm limit 100")
     # plot wordcloud
     wordcloud(dm$word, dm$freq, random.order = FALSE, colors = brewer.pal(8, palette))
 }
@@ -256,7 +266,7 @@ create_wordcloud(tdm3, "Set3")
 ``` 
 
 
-##  Observations from the analysis
+#  Observations from the analysis
 
 
 1. Case: corpora words will not be case-sensitive. Although important for spelling correction and part of
@@ -277,7 +287,7 @@ MODSIM World 2015
 8. Whitespace: this was not discussed directly by Jurafsky and Martin. The intuition is that whitespace has
 little to do with context and excess whitespace will be removed
 
-## Future plans for creating a prediction algorithm and Shiny app
+# Future plans for creating a prediction algorithm and Shiny app
 
 Using the data in this analyse a Katz back off n-gram model will used to build a predictive text input application.
 

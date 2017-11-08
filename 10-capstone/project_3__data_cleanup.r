@@ -1,0 +1,28 @@
+group_texts <- list(sample.blogs, sample.news, sample.twitter)
+group_texts <- tolower(group_texts)
+group_texts <- removeNumbers(group_texts)
+group_texts <- removePunctuation(group_texts, preserve_intra_word_dashes = TRUE)
+group_texts <- gsub("http[[:alnum:]]*", "", group_texts)
+group_texts <- stripWhitespace(group_texts)
+group_texts <- gsub("\u0092", "'", group_texts)
+group_texts <- gsub("\u0093|\u0094", "", group_texts)
+group_texts <- sent_detect_nlp(group_texts)
+group_texts <- tm_map(group_texts, qdap::clean)
+group_texts <- tm_map(group_texts, qdap::scrubber)
+group_texts <- tm_map(group_texts, qdap::replace_symbol)
+
+corpus.data <- PCorpus(VectorSource(group_texts), dbControl = list(dbName = "pcorpus.db", dbType = "DB1"))
+toEmpty <- content_transformer(function(x, pattern) gsub(pattern, "", x, fixed = TRUE))
+toSpace <- content_transformer(function(x, pattern) gsub(pattern, " ", x, fixed = TRUE))
+corpus.data <- tm_map(corpus.data, toEmpty, "#\\w+")
+corpus.data <- tm_map(corpus.data, toEmpty, "(\\b\\S+\\@\\S+\\..{1,3}(\\s)?\\b)")
+corpus.data <- tm_map(corpus.data, toEmpty, "@\\w+")
+corpus.data <- tm_map(corpus.data, toEmpty, "http[^[:space:]]*")
+corpus.data <- tm_map(corpus.data, toSpace, "/|@|\\|")
+
+save_file("https://goo.gl/To9w5B", "bad_word_list.txt")
+bad_words <- readLines("./bad_word_list.txt")
+corpus.data <- tm_map(corpus.data, removeWords, bad_words)
+
+corpus.data <- tm_map(corpus.data, stemDocument)
+ 
