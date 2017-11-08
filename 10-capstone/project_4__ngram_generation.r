@@ -1,11 +1,13 @@
-tokenize.ngram <- function(x, min.gram, max.gram) {
-    NGramTokenizer(x, Weka_control(min = min.gram, max = min.gram))
+tokenize.ngram <- function(x, min.gram = 1, max.gram = 1) {
+    y <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = min.gram, max = max.gram)) }
+    y
+    #NGramTokenizer(x, Weka_control(min = min.gram, max = min.gram))
     }
 
 
-tdm1 <- TermDocumentMatrix(corpus.data, control = list(tokenize = tokenize.ngram (1)))
-tdm2 <- TermDocumentMatrix(corpus.data, control = list(tokenize = tokenize.ngram (2)))
-tdm3 <- TermDocumentMatrix(corpus.data, control = list(tokenize =  tokenize.ngram(3)))
+tdm1 <- TermDocumentMatrix(corpus.data, control = list(tokenize = tokenize.ngram (1,1)))
+tdm2 <- TermDocumentMatrix(corpus.data, control = list(tokenize = tokenize.ngram (2,2)))
+tdm3 <- TermDocumentMatrix(corpus.data, control = list(tokenize =  tokenize.ngram(3,3)))
 
 gram1freq <- data.frame(word = tdm1$dimnames$Terms, freq = rowSums(sparseMatrix(i = tdm1$i, j = tdm1$j, x = tdm1$v)))
 gram1freq <- as.data.frame(sqldf("select * from gram1freq order by freq desc limit 10"))

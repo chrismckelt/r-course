@@ -168,35 +168,3 @@ colnames(train)[ncol(train)] <- 'y'
 train <- as.data.frame(train)
 train$y <- as.factor(train$y)
 
-# Train.
-fit <- train(y ~ ., data = train, method = 'bayesglm')
-
-# Check accuracy on training.
-predict(fit, newdata = train)
-
-# Test data.
-data2 <- c('Bats eat bugs.')
-corpus <- VCorpus(VectorSource(data2))
-tdm <- DocumentTermMatrix(corpus, control = list(dictionary = Terms(tdm), removePunctuation = TRUE, stopwords = TRUE, stemming = TRUE, removeNumbers = TRUE))
-test <- as.matrix(tdm)
-
-# Check accuracy on test.
-predict(fit, newdata = test)
-
-
-create_ngrams <- function(sentence_splits, ngram_size = 2) {
-    ngrams <- c()
-    for (sentence in sentence_splits) {
-        sentence <- trim(sentence)
-        if ((nchar(sentence) > 0) && (sapply(gregexpr("\\W+", sentence), length) >= ngram_size)) {
-            ngs <- ngram(sentence, n = ngram_size)
-            ngrams <- c(ngrams, get.ngrams(ngs))
-        }
-    }
-    return(ngrams)
-}
-
-n2 <- create_ngrams(sample.all, ngram_size = 2)
-n3 <- create_ngrams(sample.all, ngram_size = 3)
-n4 <- create_ngrams(sample.all, ngram_size = 4)
-n5 <- create_ngrams(sample.all, ngram_size = 5)

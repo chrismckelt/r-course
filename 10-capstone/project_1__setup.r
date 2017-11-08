@@ -1,6 +1,3 @@
-## ----setup, include=FALSE------------------------------------------------
-suppressMessages(rm(list = ls()))
-
 Sys.setenv(JAVA_HOME = 'C:\\Program Files\\Java\\jre1.8.0_151\\')
 source('c:/dev/r-course/10-capstone/include.r')
 
@@ -24,8 +21,11 @@ using("dplyr")
 using("SparseM")
 using("foreach")
 using("qdap")
+using("filehash")
+using("RSQLite")
 
 suppressMessages(setwd("c:/dev/r-course/10-capstone/"))
 options(mc.cores = 1)
 options(encoding = "UTF-8")
 options(stringsAsFactors = FALSE)
+

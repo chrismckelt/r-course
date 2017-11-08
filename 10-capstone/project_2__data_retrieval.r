@@ -18,3 +18,9 @@ data_summary <- data.frame(
 Blogs=c((length(nchar(data.blogs)))),News =c((length(nchar(data.news)))),
 Twitter =c((length(nchar(data.twitter)))))
 kable(data_summary)
+
+
+rm(data.blogs)
+rm(data.news)
+rm(data.twitter)
+gc()
