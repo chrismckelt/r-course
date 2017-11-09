@@ -25,7 +25,6 @@ p_load("qdap")
 p_load("filehash")
 p_load("RSQLite")
 
-suppressMessages(setwd("c:/dev/r-course/10-capstone/"))
 options(mc.cores = 1)
 options(encoding = "UTF-8")
 options(stringsAsFactors = FALSE)

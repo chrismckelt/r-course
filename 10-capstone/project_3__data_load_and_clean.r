@@ -1,30 +1,34 @@
 using("filehashSQLite")
 
 database_name <- "sqldb_pcorpus_mydata"
-database_file_path <- paste(trim(getwd()), "/", database_name)
-database_file_path <- str_remove_whitespace(database_file_path)
-db_exists <- !file.exists(database_file_path)
+database_file_path <- get_data_file(database_name, "")
+db_exists <- ifelse(file.exists(database_file_path), TRUE, FALSE)
+overwrite <- TRUE
 
-if (db_exists == FALSE) {
+if (overwrite && file.exists("sqldb_pcorpus_mydata")) {
+    cat("Deleting SQL lite database")
+    file.remove("sqldb_pcorpus_mydata")
+}
+
+if ((db_exists == FALSE))
+{
     cat("database--> creation started...")
-    group_texts <- list(sample.blogs, sample.news, sample.twitter)
-    group_texts <- sent_detect_nlp(group_texts)
+    data.all <- data.all
+    data.all <- sent_detect_nlp(data.all)
 
-    group_texts <- tolower(group_texts)
-    group_texts <- removeNumbers(group_texts)
-    group_texts <- removePunctuation(group_texts, preserve_intra_word_dashes = TRUE)
-    group_texts <- gsub("http[[:alnum:]]*", "", group_texts)
-    group_texts <- stripWhitespace(group_texts)
-    group_texts <- gsub("\u0092", "'", group_texts)
-    group_texts <- gsub("\u0093|\u0094", "", group_texts)
-
+    data.all <- tolower(data.all)
+    data.all <- removeNumbers(data.all)
+    data.all <- removePunctuation(data.all, preserve_intra_word_dashes = TRUE)
+    data.all <- gsub("http[[:alnum:]]*", "", data.all)
+    data.all <- stripWhitespace(data.all)
+    data.all <- gsub("\u0092", "'", data.all)
+    data.all <- gsub("\u0093|\u0094", "", data.all)
+   
+    dbCreate(database_name, "SQLite")
+    dbInsert("data", data.all)
+    corpus.data <- PCorpus(DataframeSource(data.all), readerControl = list(language = "en"), dbControl = list(dbName = database_name, dbType = "SQLite"))
    # dbCreate(database_name, "SQLite")
-   # db <- dbInit(database_name, "SQLite")
-    #dbCreate(database_name, "SQLite")
-    corpus.data <- PCorpus(VectorSource(group_texts), readerControl = list(language = "en"), dbControl = list(dbName = database_name, dbType = "SQLite"))
     
-    db <- dbInit(database_name, "SQLite")
-
     toEmpty <- content_transformer(function(x, pattern) gsub(pattern, "", x, fixed = TRUE))
     toSpace <- content_transformer(function(x, pattern) gsub(pattern, " ", x, fixed = TRUE))
     corpus.data <- tm_map(corpus.data, toEmpty, "#\\w+")
@@ -41,7 +45,11 @@ if (db_exists == FALSE) {
 
     writeCorpus(corpus.data, path = ".", filenames = database_name)
     cat("database--> creation completed...")
-    } else {
-        db <- dbInit(database_file_path, "SQLite")
-        corpus.data <- dbLoad(db)
-    }
+}
+
+db <- dbInit(database_name, "SQLite")
+
+if (is.na(corpus.data)) {
+    corpus.data <- PCorpus(DataframeSource(dbLoad(db)), readerControl = list(language = "en"), dbControl = list(dbName = database_name, dbType = "SQLite"))
+}
+

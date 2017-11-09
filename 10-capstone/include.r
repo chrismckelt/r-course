@@ -121,3 +121,10 @@ str_remove_whitespace <- function(str) {
     y <- str_replace_all(string = str, pattern = " ", repl = "")
     y
 }
+
+get_data_file <- function(filename, dir ="/data/") {
+    y <- paste0(trim(getwd()), dir, filename)
+    y
+}
+
+ 

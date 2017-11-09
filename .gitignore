@@ -10,3 +10,6 @@ cacert.pem
 /9-data-products/week-4/data/database.sqlite
 /9-data-products/week-4/data/lending-club-loan-data.zip
 final
+/10-capstone/sqldb_pcorpus_mydata
+/10-capstone/data
+*.zip
