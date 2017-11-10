@@ -72,7 +72,7 @@ download_zip_files <- function() {
 #'
 #' @examples
 smaller <- function(x) {
-    x <- sample(x, length(x) * 0.0009999)
+    x <- sample(x, length(x) * .6)
 }
 
 #' Trim leading and trailing string space
@@ -117,14 +117,44 @@ covert_rmd_to_r <- function() {
 
 #covert_rmd_to_r()
 
+#' Remove empty spaces in string
+#'
+#' @param str
+#'
+#' @return
+#' @export
+#'
+#' @examples
 str_remove_whitespace <- function(str) {
     y <- str_replace_all(string = str, pattern = " ", repl = "")
     y
 }
 
-get_data_file <- function(filename, dir ="/data/") {
+#' Make a path to a file in a folder (defaults to 'data')
+#'
+#' @param filename
+#' @param dir
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_data_file_path <- function(filename, dir ="/data/") {
     y <- paste0(trim(getwd()), dir, filename)
     y
 }
 
- 
+
+#' Create an RMD file from a R script
+#'
+#' @param path
+#'
+#' @return
+#' @export
+#'
+#' @examples
+generate_rmd <- function(path = 'c:/dev/r-course/10-capstone/milestone-report.RMD') {
+    library(knitr)
+    rmarkdown::render()
+}
+

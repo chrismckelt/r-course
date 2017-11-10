@@ -1,26 +1,33 @@
-tdm_file_name <- "tdm_ngrams.RData"
-tdm_ngram_filepath <- get_data_file(tdm_file_name)
+ngram_file_name <- "ngrams.RData"
+ngram_file_path <- get_data_file_path(ngram_file_name)
+stop()
+if (!file.exists(ngram_file_path)) {
 
-gram1Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 1, max = 1)) }
-gram2Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 2, max = 2)) }
-gram3Tokenizer <- function(x) { RWeka::NGramTokenizer(x, RWeka::Weka_control(min = 3, max = 3)) }
+    create_ngram <- function(text, ngram_size) {
 
-tdm1 <- TermDocumentMatrix(corpus.data, control = list(tokenize = gram1Tokenizer))
-tdm2 <- TermDocumentMatrix(corpus.data, control = list(tokenize = gram2Tokenizer))
-tdm3 <- TermDocumentMatrix(corpus.data, control = list(tokenize = gram3Tokenizer))
+        ngram <- data.table()
 
-gram1freq <- data.frame(word = tdm1$dimnames$Terms, freq = rowSums(sparseMatrix(i = tdm1$i, j = tdm1$j, x = tdm1$v)))
-gram1freq <- as.data.frame(sqldf("select * from gram1freq order by freq desc limit 10"))
+        ng <- textcnt(text, method = "string", n = ngram_size,lower = 10L) # freq must be 10 or greater
 
-gram2freq <- data.frame(word = tdm2$dimnames$Terms, freq = rowSums(sparseMatrix(i = tdm2$i, j = tdm2$j, x = tdm2$v)))
-gram2freq <- sqldf("select * from gram2freq order by freq desc limit 10")
+        if (ngram_size == 1) {
+            ngram <- data.table(word = names(ng), freq = unclass(ng), length = nchar(names(ng)))
+        }
+        else {
+            ngram <- data.table(word = names(ng), freq = unclass(ng), length = nchar(names(ng)))
+        }
+        
+        return(ngram)
+    }
 
-gram3freq <- data.frame(word = tdm3$dimnames$Terms, freq = rowSums(sparseMatrix(i = tdm3$i, j = tdm3$j, x = tdm3$v)))
-gram3freq <- sqldf("select * from gram3freq order by freq desc limit 10")
+    data.stringified <- paste(data.all, collapse = '')
 
-save_ngrams <- function() {
-    save(tdm1, tdm2, tdm3, file = files.tdm_ngrams)
-    unlink(tdm_file_name)
+    n2 <- create_ngram(data.stringified, 2)
+    n3 <- create_ngram(data.stringified, 3)
+    n4 <- create_ngram(data.stringified, 4)
+    n5 <- create_ngram(data.stringified, 5)
+
+    save(n2, n3, n4,n5,file = ngram_file_path)
+    #unlink(ngram_file_name)
 }
-
-save_ngrams()
+ 
+source(get_data_file_path(ngram_file_name))

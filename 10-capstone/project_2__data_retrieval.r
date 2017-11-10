@@ -1,6 +1,7 @@
 download_zip_files()
 
-data.file.name <- "data.all.rds"
+data.file.name <- "data.all.RData"
+
 sample_mode <- TRUE
 
 if (!file.exists(data.file.name))
@@ -34,10 +35,10 @@ if (!file.exists(data.file.name))
     rm(data.news)
     rm(data.twitter)
 
-    saveRDS(data.all, file = get_data_file("data.all.RData"))
+    save(data.all, file = get_data_file_path("data.all.RData"))
     gc()
 }
 
 if (length(data.all) == 0) {
-    data.all <- readRDS(get_data_file("data.all.RData"))
+    data.all <- source(get_data_file_path("data.all.RData"))
 }
