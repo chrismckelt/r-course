@@ -40,23 +40,23 @@ if (TRUE)
     data.all <- reduce_periods(data.all)
     data.all <- replace_numbers(data.all)
 
-    #data.all <- gsub("(ftp|http)(s?)://.*\\b", "", data.all) # urls
+    data.all <- gsub("(ftp|http)(s?)://.*\\b", "", data.all) # urls
     data.all <- gsub("\\S+@\\S+", "", data.all) # emails 
-   # data.all <- gsub("[@][a - zA - Z0 - 9_]{1,15}", "", data.all) # twitter usernames 
+    data.all <- gsub("[@][a - zA - Z0 - 9_]{1,15}", "", data.all) # twitter usernames 
     data.all <- gsub("RT |via", "", data.all) # twitter tags 
     
-
     data.all <- removePunctuation(data.all, preserve_intra_word_dashes = TRUE)
     data.all <- stripWhitespace(data.all)
     data.all <- tolower(data.all)
-
+    flog.info("data cleaning complete...")
     save(data.all, file = get_data_file_path("data.all.RData"))
-
+    flog.info("data cleaning file saved...")
     rm(remove_symbols)
     rm(reduce_periods)
     rm(convert_to_and)
     rm(convert_to_period)
     rm(replace_numbers)
+    gc()
 }
 
 source(get_data_file_path("data.all.RData"))
