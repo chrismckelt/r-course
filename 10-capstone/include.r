@@ -181,3 +181,10 @@ parallelize_task  <- function(task, ...) {
     stopCluster(cl)
     r
 }
+
+parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
+    p_load("itertools")
+    mergedList <- foreach(splitDF = isplitRows(df.big, chunkSize = chunk_size)) %dopar% {
+        merge(splitDF, smallDF, by = 'num', all.x = T)
+    }
+}
