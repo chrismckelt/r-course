@@ -27,21 +27,20 @@ if ((!file.exists(get_data_file_path("data.all.RData"))))
                                          replacement = "", corpus)
 
     data.all <- as.data.table(data.all, stringsAsFactors = FALSE) # stringsAsFactors = FALSE important for speed
+    #chunked
     data.all <- parallelize_task_chunked(sent_detect, data.all) #Detect and split sentences on endmark boundaries.
-    data.all <- parallelize_task(convert_to_and, data.all)
-    data.all <- parallelize_task(convert_to_period, data.all)
-    data.all <- parallelize_task(remove_symbols, data.all)
-    data.all <- parallelize_task(reduce_periods, data.all)
-    data.all <- parallelize_task(replace_numbers, data.all)
+    data.all <- parallelize_task_chunked(convert_to_and, data.all)
+    data.all <- parallelize_task_chunked(convert_to_period, data.all)
+    data.all <- parallelize_task_chunked(remove_symbols, data.all)
+    data.all <- parallelize_task_chunked(reduce_periods, data.all)
+    data.all <- parallelize_task_chunked(replace_numbers, data.all)
+    
     data.all <- parallelize_task(removePunctuation, data.all, preserve_intra_word_dashes = TRUE)
 
-    data.all <- parallelize_task(gsub, data.all, "(ftp|http)(s?)://.*\\b", "") # urls
-    data.all <- parallelize_task(gsub, data.all, "\\S+@\\S+", "") # emails 
-    data.all <- parallelize_task(gsub, data.all, "[@][a - zA - Z0 - 9_]{1,15}", "") # twitter usernames 
-    data.all <- parallelize_task(gsub, data.all, "RT |via", "") # twitter tags 
+    data.all <- parallelize_task_chunked(rm_non_words, data.all) # Remove Non-Words & N Character Words
 
-    data.all <- parallelize_task(stripWhitespace, data.all)
-    data.all <- parallelize_task(tolower, data.all)
+    data.all <- parallelize_task_chunked(stripWhitespace, data.all)
+    data.all <- parallelize_task_chunked(tolower, data.all)
   
     flog.info("data cleaning complete...")
 

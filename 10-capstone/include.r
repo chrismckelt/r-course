@@ -72,7 +72,7 @@ download_zip_files <- function() {
 #'
 #' @examples
 smaller <- function(x) {
-    x <- sample(x, length(x) * .05)
+    x <- sample(x, length(x) * .005)
 }
 
 #' Trim leading and trailing string space
@@ -175,9 +175,9 @@ parallelize_task  <- function(task, ...) {
     # Initiate cluster
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
-    flog.debug("Task starting")
+    flog.debug(paste("Task starting", match.call()[2]))
     r <- task(...)
-    flog.debug("Task done")
+    flog.debug(paste("Task complete", match.call()[2]))
     stopCluster(cl)
     r
 }
@@ -191,12 +191,13 @@ parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
     cl <- makeCluster(ncores)
     registerDoParallel(cl)
 
-    flog.debug("Task starting")
-    df.merged <- foreach(df.split = isplitRows(df.big, chunkSize = chunk_size), .combine = rbind) %dopar% {
-        df.chunked <- task(df.split)
+    flog.debug(paste("Task starting", match.call()[2]))
+   
+    df.merged <- foreach(df.split = isplitRows(df.big, chunkSize = chunk_size), .combine = cbind, .inorder = TRUE) %dopar% {
+        rbind(task(df.split))
     }
 
-    flog.debug("Task done")
+    flog.debug(paste("Task complete", match.call()[2]))
     stopCluster(cl)
     df.merged
 }
