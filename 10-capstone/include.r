@@ -72,7 +72,7 @@ download_zip_files <- function() {
 #'
 #' @examples
 smaller <- function(x) {
-    x <- sample(x, length(x) * .005)
+    x <- sample(x, length(x) * .01)
 }
 
 #' Trim leading and trailing string space
@@ -194,10 +194,86 @@ parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
     flog.debug(paste("Task starting", match.call()[2]))
    
     df.merged <- foreach(df.split = isplitRows(df.big, chunkSize = chunk_size), .combine = cbind, .inorder = TRUE) %dopar% {
-        rbind(task(df.split))
+        rbind(sapply(df.split, task))
     }
 
     flog.debug(paste("Task complete", match.call()[2]))
     stopCluster(cl)
     df.merged
+}
+
+
+#Create clean functions
+clean.remove_symbols <- function(corpus) gsub(perl = TRUE,
+                                        pattern = '[\\]\\[\\(\\)-/+;:#%$^\\*=^~\\{\\}/"<>«»_\\\\“\\”⁰•‘’–]',
+                                        replacement = "", corpus)
+
+clean.convert_to_period <- function(corpus) gsub(pattern = "[\\!\\?…]",
+                                           replacement = ".", corpus)
+clean.reduce_periods <- function(corpus) gsub(pattern = "[\\.]{2,}",
+                                        replacement = ".", corpus)
+clean.convert_to_and <- function(corpus) gsub(pattern = "&", replacement = " and ", corpus)
+
+clean.replace_numbers <- function(corpus) gsub(pattern = "[0-9]+",
+                                         replacement = "", corpus)
+clean.text.parrallel <- function(df.text) {
+    #chunked
+   
+    df.text <- parallelize_task_chunked(clean.convert_to_and, df.text)
+    df.text <- parallelize_task_chunked(clean.convert_to_period, df.text)
+    df.text <- parallelize_task_chunked(clean.remove_symbols, df.text)
+    df.text <- parallelize_task_chunked(clean.reduce_periods, df.text)
+    df.text <- parallelize_task_chunked(clean.replace_numbers, df.text)
+
+    df.text <- parallelize_task(removePunctuation, df.text, preserve_intra_word_dashes = TRUE)
+
+    df.text <- parallelize_task_chunked(rm_non_words, df.text) # Remove Non-Words & N Character Words
+
+    df.text <- parallelize_task_chunked(stripWhitespace, df.text)
+    df.text <- parallelize_task_chunked(tolower, df.text)
+    
+    df.text
+}
+
+#' This function allows to do some text cleaning with several
+#               options such as coverting to lowercase, removing numbers,
+#               removing punctuation symbols, removing extra white spaces
+#'
+#' @param x
+#' @param lowercase
+#' @param numbers
+#' @param punctuation
+#' @param spaces
+#'
+#' @return
+#' @export
+#'
+#' @examples
+clean.text <- function(x, lowercase = TRUE, numbers = TRUE, punctuation = TRUE, spaces = TRUE) {
+    # x: character string
+
+    # lower case
+    if (lowercase)
+        x = tolower(x)
+    # remove numbers
+    if (numbers)
+        x = gsub("[[:digit:]]", "", x)
+    # remove punctuation symbols
+    if (punctuation)
+        x = gsub("[[:punct:]]", "", x)
+    # remove extra white spaces
+    if (spaces) {
+        x = gsub("[ \t]{2,}", " ", x)
+        x = gsub("^\\s+|\\s+$", "", x)
+    }
+    # return
+    x
+}
+
+convert.to.string <- function(df, row_count =nrow(df)) {
+    str <- ""
+    for (i in 1:row_count) {
+        str <- paste(str, df[row_count,1])
+    }
+    str
 }

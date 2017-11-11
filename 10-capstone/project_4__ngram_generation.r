@@ -23,16 +23,17 @@ if (!file.exists(ngram_file_path)) {
 
     flog.info("starting ngram n2")
     n2 <- create_ngram(data.stringified, 2)
-    stop()
+ 
     flog.info("starting ngram n3")
     n3 <- parallelize_task(create_ngram, data.stringified, 3)
-    #flog.info("starting ngram n4")
-    #n4 <- create_ngram(data.stringified, 4)
-    #flog.info("starting ngram n5")
-    #n5 <- create_ngram(data.stringified, 5)
+    flog.info("starting ngram n4")
+    n4 <- parallelize_task(create_ngram, data.stringified, 4)
+    flog.info("starting ngram n5")
+    n5 <- parallelize_task(create_ngram, data.stringified, 5)
 
-    save(n2, n3,file = ngram_file_path)
+    save(n2, n3, n4, n5, file = ngram_file_path)
+    rm(data.stringified)
     gc()
 }
  
-source(get_data_file_path(ngram_file_name))
+load(get_data_file_path(ngram_file_name))
