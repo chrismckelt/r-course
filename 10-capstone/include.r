@@ -72,7 +72,7 @@ download_zip_files <- function() {
 #'
 #' @examples
 smaller <- function(x) {
-    x <- sample(x, length(x) * .6)
+    x <- sample(x, length(x) * .05)
 }
 
 #' Trim leading and trailing string space
@@ -158,3 +158,26 @@ generate_rmd <- function(path = 'c:/dev/r-course/10-capstone/milestone-report.RM
     rmarkdown::render()
 }
 
+
+
+#' Generic function for parallelizing any task  
+#'
+#' @param task
+#'
+#' @return
+#' @export
+#'
+#' @examples
+parallelize_task  <- function(task, ...) {
+   
+    # Calculate the number of cores
+    ncores <- detectCores() - 1
+    # Initiate cluster
+    cl <- makeCluster(ncores)
+    registerDoParallel(cl)
+    flog.debug("Task starting")
+    r <- task(...)
+    flog.debug("Task done")
+    stopCluster(cl)
+    r
+}

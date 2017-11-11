@@ -13,8 +13,8 @@
 predictor <- function(sentence) {
     flog.info(paste("predictor input", sentence))
     
-    if (is.na(sss)) {
-        warning("sentence_string NA or empty")
+    if (is.na(sentence)) {
+        warning("sentence NA or empty")
         #stop()
     }
 

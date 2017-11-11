@@ -7,13 +7,9 @@ if (!file.exists(get_data_file_path("bad_words.RData"))) {
 
 load(get_data_file_path("bad_words.RData"))
 
-output_file <- function() {
-    return (!file.exists(get_data_file_path("data.all.RData")))  # toggle true/false whilst debugging
-}
 
 ## clean data
-#if (output_file)
-if (TRUE)
+if ((!file.exists(get_data_file_path("data.all.RData"))))
 {
     flog.info("data cleaning...")
     #Create clean functions
@@ -30,8 +26,8 @@ if (TRUE)
     replace_numbers <- function(corpus) gsub(pattern = "[0-9]+",
                                          replacement = "", corpus)
 
-    #data.all <- as.data.frame(data.all)
-    data.all <- sent_detect(data.all) #Detect and split sentences on endmark boundaries.
+    data.all <- as.data.frame(data.all)
+  #  data.all <- parallelize_task(sent_detect_nlp, data.all) #Detect and split sentences on endmark boundaries.
 
     data.all <- convert_to_and(data.all)
     data.all <- convert_to_period(data.all)
@@ -59,4 +55,4 @@ if (TRUE)
     gc()
 }
 
-source(get_data_file_path("data.all.RData"))
+load(get_data_file_path("data.all.RData"))

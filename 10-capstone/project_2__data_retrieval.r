@@ -42,3 +42,4 @@ if (!file.exists(data.file.name))
 if (length(data.all) == 0) {
     data.all <- source(get_data_file_path("data.all.RData"))
 }
+
