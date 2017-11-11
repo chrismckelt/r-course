@@ -71,8 +71,8 @@ download_zip_files <- function() {
 #' @export
 #'
 #' @examples
-smaller <- function(x) {
-    x <- sample(x, length(x) * .01)
+smaller <- function(x, size = .5) {
+    x <- sample(x, length(x) * .15)
 }
 
 #' Trim leading and trailing string space
@@ -273,7 +273,7 @@ clean.text <- function(x, lowercase = TRUE, numbers = TRUE, punctuation = TRUE, 
 convert.to.string <- function(df, row_count =nrow(df)) {
     str <- ""
     for (i in 1:row_count) {
-        str <- paste(str, df[row_count,1])
+        str <- paste(str, df[i,1])
     }
     str
 }
