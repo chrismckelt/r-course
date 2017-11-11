@@ -184,7 +184,19 @@ parallelize_task  <- function(task, ...) {
 
 parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
     p_load("itertools")
-    mergedList <- foreach(splitDF = isplitRows(df.big, chunkSize = chunk_size)) %dopar% {
-        merge(splitDF, smallDF, by = 'num', all.x = T)
+
+    # Calculate the number of cores
+    ncores <- detectCores() - 1
+    # Initiate cluster
+    cl <- makeCluster(ncores)
+    registerDoParallel(cl)
+
+    flog.debug("Task starting")
+    df.merged <- foreach(df.split = isplitRows(df.big, chunkSize = chunk_size), .combine = rbind) %dopar% {
+        df.chunked <- task(df.split)
     }
+
+    flog.debug("Task done")
+    stopCluster(cl)
+    df.merged
 }
