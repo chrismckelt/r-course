@@ -13,8 +13,19 @@ if ((!file.exists(get_data_file_path("data.all.RData"))))
     flog.info("data cleaning...")
     
     data.all <- as.data.table(data.all, stringsAsFactors = FALSE) # stringsAsFactors = FALSE important for speed
-    data.all <- parallelize_task_chunked(sent_detect, data.all) #Detect and split sentences on endmark boundaries.
-    data.all <- clean.text.parrallel(df.text = data.all)
+    data.all <- parallelize_task(sent_detect, data.all) #Detect and split sentences on endmark boundaries.
+    data.all <- clean.convert_to_and(data.all)
+    data.all <- clean.convert_to_period(data.all)
+    data.all <- clean.remove_symbols(data.all)
+    data.all <- clean.reduce_periods(data.all)
+    data.all <- clean.replace_numbers(data.all)
+
+    data.all <- removePunctuation(data.all, preserve_intra_word_dashes = TRUE)
+
+    data.all <- rm_non_words(data.all) # Remove Non-Words & N Character Words
+
+    data.all <- stripWhitespace(data.all)
+    data.all <- tolower(data.all)
     flog.info("data cleaning complete...")
 
     save(data.all, file = get_data_file_path("data.all.RData"))

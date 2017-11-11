@@ -25,29 +25,36 @@ predictor <- function(sentence) {
     flog.debug(paste("predictor --> sentence.cleaned =", sentence))
     words = str_split(sentence, " ")
     words <- as.data.table(words, stringsAsFactors = FALSE)
-
+   
     # 4 words given 
     if (nrow(words) >= 4)
     {
         flog.debug("predictor --> trying n5+")
-        sqldf(stupid_backoff(5, words))
+        sqldf(try_next_ngram(5, words))
     }
 
     # 3 words given 
     if (nrow(words) == 3) {
         flog.debug("predictor --> trying n4")
-        sqldf(stupid_backoff(4, words))
+        sqldf(try_next_ngram(4, words))
     }
     
     # 2 words given 
     if (nrow(words) == 2) {
         flog.debug("predictor --> trying n3")
-        sqldf(stupid_backoff(3, words))
+        sqldf(try_next_ngram(3, words))
     }
 
+    stop("no results")
     
-  
-    
+}
+
+take_words <- function(df.words, word_count_to_take) {
+    to <- nrow(df.words)
+    from <- to - word_count_to_take
+    chopped <- df.words[from:to]
+    flog.debug(chopped)
+    chopped
 }
 
 #' Cycle down ngram functions when no data found
@@ -59,22 +66,20 @@ predictor <- function(sentence) {
 #' @export
 #'
 #' @examples
-stupid_backoff <- function(ngram, df.words) {
+try_next_ngram <- function(ngram, df.words) {
+    #ngram <- 5
+    #df.words <- words
 
+    stopifnot(nrow(df.words) > 0)
     df.any <- create_sql(ngram, df.words)
-    df.any <- as.data.table(df.any)
-    if (nrow(df.any)) df.any
 
-    flog.debug(paste("stupid_backoff --> no results found trying next ngram:",ngram-1))
+    flog.debug(paste("predictor --> try_next_ngram --> no results found trying next ngram:",ngram-1))
 
-    if (ngram <= 1) NULL
-
-    # no results found - try next ngram with 1 less word
-    sql <- paste("select * from [df.words] limit ", ngram - 1)
-    flog.debug(paste("stupid_backoff --> sql words =", sql))
-    df.words <- sqldf(sql)
-    stupid_backoff(ngram - 1, df.words)
-
+    if (ngram > 1) {
+        # no results found - try next ngram with 1 less word
+        try_next_ngram(ngram - 1, df.words)
+    }
+    df.any
 }
 
 #' Dynamic SQL string to search a ngram source for N terms provided
@@ -87,16 +92,17 @@ stupid_backoff <- function(ngram, df.words) {
 #'
 #' @examples
 create_sql <- function(ngram, df.words) {
+    if (ngram <= 1) NULL
+    
+    df.chopped <- take_words(df.words, ngram-1)
+    arg <- ""
 
-    #   ngram <- 5
-    #   df.words <- words
-
-    sql <- paste("select * from [df.words] limit ", ngram)
-    flog.debug(paste("predictor --> sql words =", sql))
-    df.words <- sqldf(sql)
-    arg <- str_trim(convert.to.string(df.words))
+    for (i in 1:nrow(df.chopped)) {
+       arg <- paste(arg, df.chopped$V1[i])
+    }
+    arg <- str_trim(arg)
     sql <- paste0("select * from n", ngram, " where word like '%", arg, "%' order by freq desc limit 10")
-    flog.debug(paste("predictor --> sql =", sql))
+    flog.debug(paste("predictor --> create_sql --> sql ngram =", sql))
     sql
 }
 

@@ -72,7 +72,7 @@ download_zip_files <- function() {
 #'
 #' @examples
 smaller <- function(x, size = .5) {
-    x <- sample(x, length(x) * .15)
+    x <- sample(x, length(x) * .01)
 }
 
 #' Trim leading and trailing string space
@@ -182,7 +182,7 @@ parallelize_task  <- function(task, ...) {
     r
 }
 
-parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
+parallelize_task_chunked <- function(task, df.big, chunk_size = 100) {
     p_load("itertools")
 
     # Calculate the number of cores
@@ -216,24 +216,6 @@ clean.convert_to_and <- function(corpus) gsub(pattern = "&", replacement = " and
 
 clean.replace_numbers <- function(corpus) gsub(pattern = "[0-9]+",
                                          replacement = "", corpus)
-clean.text.parrallel <- function(df.text) {
-    #chunked
-   
-    df.text <- parallelize_task_chunked(clean.convert_to_and, df.text)
-    df.text <- parallelize_task_chunked(clean.convert_to_period, df.text)
-    df.text <- parallelize_task_chunked(clean.remove_symbols, df.text)
-    df.text <- parallelize_task_chunked(clean.reduce_periods, df.text)
-    df.text <- parallelize_task_chunked(clean.replace_numbers, df.text)
-
-    df.text <- parallelize_task(removePunctuation, df.text, preserve_intra_word_dashes = TRUE)
-
-    df.text <- parallelize_task_chunked(rm_non_words, df.text) # Remove Non-Words & N Character Words
-
-    df.text <- parallelize_task_chunked(stripWhitespace, df.text)
-    df.text <- parallelize_task_chunked(tolower, df.text)
-    
-    df.text
-}
 
 #' This function allows to do some text cleaning with several
 #               options such as coverting to lowercase, removing numbers,
@@ -269,11 +251,4 @@ clean.text <- function(x, lowercase = TRUE, numbers = TRUE, punctuation = TRUE, 
     # return
     x
 }
-
-convert.to.string <- function(df, row_count =nrow(df)) {
-    str <- ""
-    for (i in 1:row_count) {
-        str <- paste(str, df[i,1])
-    }
-    str
-}
+ 
