@@ -21,25 +21,28 @@ predictor <- function(sentence) {
     term_count <- nrow(dt.search.terms)
 
     if (term_count > 5) {
-           term_count <- 5
+           term_count <- 4
     }
 
     dt.search.result <- c("ngram", "word", "freq", "length", "predicted")
-    counter <- 1    
+    counter <-1    
     while (counter < term_count) {
-        ng_id <- term_count - (counter)
+        ng_id <- term_count - (counter) + 2
         result <- search_ngram(dt.search.terms[counter:term_count], ng_id)
         if (nrow(result) > 0) {
             msg <- paste("predictor --> ngram ", ng_id, "found", nrow(result))
             flog.debug(msg)
             df.row <- sqldf(paste("select word, freq, length, word as predicted from result"))
-            #print(df.row)
-
-            dt.search.result <- rbind(dt.search.result, data.frame(ngram = ng_id, word = df.row[1], freq = df.row[2], length = df.row[3], predicted = (df.row[4])))
+            
+#            predicted_word <- lapply(df.row[4], function(x) str_get_last_word(x))
+            dt.search.result <- rbind(dt.search.result, data.frame(ngram = ng_id, word = df.row[1], freq = df.row[2], length = df.row[3], predicted = df.row[4]))
         }
         counter <- counter + 1
     }
-
+    for (i in 1:nrow(dt.search.result)) {
+        dt.search.result[[5]][i] <- str_get_last_word(as.character(dt.search.result[[5]][i]))
+        #print(dt.search.result$predicted[i])
+    }
     dt.search.result
 }
 
@@ -60,24 +63,15 @@ search_ngram <- function(search_terms, take) {
     arg <- paste(search_terms$V1, sep = " ", collapse = " ")
     arg <- str_trim(arg)
     if (arg=="") stop("arg empty")
-    sql <- paste0("select * from n", take+2, " where word like '", arg, "%' order by freq desc limit 10")
+    sql <- paste0("select * from n", take, " where word like '", arg, "%' order by freq desc limit 10")
     flog.debug(paste("predictor --> search_ngram --> sql ngram =", sql))
     df.result <- sqldf(sql)
     df.result
 }
 
-#' takes a dt.search.result data table and outputs the top 5 words
-predict.word <- function(txt,dt.pred) {
-    words <- lapply(dt.pred$word, function(y) gsub(txt, "", y))
-    words <- words[complete.cases(words)]
-    na.omit(words)
-}
-
-search <- "is one of the"
+search <- "a few"
 search <- clean.text(search)
 dt.search.terms = as.data.table(str_split(search, " "), stringsAsFactors = FALSE)
 result <- predictor(search)
- 
-for (i in 1:length(result$predicted)) {
-    result$predicted[i] <- str_get_last_word(result$predicted[i])
-}
+
+
