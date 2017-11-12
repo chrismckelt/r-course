@@ -251,4 +251,10 @@ clean.text <- function(x, lowercase = TRUE, numbers = TRUE, punctuation = TRUE, 
     # return
     x
 }
- 
+
+
+guard <- function(txt) {
+    if (!is.na(txt) && length(txt) > 0) txt
+
+    ""
+}
