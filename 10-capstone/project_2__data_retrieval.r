@@ -15,8 +15,8 @@ if (!file.exists(data.file.name))
 
     if (sample_mode) {
         sample.blogs <- smaller(data.blogs,.2)
-        sample.news <- smaller(data.news, .05)
-        sample.twitter <- smaller(data.twitter, .05)
+        sample.news <- smaller(data.news, .2)
+        sample.twitter <- smaller(data.twitter, .2)
         data.all <- c(sample.blogs, sample.news, sample.twitter)
     }
     else {

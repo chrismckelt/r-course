@@ -71,8 +71,8 @@ download_zip_files <- function() {
 #' @export
 #'
 #' @examples
-smaller <- function(x, size = .5) {
-    x <- sample(x, length(x) * .01)
+smaller <- function(x, size = .3) {
+    x <- sample(x, length(x) * size)
 }
 
 #' Trim leading and trailing string space
