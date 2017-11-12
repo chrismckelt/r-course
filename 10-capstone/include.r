@@ -253,8 +253,11 @@ clean.text <- function(x, lowercase = TRUE, numbers = TRUE, punctuation = TRUE, 
 }
 
 
-guard <- function(txt) {
-    if (!is.na(txt) && length(txt) > 0) txt
-
-    ""
+#' Given a sentence get the last word
+#'
+#'https://stackoverflow.com/questions/17658216/extract-last-word-in-string-in-r
+str_get_last_word <- function(str) {
+    x <- tail(strsplit(str, split = " ")[[1]], 1)
+    as.character(x)
 }
+

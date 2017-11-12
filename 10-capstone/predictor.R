@@ -1,5 +1,3 @@
-dt.result <- data.table()
-
 #' Search ngrams with identical first two words. 
 #' Calculate probabilities using modified Kneser - Ney smoothing. 
 #' Use the word with the highest probability as prediction and the words with the highest probabilities as possible choices.
@@ -12,35 +10,37 @@ dt.result <- data.table()
 #' @examples
 #' https://en.wikipedia.org/wiki/Katz%27s_back-off_model
 predictor <- function(sentence) {
-    flog.info(paste("predictor input", sentence))
     
     if (is.na(sentence)) {
         warning("sentence NA or empty")
         stop()
     }
 
-    sentence <- "a couple of weeks"
-    flog.debug(paste("predictor --> sentence =", sentence))
-    sentence <- clean.text(sentence)
     flog.debug(paste("predictor --> sentence.cleaned =", sentence))
-    dt.words = as.data.table(str_split(sentence, " "),stringsAsFactors = FALSE)
-    take <- nrow(dt.words)
-   
-    dt.result <- c("ngram", "word", "freq", "length")
-    while (take > 1) {
-        result <- search_ngram(words, take)
-        print(result)
-        if (nrow(result) > 0) {
-            flog.debug(paste("predictor --> ngram ", take, "found", nrow(result)))
-            df.row <- sqldf(paste("select word, freq, length from result"))
-            print(df.row)
-            dt.result <- rbind(dt.result, data.frame(ngram = take, word = df.row[1], freq = df.row[2], length = df.row[3]))
-        }
-        take <- take-1
+    dt.search.terms = as.data.table(str_split(sentence, " "), stringsAsFactors = FALSE)
+    term_count <- nrow(dt.search.terms)
+
+    if (term_count > 5) {
+           term_count <- 5
     }
 
-    stop("no results")
-    
+    dt.search.result <- c("ngram", "word", "freq", "length", "predicted")
+    counter <- 1    
+    while (counter < term_count) {
+        ng_id <- term_count - (counter)
+        result <- search_ngram(dt.search.terms[counter:term_count], ng_id)
+        if (nrow(result) > 0) {
+            msg <- paste("predictor --> ngram ", ng_id, "found", nrow(result))
+            flog.debug(msg)
+            df.row <- sqldf(paste("select word, freq, length, word as predicted from result"))
+            #print(df.row)
+
+            dt.search.result <- rbind(dt.search.result, data.frame(ngram = ng_id, word = df.row[1], freq = df.row[2], length = df.row[3], predicted = (df.row[4])))
+        }
+        counter <- counter + 1
+    }
+
+    dt.search.result
 }
 
 
@@ -48,29 +48,36 @@ predictor <- function(sentence) {
 #' Cycle down ngram functions when no data found
 #'
 #' @param ngram
-#' @param df.words
 #'
 #' @return
 #' @export
 #'
 #' @examples
-search_ngram <- function(df.words, take) {
-    row_count <- nrow(df.words)
-    if (row_count == 1) NULL
-    if (take == 1) NULL
-
-    flog.debug(paste("take",take))
-    df.searchterms <- take_words(words, take-1)
-    arg <- paste(df.searchterms$V1, sep = " ",collapse = " ")
-        
+search_ngram <- function(search_terms, take) {
+    
+    #term_count <- 3
+    flog.debug(paste("search_terms count", nrow(search_terms)))
+    arg <- paste(search_terms$V1, sep = " ", collapse = " ")
     arg <- str_trim(arg)
-    sql <- paste0("select * from n", take, " where word like '%", arg, "%' order by freq desc limit 10")
+    if (arg=="") stop("arg empty")
+    sql <- paste0("select * from n", take+2, " where word like '", arg, "%' order by freq desc limit 10")
     flog.debug(paste("predictor --> search_ngram --> sql ngram =", sql))
     df.result <- sqldf(sql)
     df.result
 }
 
+#' takes a dt.search.result data table and outputs the top 5 words
+predict.word <- function(txt,dt.pred) {
+    words <- lapply(dt.pred$word, function(y) gsub(txt, "", y))
+    words <- words[complete.cases(words)]
+    na.omit(words)
+}
 
-result <- predictor("a couple of weeks")
-result
-
+search <- "is one of the"
+search <- clean.text(search)
+dt.search.terms = as.data.table(str_split(search, " "), stringsAsFactors = FALSE)
+result <- predictor(search)
+ 
+for (i in 1:length(result$predicted)) {
+    result$predicted[i] <- str_get_last_word(result$predicted[i])
+}

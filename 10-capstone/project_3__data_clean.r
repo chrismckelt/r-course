@@ -14,6 +14,7 @@ if ((!file.exists(get_data_file_path("data.all.RData"))))
     
     data.all <- as.data.table(data.all, stringsAsFactors = FALSE) # stringsAsFactors = FALSE important for speed
     data.all <- parallelize_task(sent_detect, data.all) #Detect and split sentences on endmark boundaries.
+    data.all <- str_replace_all(data.all, str_replace_all(x, '[[:punct:]]', ' '),'')
     data.all <- clean.convert_to_and(data.all)
     data.all <- clean.convert_to_period(data.all)
     data.all <- clean.remove_symbols(data.all)
