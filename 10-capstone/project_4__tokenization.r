@@ -20,10 +20,14 @@ print(difftime(Sys.time(), t1, units = 'sec'))
 data.stringified <- paste(data.all, collapse = '')
 
 it <- itoken(data.stringified, preprocess_function = tolower, tokenizer = word_tokenizer, chunks_number = 10, progessbar = F)
-vocab <- create_vocabulary(it, ngram = c(1L, 3L))
+vocab = create_vocabulary(it, ngram = c(1L, 2L))
+vocab = vocab %>% prune_vocabulary(term_count_min = 10,
+                   doc_proportion_max = 0.5)
 
-fh <- feature_hasher(hash_size = 2 ** 18, ngram = c(1L, 3L))
 
-corpus <- create_hash_corpus(it, feature_hasher = fh)
+bigram_vectorizer = vocab_vectorizer(vocab)
+ 
+
+dtm_train = create_dtm(it, bigram_vectorizer)
 
 print(difftime(Sys.time(), t1, units = 'sec'))
