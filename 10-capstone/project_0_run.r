@@ -9,8 +9,8 @@ source('c:/dev/r-course/10-capstone/project_1__setup.r')
 program_result = withCallingHandlers({
     source('c:/dev/r-course/10-capstone/project_2__data_retrieval.r')
     source('c:/dev/r-course/10-capstone/project_3__data_clean.r')
-    source('c:/dev/r-course/10-capstone/project_4__ngram_generation.r')
-
+    #source('c:/dev/r-course/10-capstone/project_4__ngram_generation.r')
+    source('c:/dev/r-course/10-capstone/project_4__tokenization.r')
 }, warning = function(w) {    
     flog.warn(w)
 }, error = function(e) {    
@@ -20,3 +20,4 @@ program_result = withCallingHandlers({
 })
 
 program_result
+
