@@ -15,6 +15,7 @@ predictor <- function(sentence) {
         warning("sentence NA or empty")
         stop()
     }
+    sentence <- clean.text(sentence)
 
     flog.debug(paste("predictor --> sentence.cleaned =", sentence))
     dt.search.terms = as.data.table(str_split(sentence, " "), stringsAsFactors = FALSE)
@@ -24,7 +25,8 @@ predictor <- function(sentence) {
            term_count <- 4
     }
 
-    dt.search.result <- c("ngram", "word", "freq", "length", "predicted")
+    dt.search.result <- colnames(c("ngram", "word", "freq", "length", "predicted"))
+    
     counter <-1    
     while (counter < term_count) {
         ng_id <- term_count - (counter) + 2
@@ -34,15 +36,12 @@ predictor <- function(sentence) {
             flog.debug(msg)
             df.row <- sqldf(paste("select word, freq, length, word as predicted from result"))
             
-#            predicted_word <- lapply(df.row[4], function(x) str_get_last_word(x))
             dt.search.result <- rbind(dt.search.result, data.frame(ngram = ng_id, word = df.row[1], freq = df.row[2], length = df.row[3], predicted = df.row[4]))
         }
         counter <- counter + 1
     }
-    for (i in 1:nrow(dt.search.result)) {
-        dt.search.result[[5]][i] <- str_get_last_word(as.character(dt.search.result[[5]][i]))
-        #print(dt.search.result$predicted[i])
-    }
+    dt.search.result$predicted <- lapply(dt.search.result$predicted, function(x) str_get_last_word(x))
+    
     dt.search.result
 }
 
@@ -74,4 +73,4 @@ search <- clean.text(search)
 dt.search.terms = as.data.table(str_split(search, " "), stringsAsFactors = FALSE)
 result <- predictor(search)
 
-
+result

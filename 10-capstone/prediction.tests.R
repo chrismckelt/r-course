@@ -13,6 +13,16 @@ q9 <- "I’m thankful my childhood was filled with imagination and bruises from pl
 q10 <- "I like how the same people are in almost all of Adam Sandler's"
 #source('c:/dev/r-course/10-capstone/predictor.r')
  
+a1 <- predictor(q1)
 
 
-ana = word_analogy(file_name = "vec.bin", search_words = q1, num = 20)
+predictor(q2)
+predictor(q3)
+predictor(q4)
+predictor(q5)
+predictor(q6)
+predictor(q7)
+predictor(q8)
+predictor(q9)
+predictor(q10)
+
