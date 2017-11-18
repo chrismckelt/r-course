@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="//www.lendingclub.com/favicon.ico">
+    <title>Analysis of Lending Clubs loan book | Chris McKelt</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/plugins/codemirror/codemirror.css" rel="stylesheet">
+    <link href="css/plugins/codemirror/ambiance.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/shiny.css" rel="stylesheet" />
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/css-social-buttons/1.3.0/css/zocial.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/css-social-buttons/1.3.0/css/zocial.min.css.map" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/css-social-buttons/1.3.0/css/zocial.svg" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/css-social-buttons/1.3.0/css/zocial.ttf" rel="stylesheet">
+
+    <!--shiny -->
+    {{ headContent() }}
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- theme and plugin javascript -->
+    <script src="js/favicon.min.js"></script>
+    <script src="js/inspinia.js"></script>
+    <script src="js/plugins/pace/pace.min.js"></script>
+    <script src="js/plugins/select2/select2.full.min.js"></script>
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header">
+                        <div class="dropdown profile-element">
+                            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                                <span class="clear">
+                                    <span class="block m-t-xs">
+                                        <strong class="font-bold">Chris McKelt</strong>
+                                    </span> <span class="text-muted text-xs block">@chris_mckelt<b class="caret"></b></span>
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                                <li>
+                                    {{tag_footer}}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="logo-element">
+                            <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                        </div>
+                    </li>
+                    <li>
+                        <li class="active" href="#" onclick="javascript: showDiv(1);">
+                            <a href="#">
+                                <i class="fa fa-th-large"></i> <span class="nav-label">1. Analysis</span>
+                            </a>
+                        </li>
+                        <li onclick="javascript: showDiv(2);">
+                            <a href="#">
+                                <i class="fa fa-th-large"></i> <span class="nav-label">2. Instructions</span>
+                            </a>
+                        </li>
+                        <li class="#" onclick="javascript: showDiv(3);">
+                            <a href="#">
+                                <i class="fa fa-th-large"></i> <span class="nav-label">3. Contact</span>
+                            </a>
+                        </li>
+                        <li class="#">
+                            <a href="https://chrismckelt.github.io/r-course/9-data-products/pitch/pitch.html" target="_new">
+                                <i class="fa fa-th-large"></i> <span class="nav-label">Pitch</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                            {{actionLink("stop", "Stop")}}
+                        </a>
+                        </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="gray-bg">
+
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top white-bg" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#">
+                            <i class="fa fa-bars">&nbsp;&nbsp;&nbsp;&nbsp; Developing Data Products --> Course 9 in Coursera Data Science Certificate</i>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+
+            <div id="div1" class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    <div>
+                        <a href="https://github.com/chrismckelt/r-course/tree/master/9-data-products/week-4">View code</a>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="text-left m-t-lg">
+                            <div>
+                                {{ tag_about }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="text-left m-t-lg">
+                            <h2>Click on a row below to compare against total loan amount</h2>
+                            <h4>Please wait 30 seconds after clicking for graph to reload...</h4>
+                            <div class="pre-scrollable">
+                                {{ tag_data_dictionary }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <h3>Choose a variable to compare</h3>
+                </div>
+                <div class="row" class="text-center">
+                    <div class="col-xs-4 col-xs-offset-4">
+                        <div class="pull-right">{{ chart_loan_amount }}</div>
+                    </div>
+                </div>
+            </div>
+            <div id="div2" class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="text-left m-t-lg">
+                            <h1>
+                                Instructions
+                            </h1>
+                            <h3>Click a row item from the data dictionary table</h3>
+                            <p>This will compare the variable against the aggregated loan amount.</p>
+                            <p>
+                                Some interesting comparisons include:
+                                <ol>
+                                    <li>grade - credit quality of applicant</li>
+                                    <li>home_ownership - The home ownership status provided by the borrower during registration. Our values are: RENT, OWN, MORTGAGE, OTHER.</li>
+                                    <li>term - The number of payments on the loan. Values are in months and can be either 36 or 60.</li>
+                                    <li>zip_code - The first 3 numbers of the zip code provided by the borrower in the loan application.</li>
+                                </ol>
+                            </p>
+                            <p>
+                                <img src="https://user-images.githubusercontent.com/662868/31750771-9c20e4b6-b4b4-11e7-9767-b401845660d5.png" alt="Click on a row to change the chart" />
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="div3" class="wrapper wrapper-content animated fadeInRight">
+                <div class="col-xs-12">
+                    <ul class="list" style="list-style-type: none;">
+                        <li>
+                            <a href="https://www.dropbox.com/s/m31zsq56uhacrqm/Chris_McKelt_Resume.docx?dl=0" class="zocial dropbox">resume</a>
+                        </li>
+                        <li>
+                            <li>
+                                <a href="http://www.linkedin.com/in/chrismckelt" class="zocial linkedin">linkedin</a>
+                            </li>
+                            <li>
+                                <a href="http://twitter.com/chris_mckelt" class="zocial email">chris@mckelt.com</a>
+                            </li>
+                            <li>
+                                <a href="http://twitter.com/chris_mckelt" class="zocial twitter">@chris_mckelt</a>
+                            </li>
+                            <li>
+                                <a href="https://github.com/chrismckelt" class="zocial github">chrismckelt</a>
+                            </li>
+                            <li>
+                                <a href="http://mckelt.com/blog" class="zocial blogger">Blog</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="js/custom.js"></script>
+</body>
+
+</html>

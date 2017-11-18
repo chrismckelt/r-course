@@ -67,7 +67,7 @@ private bool Search(StringMarkov model, int level)
 {
 	try {
 		model.Retrain(level);
-		string text = CleanString.RemoveSpecialCharacters("When you breathe, I want to be the air for you. I'll be there for you, I'd live and I'd");
+		string text = CleanString.RemoveSpecialCharacters("I'd give anything to see arctic monkeys this");
 		
 		var splits = text.Split(Convert.ToChar(" "));
 		
@@ -113,7 +113,7 @@ private string GetLines()
 		var fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
 		using (var streamReader = new StreamReader(fileStream, Encoding.UTF8))
 		{
-			int max = Int32.MaxValue / 2;
+			int max = 99999;
 			string line;
 			while ((line = streamReader.ReadLine()) != null && max > 1)
 			{

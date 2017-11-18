@@ -36,5 +36,5 @@ options(save.defaults = list(ascii = TRUE, safe = FALSE))
 flog.threshold(DEBUG, name = 'logger')
 
 
-devtools::install_github("pommedeterresautee/fastrtext")
-require(fastrtext)
+devtools::install_github("ggrothendieck/sqldf")
+ require(sqldf)

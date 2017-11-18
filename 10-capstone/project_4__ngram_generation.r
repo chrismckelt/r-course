@@ -7,7 +7,7 @@ if (!file.exists(ngram_file_path)) {
         flog.info(paste("starting ngram size =",ngram_size))
         ngram <- data.table()
 
-        ng <- textcnt(text, method = "string", n = ngram_size,lower = 10L,verbose = TRUE) # freq must be 10 or greater
+        ng <- textcnt(text, method = "string", n = ngram_size,verbose = TRUE) # freq must be 10 or greater
 
         ngram <- data.table(word = names(ng), freq = unclass(ng), length = nchar(names(ng)))
         

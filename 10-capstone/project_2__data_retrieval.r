@@ -14,9 +14,9 @@ if (!file.exists(data.file.name))
     data.twitter = iconv(data.twitter, "latin1", "ASCII", sub = "")
 
     if (sample_mode) {
-        sample.blogs <- small_sample(data.blogs, .05)
-        sample.news <- small_sample(data.news, .02)
-        sample.twitter <- small_sample(data.twitter, .02)
+        sample.blogs <- small_sample(data.blogs, .015)
+        sample.news <- small_sample(data.news, .01)
+        sample.twitter <- small_sample(data.twitter, .01)
         data.all <- c(sample.blogs, sample.news, sample.twitter)
     }
     else {

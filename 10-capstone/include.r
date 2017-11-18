@@ -25,11 +25,12 @@ using("pacman")
 #' @examples
 install_standard_packages <- function() {
     ## setup - install missing packages and reference
-    packs <- c("devtools", "tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr", "ggplot2", "lubridate")
+    packs <- c("devtools", "tidyverse", "knitr", "markdown", "moments", "e1071", "data.table",  "downloader", "magrittr", "ggplot2", "lubridate")
     p_load("foreach")
     foreach(n = 1:length(packs)) %do%  using(packs[n])
 }
 
+devtools::install_github("ggrothendieck/sqldf")
 
 #' Download and save a file from the given url
 #'
@@ -71,7 +72,7 @@ download_zip_files <- function() {
 #' @export
 #'
 #' @examples
-small_sample <- function(x, size = .0001) {
+small_sample <- function(x, size) {
     x <- sample(x, length(x) * size)
 }
 
@@ -408,4 +409,3 @@ str_get_last_word <- function(str) {
     last <- word(sentences, -1)
     last
 }
-
