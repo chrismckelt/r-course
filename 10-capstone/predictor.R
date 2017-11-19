@@ -27,8 +27,7 @@ predictor <- function(text, hints = c()) {
 
     flog.debug(paste("predictor --> text.cleaned =", text))
     dt.search.result <- colnames(c("ngram", "word", "freq", "predicted"))
-#    sqldf("create index idx_freq on dt.search.result(freq)")
- #   sqldf("create index idx_word on dt.search.result(word)")
+
     search_results_exist <- FALSE
     dt.search.terms = as.data.table(str_split(text, " "), stringsAsFactors = FALSE)
     term_count <- nrow(dt.search.terms)
@@ -77,10 +76,12 @@ predictor <- function(text, hints = c()) {
         }
 
         if (search_results_exist) {
+            sqldf("create index idx_freq on [dt.search.result](freq)")
+            sqldf("create index idx_word on [dt.search.result](word)")
+
             # update column to just show predicted
             dt.search.result$predicted <- lapply(dt.search.result$predicted, function(x) unlist(str_get_last_word(x)))
             out <- strategy_stupid_back_off(dt.search.result)
-            print(out)
             out
         } else {
             default_words

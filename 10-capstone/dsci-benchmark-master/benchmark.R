@@ -216,11 +216,9 @@ predict.baseline <- function(x) {
 
 }
 
-tweets <- sample(tweets)
-blogs <- sample(blogs)
+tweets <- small_sample(tweets,.8)
+blogs <- small_sample(blogs, .8)
 flog.threshold(DEBUG)
-
-
 
 
 ################################################################################################
