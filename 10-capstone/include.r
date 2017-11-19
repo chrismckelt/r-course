@@ -221,20 +221,11 @@ parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
 clean_data_text <- function(txt) {
     # x: character string
   
-    # lower case
-    if (lowercase)
-        txt = tolower(txt)
-    # remove numbers
-    if (numbers)
-        txt = gsub("[[:digit:]]", "", txt)
-    # remove punctuation symbols
-    if (punctuation)
-        txt = gsub("[[:punct:]]", "", txt)
-    # remove extra white spaces
-    if (spaces) {
-        txt = gsub("[ \t]{2,}", " ", txt)
-        txt = gsub("^\\s+|\\s+$", "", txt)
-    }
+    txt = tolower(txt)
+    txt = gsub("[[:digit:]]", "", txt)
+    txt = gsub("[[:punct:]]", "", txt)
+    txt = gsub("[ \t]{2,}", " ", txt)
+    txt = gsub("^\\s+|\\s+$", "", txt)
     #short form of common names: st., av., mr, etc.., remove periods
     txt <- gsub("\\s([A-Z])\\.\\s", " \\1", txt)
     txt <- gsub("\\s([A-Z][a-z]{1,3})\\.\\s", " \\1", txt)

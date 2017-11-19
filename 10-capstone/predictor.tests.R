@@ -9,7 +9,7 @@ q5 <- "When you were in Holland you were like 1 inch away from me but you hadn't
 q6 <- "I'd just like all of these questions answered, a presentation of evidence, and a jury to settle the"
 q7 <- "I can't deal with unsymetrical things. I can't even hold an uneven number of bags of groceries in each"
 q8 <- "Every inch of you is perfect from the bottom to the"
-q9 <- "I’m thankful my childhood was filled with imagination and bruises from playing"
+q9 <- "bruises from playing"
 q10 <- "I like how the same people are in almost all of Adam Sandler's"
 #source('c:/dev/r-course/10-capstone/predictor.r')
  
@@ -25,7 +25,7 @@ a9 <- predictor(q9, c("weekly", "outside", "daily", "inside")) #### outside
 a10 <- predictor(q10, c("movies", "novels", "stories", "pictures")) # movies
 
 
-pred <- predictor("I dont") 
+pred <- predictor("best thing") 
 
 pred
 
