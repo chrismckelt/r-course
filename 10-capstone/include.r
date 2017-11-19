@@ -218,9 +218,9 @@ parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
 #' @export
 #'
 #' @examples
-clean_data_text <- function(txt, lowercase = TRUE, numbers = TRUE, punctuation = TRUE, spaces = TRUE) {
+clean_data_text <- function(txt) {
     # x: character string
-    print(txt)
+  
     # lower case
     if (lowercase)
         txt = tolower(txt)
@@ -378,6 +378,12 @@ clean_data_text <- function(txt, lowercase = TRUE, numbers = TRUE, punctuation =
     txt <- gsub("<S> a <S>", "<S> ", txt)
     txt <- gsub("^a <S>", "", txt)
     txt <- gsub("^q <S>", "", txt)
+
+    for (word in corpus::stopwords_en) {
+        patt <- paste0('\\b', word, '\\b')
+        repl <- paste(word, " ")
+        txt <- gsub(patt, repl, txt)
+    }
 
     #remove extra whitespaces
     txt <- stripWhitespace(txt)

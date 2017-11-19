@@ -12,6 +12,8 @@ program_result = withCallingHandlers({
     #source('c:/dev/r-course/10-capstone/project_4__ngram_generation.r')
     #source('c:/dev/r-course/10-capstone/project_4__tokenization.r')
     source('c:/dev/r-course/10-capstone/project_4__rcorpus.r')
+    source('c:/dev/r-course/10-capstone/predictor.r')
+    source('c:/dev/r-course/10-capstone/predictor.tests.r')
 
 }, warning = function(w) {    
     flog.warn(w)

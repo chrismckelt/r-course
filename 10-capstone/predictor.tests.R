@@ -13,21 +13,19 @@ q9 <- "I’m thankful my childhood was filled with imagination and bruises from pl
 q10 <- "I like how the same people are in almost all of Adam Sandler's"
 #source('c:/dev/r-course/10-capstone/predictor.r')
  
-predictor(q1, c("give", "eat", "die", "sleep")) # die
-predictor(q2, c("horticultural", "financial", "marital", "spiritual")) # marital
-predictor(q3, c("decade", "morning", "weekend", "month")) # weekend
-predictor(q4, c("hunger", "happiness", "stress", "sleepiness")) ####### stress
-predictor(q5, c("minute", "picture", "walk", "look")) #picture
-predictor(q6, c("case", "account", "incident", "matter")) # not case
-predictor(q7, c("toe", "hand", "finger", "arm")) ##### hand
-predictor(q8, c("center", "side", "top", "middle")) #### top
-predictor(q9, c("weekly", "outside", "daily", "inside")) #### outside
-predictor(q10, c("movies", "novels", "stories", "pictures")) # movies
+a1 <- predictor(q1, c("give", "eat", "die", "sleep")) # die
+a2 <- predictor(q2, c("horticultural", "financial", "marital", "spiritual")) # marital
+a3 <- predictor(q3, c("decade", "morning", "weekend", "month")) # weekend
+a4 <- predictor(q4, c("hunger", "happiness", "stress", "sleepiness")) ####### stress
+a5 <- predictor(q5, c("minute", "picture", "walk", "look")) #picture
+a6 <- predictor(q6, c("case", "account", "incident", "matter")) # not case
+a7 <- predictor(q7, c("toe", "hand", "finger", "arm")) ##### hand
+a8 <- predictor(q8, c("center", "side", "top", "middle")) #### top
+a9 <- predictor(q9, c("weekly", "outside", "daily", "inside")) #### outside
+a10 <- predictor(q10, c("movies", "novels", "stories", "pictures")) # movies
 
-hints <- c("give", "eat", "die", "sleep")
-sql <- paste0("select * from n1 where word in ('", hints[1], "' , '", hints[2], "', '", hints[3], "', '", hints[4], "') order by freq desc")
-flog.debug(paste("predictor --> hints sql ", sql))
-sqldf(sql)
 
- 
+pred <- predictor("I dont") 
+
+pred
 

@@ -11,10 +11,10 @@ if (!file.exists(ngram_file_path)) {
     get_word_stats <- function(text, ngram_size) {
         flog.info(paste("starting ngram size =", ngram_size))
 
-        filt <- corpus::text_filter(stemmer = "en", drop_punct = TRUE,  drop_number = TRUE, drop = stop_words)
+        filt <- corpus::text_filter(stemmer = "en", drop_punct = TRUE, drop_number = TRUE, drop = corpus::stopwords_en)
         ng <- term_stats(text, filt, ngrams = ngram_size, min_count = 10,,min_support = 1)
 
-        ngram <- data.table(word = unlist(ng$term), freq = unlist(ng$count), length = unlist(ng$support))
+        ngram <- data.table(word = unlist(ng$term), freq = unlist(ng$count), length = support(ng$support))
 
         
         return(ngram)
@@ -36,7 +36,3 @@ if (!file.exists(ngram_file_path)) {
 }
 
 load(get_data_file_path(ngram_file_name))
-
-
-xxx <- text_match(data.stringified, c("horticultural", "financial", "marital", "spiritual"))
-yyy<- sqldf("select term, count(term) as total from xxx group by term")
