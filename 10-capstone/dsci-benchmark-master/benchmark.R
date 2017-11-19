@@ -206,8 +206,17 @@ benchmark <- compiler::cmpfun(function(FUN, ..., sent.list, ext.output=T) {
 # As an example, we create a very simple baseline algorithm which always returns
 # the three most frequent English words.
 predict.baseline <- function(x) {
-    res <- predictor(x)
-    res
+
+    if (length(trim(x)) > 0) {
+        flog.info(paste("benchmark start ", x))
+        res <- predictor(x)
+        print(res)
+        flog.info(paste("benchmark end ", x))
+        res
+    }
+
+
+
 }
 
 

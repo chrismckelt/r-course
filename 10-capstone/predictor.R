@@ -10,14 +10,22 @@
 #' @examples
 #' https://en.wikipedia.org/wiki/Katz%27s_back-off_model
 predictor <- function(text, hints = c()) {
-
+    
     if (is.na(text)) {
         warning("text NA or empty")
         stop()
     }
+
+    if (length(trim(text)) == 0) {
+        warning("text NA or empty")
+        stop()
+    }
+    
     text <- clean_data_text(text)
 
-    if (length(trim(text)) == 0) return (NULL)
+    default_words <- c('the', 'on', 'a')
+
+    if (length(trim(text)) == 0) 
 
     flog.debug(paste("predictor --> text.cleaned =", text))
     dt.search.result <- colnames(c("ngram", "word", "freq", "predicted"))
@@ -25,46 +33,58 @@ predictor <- function(text, hints = c()) {
     search_results_exist <- FALSE
     dt.search.terms = as.data.table(str_split(text, " "), stringsAsFactors = FALSE)
     term_count <- nrow(dt.search.terms)
-
-    if (term_count > 5) {
+    if (term_count == 0) return(NULL)
+    
+    if (term_count >= 5) {
            term_count <- 4
     }
 
     #search ngrams - cycle of word count and call function to search ngram table
+    data_found <- TRUE
     if (term_count > 1) {
         counter <- 1
-        while (counter < term_count + 1) {
+        while (all((counter < term_count + 1) && data_found)) {
             ng_id <- term_count - (counter - 1) + 1
             result <- search_ngram(text, ng_id)
             if (nrow(result) > 0) {
                 sql <- paste("select word, freq, word as predicted from result")
                 df.row <- sqldf(sql)
-                dt.search.result <- rbind(dt.search.result, data.frame(ngram = ng_id, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
-                search_results_exist <- TRUE
+                if (nrow(df.row) > 0) {
+                    dt.search.result <- rbind(dt.search.result, data.frame(ngram = 1, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
+                    search_results_exist <- TRUE
+                }
             }
             counter <- counter + 1
         }
 
         #search unigram
         result <- search_unigram(text)
-        if (nrow(result) > 0) {
+        if (search_results_exist) {
             sql <- paste("select word, freq, word as predicted from result")
             df.row <- sqldf(sql)
-            dt.search.result <- rbind(dt.search.result, data.frame(ngram = 1, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
-            search_results_exist <- TRUE
+            if (nrow(df.row)> 0 ) dt.search.result <- rbind(dt.search.result, data.frame(ngram = 1, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
         }
 
         # update column to just show predicted
         dt.search.result$predicted <- lapply(dt.search.result$predicted, function(x) unlist(str_get_last_word(x)))
 
-        dt.search.result <- as.data.table(dt.search.result)
+        #dt.search.result <- as.data.table(strategy_stupid_back_off(dt.search.result))
+        
+        try_result = withCallingHandlers({
+            
+         #   sqldf("select top 5 prediction from [dt.search.result] where ngram > 1 order by score desc")
+          }, warning = function(w) {
+              flog.warn(w)
+          }, error = function(e) {
+              flog.error(e)
+              default_words
+          }, finally = {
 
-        as.data.table(strategy_stupid_back_off(dt.search.result))
-        sqldf("select top 5 prediction from [dt.search.result] order by score desc")
+          })
+        default_words
     }
     else {
-        dt.search.result <- as.data.table(dt.search.result)
-        dt.search.result
+        default_words
     }
 
 }
@@ -124,6 +144,7 @@ search_ngram <- function(text, ng_id) {
     sql = paste(sql, " order by freq desc limit 5 ")
     flog.debug(paste("predictor --> search_ngram --> ", sql))
     df.result <- sqldf(sql)
+    flog.debug(paste("predictor --> search_ngram --> rows = ", nrow(df.result)))
     df.result
 }
 

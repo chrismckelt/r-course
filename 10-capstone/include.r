@@ -220,7 +220,7 @@ parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
 #' @examples
 clean_data_text <- function(txt) {
     # x: character string
-  
+    print("clean_data_text start")
     txt = tolower(txt)
     txt = gsub("[[:digit:]]", "", txt)
     txt = gsub("[[:punct:]]", "", txt)
@@ -379,7 +379,7 @@ clean_data_text <- function(txt) {
     #remove extra whitespaces
     txt <- stripWhitespace(txt)
     txt <- stri_trim_both(txt)
-
+    print("clean_data_text end")
     txt
 }
 
@@ -402,3 +402,17 @@ str_get_words <- function(txt, total){
     stringi::stri_flatten(lst, collapse = " ")
 }
 
+
+guard <- function(func) {
+    try_result = withCallingHandlers({
+        func()
+    }, warning = function(w) {
+        flog.warn(w)
+    }, error = function(e) {
+        flog.error(e)
+    }, finally = {
+
+    })
+
+    try_result
+}
