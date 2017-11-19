@@ -61,7 +61,6 @@ void Main()
 		}
 	}
 }
-	public static string text = CleanString.RemoveSpecialCharacters("When you breathe, I want to be the air for you. I'll be there for you, I'd live and I'd");
 
 private bool Search(StringMarkov model, int level)
 {

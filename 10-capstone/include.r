@@ -403,16 +403,3 @@ str_get_words <- function(txt, total){
 }
 
 
-guard <- function(func) {
-    try_result = withCallingHandlers({
-        func()
-    }, warning = function(w) {
-        flog.warn(w)
-    }, error = function(e) {
-        flog.error(e)
-    }, finally = {
-
-    })
-
-    try_result
-}

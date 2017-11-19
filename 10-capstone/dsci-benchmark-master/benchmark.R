@@ -208,16 +208,18 @@ benchmark <- compiler::cmpfun(function(FUN, ..., sent.list, ext.output=T) {
 predict.baseline <- function(x) {
 
     if (length(trim(x)) > 0) {
-        flog.info(paste("benchmark start ", x))
         res <- predictor(x)
-        print(res)
-        flog.info(paste("benchmark end ", x))
         res
     }
 
 
 
 }
+
+tweets <- sample(tweets)
+blogs <- sample(blogs)
+flog.threshold(DEBUG)
+
 
 
 
