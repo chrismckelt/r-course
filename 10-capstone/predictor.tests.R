@@ -13,16 +13,16 @@ q9 <- "I’m thankful my childhood was filled with imagination and bruises from pl
 q10 <- "I like how the same people are in almost all of Adam Sandler's"
 #source('c:/dev/r-course/10-capstone/predictor.r')
  
-predictor(q1, c("give", "eat", "die", "sleep")) #NOT give
+predictor(q1, c("give", "eat", "die", "sleep")) # die
 predictor(q2, c("horticultural", "financial", "marital", "spiritual")) # marital
 predictor(q3, c("decade", "morning", "weekend", "month")) # weekend
 predictor(q4, c("hunger", "happiness", "stress", "sleepiness")) ####### stress
 predictor(q5, c("minute", "picture", "walk", "look")) #picture
-predictor(q6, c("case", "account", "incident", "matter")) #
+predictor(q6, c("case", "account", "incident", "matter")) # not case
 predictor(q7, c("toe", "hand", "finger", "arm")) ##### hand
 predictor(q8, c("center", "side", "top", "middle")) #### top
 predictor(q9, c("weekly", "outside", "daily", "inside")) #### outside
-predictor(q10, c("movies", "novels", "stories", "pictures")) # NOT picture
+predictor(q10, c("movies", "novels", "stories", "pictures")) # movies
 
 hints <- c("give", "eat", "die", "sleep")
 sql <- paste0("select * from n1 where word in ('", hints[1], "' , '", hints[2], "', '", hints[3], "', '", hints[4], "') order by freq desc")
@@ -30,15 +30,4 @@ flog.debug(paste("predictor --> hints sql ", sql))
 sqldf(sql)
 
  
-gg <- predictor("When you breathe, I want to be the air for you. I'll be there for you, I'd live and I'd")
-gg <- as.data.table(gg)
-sql <- paste0("select * from gg where predicted in ('", hints[1], "' , '", hints[2], "', '", hints[3], "', '", hints[4], "') order by freq desc")
-flog.debug(paste("predictor --> hints sql ", sql))
-gg$predicted <- unlist(gg$predicted)
-dt.found <- (sqldf(sql))
-flog.debug(paste("predictor --> hints sql 222 ", sql))
-if (nrow(dt.found) > 0) {
-    return(dt.found)
-}
-
 

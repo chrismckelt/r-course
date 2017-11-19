@@ -395,3 +395,13 @@ str_get_last_word <- function(str) {
     last <- word(sentences, -1)
     last
 }
+
+
+#' Given a sentence get the last words
+str_get_words <- function(txt, total){
+    array <- unlist(strsplit(txt, ' '))
+    from <- (length(array) + 1) - total
+    lst <- array[from:length(array)]
+    stringi::stri_flatten(lst, collapse = " ")
+}
+
