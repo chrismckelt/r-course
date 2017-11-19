@@ -40,7 +40,7 @@ if ((db_exists == FALSE))
     corpus.original <- tm_map(corpus.original, toEmpty, "http[^[:space:]]*")
     corpus.original <- tm_map(corpus.original, toSpace, "/|@|\\|")
     corpus.original <- tm_map(corpus.original, removeWords, bad_words)
-    corpus.original <- clean.text(corpus.original)
+    corpus.original <- clean_text(corpus.original)
    
     corpus.result <- textreg(data.all, labeling = c(TRUE), banned = bad_words, verbosity = 1, token.type = )
     corpus.stemmed <- stem.corpus(convert.tm.to.character(corpus.original))

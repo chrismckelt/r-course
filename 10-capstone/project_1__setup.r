@@ -26,7 +26,7 @@ using("textreg") #https://cran.r-project.org/web/packages/textreg/textreg.pdf
 using("tau")
 p_load("foreach")
 pacman::p_load_gh("trinker/qdapRegex") # https://github.com/trinker/qdapRegex
- 
+p_load("corpus")
 options(mc.cores = 1)
 options(encoding = "UTF-8")
 options(stringsAsFactors = FALSE)

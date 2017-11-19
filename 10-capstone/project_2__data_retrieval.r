@@ -4,6 +4,9 @@ data.file.name <- "data.all.RData"
 
 sample_mode <- TRUE
 
+# We will use the Snowball English stop word list:
+stop_words <- corpus::stopwords_en
+
 if (!file.exists(data.file.name))
 {
     data.blogs <- read_file("data/final/en_US/en_US.blogs.txt")
@@ -14,9 +17,9 @@ if (!file.exists(data.file.name))
     data.twitter = iconv(data.twitter, "latin1", "ASCII", sub = "")
 
     if (sample_mode) {
-        sample.blogs <- small_sample(data.blogs, .015)
-        sample.news <- small_sample(data.news, .01)
-        sample.twitter <- small_sample(data.twitter, .01)
+        sample.blogs <- small_sample(data.blogs, .1)
+        sample.news <- small_sample(data.news, .1)
+        sample.twitter <- small_sample(data.twitter, .1)
         data.all <- c(sample.blogs, sample.news, sample.twitter)
     }
     else {

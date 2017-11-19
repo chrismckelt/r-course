@@ -183,7 +183,7 @@ parallelize_task  <- function(task, ...) {
     r
 }
 
-parallelize_task_chunked <- function(task, df.big, chunk_size = 100) {
+parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
     p_load("itertools")
 
     # Calculate the number of cores
@@ -204,20 +204,6 @@ parallelize_task_chunked <- function(task, df.big, chunk_size = 100) {
 }
 
 
-#Create clean functions
-clean.remove_symbols <- function(corpus) gsub(perl = TRUE,
-                                        pattern = '[\\]\\[\\(\\)-/+;:#%$^\\*=^~\\{\\}/"<>«»_\\\\“\\”⁰•‘’–]',
-                                        replacement = "", corpus)
-
-clean.convert_to_period <- function(corpus) gsub(pattern = "[\\!\\?…]",
-                                           replacement = ".", corpus)
-clean.reduce_periods <- function(corpus) gsub(pattern = "[\\.]{2,}",
-                                        replacement = ".", corpus)
-clean.convert_to_and <- function(corpus) gsub(pattern = "&", replacement = " and ", corpus)
-
-clean.replace_numbers <- function(corpus) gsub(pattern = "[0-9]+",
-                                         replacement = "", corpus)
-
 #' This function allows to do some text cleaning with several
 #               options such as coverting to lowercase, removing numbers,
 #               removing punctuation symbols, removing extra white spaces
@@ -232,9 +218,9 @@ clean.replace_numbers <- function(corpus) gsub(pattern = "[0-9]+",
 #' @export
 #'
 #' @examples
-clean.text <- function(txt, lowercase = TRUE, numbers = TRUE, punctuation = TRUE, spaces = TRUE) {
+clean_data_text <- function(txt, lowercase = TRUE, numbers = TRUE, punctuation = TRUE, spaces = TRUE) {
     # x: character string
-
+    print(txt)
     # lower case
     if (lowercase)
         txt = tolower(txt)

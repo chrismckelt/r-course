@@ -9,16 +9,16 @@
 #'
 #' @examples
 #' https://en.wikipedia.org/wiki/Katz%27s_back-off_model
-predictor <- function(sentence, hints = c()) {
+predictor <- function(text, hints = c()) {
 
-    if (is.na(sentence)) {
-        warning("sentence NA or empty")
+    if (is.na(text)) {
+        warning("text NA or empty")
         stop()
     }
-    sentence <- clean.text(sentence)
+    text <- clean_data_text(text)
 
-    flog.debug(paste("predictor --> sentence.cleaned =", sentence))
-    dt.search.terms = as.data.table(str_split(sentence, " "), stringsAsFactors = FALSE)
+    flog.debug(paste("predictor --> text.cleaned =", text))
+    dt.search.terms = as.data.table(str_split(text, " "), stringsAsFactors = FALSE)
     term_count <- nrow(dt.search.terms)
 
     if (term_count > 5) {
@@ -28,9 +28,9 @@ predictor <- function(sentence, hints = c()) {
     dt.search.result <- colnames(c("ngram", "word", "freq", "length", "predicted"))
     search_results_exist <- FALSE
     # input text given
-    counter <-1    
+    counter <- 1     
     while (counter < term_count) {
-        ng_id <- term_count - (counter)+1
+        ng_id <- term_count - (counter-1)
         result <- search_ngram(dt.search.terms[counter:term_count], ng_id, hints)
         if (nrow(result) > 0) {
             flog.debug(paste("predictor --> ngram ", ng_id, "found", nrow(result)))
@@ -66,7 +66,7 @@ predictor <- function(sentence, hints = c()) {
         stop()
     }
    
-    dt.search.result
+    as.data.table(dt.search.result)
 }
 
 
@@ -104,7 +104,7 @@ search_ngram <- function(search_terms, take, hints = c()) {
 }
 
 search <- "a few"
-search <- clean.text(search)
+search <- clean_data_text(search)
 dt.search.terms = as.data.table(str_split(search, " "), stringsAsFactors = FALSE)
 result <- predictor(search)
 
