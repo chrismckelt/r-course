@@ -216,9 +216,9 @@ predict.baseline <- function(x) {
 
 }
 
-tweets <- small_sample(tweets,.8)
-blogs <- small_sample(blogs, .8)
-flog.threshold(DEBUG)
+tweets <- small_sample(tweets,.1)
+blogs <- small_sample(blogs, .1)
+flog.threshold(INFO)
 
 
 ################################################################################################
@@ -228,7 +228,7 @@ flog.threshold(DEBUG)
 ################################################################################################
 benchmark(predict.baseline,
           # additional parameters to be passed to the prediction function can be inserted here
-          sent.list = list('tweets' = tweets, 
+          sent.list = list('tweets' = tweets,
                            'blogs' = blogs), 
           ext.output = T)
  

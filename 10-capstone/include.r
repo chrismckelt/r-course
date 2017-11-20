@@ -220,8 +220,9 @@ parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
 #' @examples
 clean_data_text <- function(txt) {
     # x: character string
-    print("clean_data_text start")
+    
     txt = tolower(txt)
+    txt = gsub("'", "", txt)
     txt = gsub("[[:digit:]]", "", txt)
     txt = gsub("[[:punct:]]", "", txt)
     txt = gsub("[ \t]{2,}", " ", txt)
@@ -379,7 +380,6 @@ clean_data_text <- function(txt) {
     #remove extra whitespaces
     txt <- stripWhitespace(txt)
     txt <- stri_trim_both(txt)
-    print("clean_data_text end")
     txt
 }
 
@@ -403,3 +403,14 @@ str_get_words <- function(txt, total){
 }
 
 
+is_data_frame_valid <- function(df) {
+    if (is.null(df)) return(FALSE)
+
+    if (is.na(df)) return(FALSE)
+
+    if (length(df)>0) return(FALSE)
+
+    if (nrow(df)==0) return(FALSE)
+
+    return (TRUE)
+}
