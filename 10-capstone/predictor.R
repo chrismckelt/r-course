@@ -40,7 +40,7 @@ predictor <- function(text, hints = c()) {
     search_results_exist <- FALSE
     #search ngrams - cycle of word count and call function to search ngram table
     data_found <- TRUE
-    if (term_count > 1) {
+    if (term_count > 0) {
         counter <- 1
         search_results_exist <- FALSE
         while (all((counter < term_count + 1) && data_found)) {
@@ -51,17 +51,18 @@ predictor <- function(text, hints = c()) {
                 df.row <- sqldf(sql)
                 if (nrow(df.row) > 0) {
                     dt.search.result <- rbind(dt.search.result, data.frame(ngram = ng_id, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
-                    search_results_exist <- TRUE
+                    if (!search_results_exist) {
+                        sqldf("create index idx_freq on [dt.search.result](freq)")
+                        sqldf("create index idx_word on [dt.search.result](word)")
+                        search_results_exist <- TRUE
+                    }
                     # speed up results 
                     #if (nrow(df.row) > 3) {
                         #return (dt.search.result$word)
                     #}
                 }
             }
-            #if (nrow(dt.search.result) > 0) {
-                #sqldf("create index idx_freq on [dt.search.result](freq)")
-                #sqldf("create index idx_word on [dt.search.result](word)")
-            #}
+           
             counter <- counter + 1
         }
 
