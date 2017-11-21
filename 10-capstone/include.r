@@ -219,14 +219,12 @@ parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
 #'
 #' @examples
 clean_data_text <- function(txt) {
-    # x: character string
+    # txt: character string
     
-    txt = tolower(txt)
-    txt = gsub("'", "", txt)
-    txt = gsub("[[:digit:]]", "", txt)
-    txt = gsub("[[:punct:]]", "", txt)
-    txt = gsub("[ \t]{2,}", " ", txt)
-    txt = gsub("^\\s+|\\s+$", "", txt)
+    #stem text
+    #if (stemming) {
+        #txt <- stemText(txt)
+    #}
     #short form of common names: st., av., mr, etc.., remove periods
     txt <- gsub("\\s([A-Z])\\.\\s", " \\1", txt)
     txt <- gsub("\\s([A-Z][a-z]{1,3})\\.\\s", " \\1", txt)
@@ -304,7 +302,7 @@ clean_data_text <- function(txt) {
     #remove remaining non characters
     txt <- gsub("[^0-9A-Za-záéíóúàèìòùäöüßñ.'<>]+", " ", txt)
     #remove periods in acronyms, so we can analyze them as a single word
-    txt <- gsub("([a-z])\\.([a-z])\\.(([a-z])\\.)?(([a-z])\\.)?(\\s|$)?", " \\1\\2\\4\\6 ", txt)
+    #txt <- gsub("([a-z])\\.([a-z])\\.(([a-z])\\.)?(([a-z])\\.)?(\\s|$)?", " \\1\\2\\4\\6 ", txt)
     #remove duplicate number marks, mostly due to decimal points, but should be fixed
     txt <- gsub("(<N>[ .']+){2,}", " <N> ", txt)
     #replace punctuation with special mark
@@ -329,6 +327,9 @@ clean_data_text <- function(txt) {
     txt <- gsub("(^|\\s)'([a-záéíóúàèìòùäöüßñ<>]+)'?(\\s|$)", "\\1\\2 ", txt)
     txt <- gsub("(\\s)?([a-záéíóúàèìòùäöüßñ<>]+)'(\\s|$)", "\\1\\2 ", txt)
     txt <- gsub("\\s'([a-z])", " \\1", txt)
+
+    #remove genitive signs in names and sustantives
+   # txt <- removeGenitives(txt)
 
     #fix <S> marks placed incorrectly
     txt <- gsub(" st <S>", " st ", txt)
@@ -371,16 +372,17 @@ clean_data_text <- function(txt) {
     txt <- gsub("^a <S>", "", txt)
     txt <- gsub("^q <S>", "", txt)
 
-    for (word in corpus::stopwords_en) {
-        patt <- paste0('\\b', word, '\\b')
-        repl <- paste(word, " ")
-        txt <- gsub(patt, repl, txt)
-    }
-
     #remove extra whitespaces
     txt <- stripWhitespace(txt)
     txt <- stri_trim_both(txt)
+
     txt
+
+    #for (word in corpus::stopwords_en) {
+        #patt <- paste0('\\b', word, '\\b')
+        #repl <- paste(word, " ")
+        #txt <- gsub(patt, repl, input)
+    #}
 }
 
 
@@ -404,11 +406,12 @@ str_get_words <- function(txt, total){
 
 
 is_data_frame_valid <- function(df) {
+
+    if (length(df) > 0) return(FALSE)
+
     if (is.null(df)) return(FALSE)
 
     if (is.na(df)) return(FALSE)
-
-    if (length(df)>0) return(FALSE)
 
     if (nrow(df)==0) return(FALSE)
 

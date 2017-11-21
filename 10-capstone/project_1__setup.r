@@ -22,6 +22,7 @@ p_load("dplyr")
 p_load("SparseM")
 p_load("qdap")
 p_load("parallel")
+p_load("DBI")
 using("textreg") #https://cran.r-project.org/web/packages/textreg/textreg.pdf
 using("tau")
 p_load("foreach")
