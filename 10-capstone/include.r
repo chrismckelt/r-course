@@ -222,11 +222,18 @@ clean_data_text <- function(txt) {
     # txt: character string
     
     #stem text
-    #txt <- stemText(txt)
+    require(SnowballC)
+    txt <- wordStem(txt, language = 'en')
 
     #lower case text
     txt <- tolower(txt)
-   
+
+    txt <- gsub("[0-9](?:st|nd|rd|th)", "", txt, ignore.case = F, perl = T) #remove ordinal numbers
+    txt <- gsub("[.\\-!]", " ", txt, ignore.case = F, perl = T) #remove punctuation
+    txt <- gsub("[^\\p{L}'\\s]+", "", txt, ignore.case = F, perl = T) #remove punctuation, leaving '
+    txt <- gsub("^\\s+|\\s+$", "", txt) #trim leading and trailing whitespace
+
+    txt <- stripWhitespace(txt)
     #dont split compound words, like e-reader, e-mail, etc...
     #txt <- gsub("(^|\\s)([a-z]{1,2})-([a-z]+)", "", txt)
     ##remove RTs
@@ -301,8 +308,9 @@ clean_data_text <- function(txt) {
 
     txt <- gsub("http"," ", txt)
     txt <- gsub("mailto", " ", txt)
+
     #remove genitive signs that are alone
-    txt <- gsub("(\\s)'s(\\s|$)", " ", txt)
+    #txt <- gsub("(\\s)'s(\\s|$)", " ", txt)
 
     #remove single apostrophes in front of a word or at the end
     txt <- gsub("^'", " ", txt)
