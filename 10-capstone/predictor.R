@@ -10,7 +10,7 @@
 #' @examples
 #' https://en.wikipedia.org/wiki/Katz%27s_back-off_model
 predictor <- function(text, hints = c()) {
-     
+   # text <- "asdf best thing asdf ddd asdad ddd "
     if (is.na(text)) {
         warning("text NA or empty")
         stop()
@@ -20,33 +20,33 @@ predictor <- function(text, hints = c()) {
         warning("text NA or empty")
         stop()
     }
-    text <- unlist(iconv(text, "latin1", "ASCII", sub = ""))
-    print(text)
+ 
     text <- clean_data_text(text)
 
     if (length(trim(text)) == 0)  stop("no input text")
 
-    flog.debug(paste("predictor --> text.cleaned =", text))
+   # flog.debug(paste("predictor --> text.cleaned =", text))
     dt.search.result <- colnames(c("ngram", "word", "freq", "predicted"))
-
     dt.search.terms = as.data.table(str_split(text, " "), stringsAsFactors = FALSE)
-    term_count <- nrow(dt.search.terms)
-    if (term_count == 0) return(NULL)
 
     ### tweak to optimise speed
+    term_count <- nrow(dt.search.terms)
     if (term_count >= 5) { 
            term_count <- 4
     }
 
+    if (term_count == 0) return(NULL)
+
     search_results_exist <- FALSE
     #search ngrams - cycle of word count and call function to search ngram table
-    data_found <- TRUE
+    search_complete <- FALSE
     if (term_count > 0) {
         counter <- 1
         search_results_exist <- FALSE
-        while (all((counter < term_count + 1) && data_found)) {
-            ng_id <- term_count - (counter - 1) + 1
-            result <- search_ngram(text, ng_id)
+
+        if (term_count == 4) {
+            text.temp <- str_get_words(text, 3)
+            result <- search_ngram(text.temp)
             if (is_data_frame_valid(result)) {
                 sql <- paste("select word, freq, word as predicted from result order by freq desc limit 3")
                 df.row <- sqldf(sql)
@@ -57,30 +57,50 @@ predictor <- function(text, hints = c()) {
                         sqldf("create index idx_word on [dt.search.result](word)")
                         search_results_exist <- TRUE
                     }
-                    # speed up results 
-                    #if (nrow(df.row) > 3) {
-                        #return (dt.search.result$word)
-                    #}
                 }
             }
-           
-            counter <- counter + 1
+
+            term_count <- term_count - 1
         }
 
-        not_indexed <- TRUE
-        if (is_data_frame_valid(dt.fast.lookup)) {
-            ngram1_word <- str_get_last_word(text)
-            df.row <- sqldf(paste("select * from [dt.fast.lookup] where word = '", ngram1_word,"''"))
-            if (nrow(df.row) > 0) {
-                flow.debug(paste("FAST LOOKUP for ",ngram1_word))
-                dt.search.result <- rbind(dt.search.result, data.frame(ngram = 1, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
-                not_indexed <- FALSE
-                if (!indexed) {
-                    sqldf("create index idx_freq on [dt.fast.lookup](freq)")
-                    sqldf("create index idx_word on [dt.fast.lookup](word)")
-                    indexed <- TRUE
+        if (all(is_data_frame_valid(dt.search.result) && nrow(dt.search.result > 2))) search_complete<-TRUE
+
+        if (all(term_count == 3) &&(!search_complete)) {
+            text.temp <- str_get_words(text, 4)
+            result <- search_ngram(text.temp)
+            if (is_data_frame_valid(result)) {
+                sql <- paste("select word, freq, word as predicted from result order by freq desc limit 3")
+                df.row <- sqldf(sql)
+                if (is_data_frame_valid(df.row)) {
+                    dt.search.result <- rbind(dt.search.result, data.frame(ngram = ng_id, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
+                    if (!search_results_exist) {
+                        sqldf("create index idx_freq on [dt.search.result](freq)")
+                        sqldf("create index idx_word on [dt.search.result](word)")
+                        search_results_exist <- TRUE
+                    }
                 }
             }
+            term_count <- term_count - 1
+        }
+
+        if (all(is_data_frame_valid(dt.search.result) && nrow(dt.search.result > 3))) search_complete <- TRUE
+
+        if (all(!term_count == 2 && (!search_complete))) {
+            text.temp <- str_get_words(text, 3)
+            result <- search_ngram(text.temp)
+            if (is_data_frame_valid(result)) {
+                sql <- paste("select word, freq, word as predicted from result order by freq desc limit 3")
+                df.row <- sqldf(sql)
+                if (is_data_frame_valid(df.row)) {
+                    dt.search.result <- rbind(dt.search.result, data.frame(ngram = ng_id, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
+                    if (!search_results_exist) {
+                        sqldf("create index idx_freq on [dt.search.result](freq)")
+                        sqldf("create index idx_word on [dt.search.result](word)")
+                        search_results_exist <- TRUE
+                    }
+                }
+            }
+            term_count <- term_count - 1
         }
 
         #search unigram
@@ -156,17 +176,11 @@ strategy_stupid_back_off <- function(pred) {
 }
 
 #' Cycle down ngram functions when no data found
-search_ngram <- function(text, ng_id) {
-    flog.debug(paste("predictor --> search_ngram text --> ", text))
-    flog.debug(paste("predictor --> ng_id --> ", ng_id))
-    search_sql <- trim(str_get_words(text, (ng_id - 1)))
-    if (length(trim(search_sql) == 0)) {
-        flog.warn("search_ngram input empty")
-        return (NULL)
-    }
+search_ngram <- function(text) {
+    check <- strsplit(text, ' ')
 
-    sql <- paste0("select * from n", ng_id)
-    sql <- paste0(sql, " where word like '", search_sql, "%'")
+    sql <- paste0("select * from n", (length(check) + 1))
+    sql <- paste0(sql, " where word like '", text, "%'")
     sql = paste(sql, " order by freq desc limit 5 ")
     flog.debug(paste("predictor --> search_ngram --> ", sql))
     df.result <- sqldf(sql)
@@ -175,13 +189,6 @@ search_ngram <- function(text, ng_id) {
 }
 
 search_unigram <- function(text) {
-
-    search_sql <- trim(str_get_last_word(text))
-    if (length(search_sql) == 0) {
-        flog.warn("search_unigram input empty")
-        return(NULL)
-    }    
-
     sql <- paste0("select * from n1 where word = '", search_sql, "' order by freq desc limit 5 ")
     flog.debug(paste("predictor --> search_unigram --> ", sql))
     df.result <- sqldf(sql)

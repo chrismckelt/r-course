@@ -225,13 +225,17 @@ clean_data_text <- function(txt) {
     #if (stemming) {
         #txt <- stemText(txt)
     #}
+
+    txt <- unlist(iconv(txt, "latin1", "ASCII", sub = ""))
     #short form of common names: st., av., mr, etc.., remove periods
     txt <- gsub("\\s([A-Z])\\.\\s", " \\1", txt)
     txt <- gsub("\\s([A-Z][a-z]{1,3})\\.\\s", " \\1", txt)
     txt <- gsub("^([A-Z])\\.\\s", " \\1", txt)
     txt <- gsub("^([A-Z][a-z]{1,3})\\.\\s", " \\1", txt)
     #lower case text
-    txt <- stri_trans_tolower(txt)
+    txt <- tolower(txt)
+    #single quotes
+    txt <- gsub('[[:punct:] ]+', ' ', txt)
     #remove smileys
     txt <- gsub("<3|</3|\\bxd\\b|\\bx-d\\b|:&|:-&|:p\\b|:-p\\b|\\b=p\\b|\\b:d\\b|;d\\b|\\b:o\\)\\b|\\b8\\)|\\b8d\\b|\\b8-d\\b|:3\\b|:-x\\b|:x\\b|:o\\)|:-d\\b|:-o\\b|:o\\b|o_o\\b|o-o\\b|=p\\b|:s\\b|\\bd:", " ", txt)
     # remove lower greater symbols
@@ -375,14 +379,14 @@ clean_data_text <- function(txt) {
     #remove extra whitespaces
     txt <- stripWhitespace(txt)
     txt <- stri_trim_both(txt)
+   
+    for (word in corpus::stopwords_en) {
+        patt <- paste0('\\b', word, '\\b')
+        repl <- paste(word, " ")
+        txt <- gsub(patt, repl, txt)
+    }
 
     txt
-
-    #for (word in corpus::stopwords_en) {
-        #patt <- paste0('\\b', word, '\\b')
-        #repl <- paste(word, " ")
-        #txt <- gsub(patt, repl, input)
-    #}
 }
 
 
@@ -391,17 +395,15 @@ clean_data_text <- function(txt) {
 #'http://stringr.tidyverse.org/reference/word.html
 str_get_last_word <- function(str) {
     sentences <- c(str)
-    last <- word(sentences, -1)
+    last <- stringr::word(sentences, -1)
     last
 }
 
 
 #' Given a sentence get the last words
 str_get_words <- function(txt, total){
-    array <- unlist(strsplit(txt, ' '))
-    from <- (length(array) + 1) - total
-    lst <- array[from:length(array)]
-    stringi::stri_flatten(lst, collapse = " ")
+    
+    paste(tail(strsplit(txt, "\\s+")[[1]], total), collapse = " ")
 }
 
 
@@ -417,3 +419,4 @@ is_data_frame_valid <- function(df) {
 
     return (TRUE)
 }
+

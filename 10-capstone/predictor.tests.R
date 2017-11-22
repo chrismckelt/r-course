@@ -25,7 +25,13 @@ a9 <- predictor(q9, c("weekly", "outside", "daily", "inside")) #### outside
 a10 <- predictor(q10, c("movies", "novels", "stories", "pictures")) # movies
 
 
-pred <- predictor("best thing") 
+predictor("best thing") 
 
-pred
+str_get_last_word("best thing")
+txt <- "asdf best thing asdf ddd asdad ddd "
+
+str_get_words(txt,1)
+
+
+
 
