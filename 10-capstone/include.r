@@ -226,7 +226,6 @@ clean_data_text <- function(txt) {
         #txt <- stemText(txt)
     #}
 
-    txt <- unlist(iconv(txt, "latin1", "ASCII", sub = ""))
     #short form of common names: st., av., mr, etc.., remove periods
     txt <- gsub("\\s([A-Z])\\.\\s", " \\1", txt)
     txt <- gsub("\\s([A-Z][a-z]{1,3})\\.\\s", " \\1", txt)
@@ -234,13 +233,7 @@ clean_data_text <- function(txt) {
     txt <- gsub("^([A-Z][a-z]{1,3})\\.\\s", " \\1", txt)
     #lower case text
     txt <- tolower(txt)
-    #single quotes
-    txt <- gsub('[[:punct:] ]+', ' ', txt)
-    #remove smileys
-    txt <- gsub("<3|</3|\\bxd\\b|\\bx-d\\b|:&|:-&|:p\\b|:-p\\b|\\b=p\\b|\\b:d\\b|;d\\b|\\b:o\\)\\b|\\b8\\)|\\b8d\\b|\\b8-d\\b|:3\\b|:-x\\b|:x\\b|:o\\)|:-d\\b|:-o\\b|:o\\b|o_o\\b|o-o\\b|=p\\b|:s\\b|\\bd:", " ", txt)
-    # remove lower greater symbols
-    txt <- gsub("[<>]+", " ", txt)
-    txt <- gsub("&", " and ", txt)
+   
     #dont split compound words, like e-reader, e-mail, etc...
     txt <- gsub("(^|\\s)([a-z]{1,2})-([a-z]+)", " \\2\\3 ", txt)
     #remove RTs
@@ -285,8 +278,7 @@ clean_data_text <- function(txt) {
     txt <- gsub("<N>( )*%", "<PN> ", txt)
     #numbers reffering to some year, like 80s, 90s... replaced with <YN>
     txt <- gsub("<N>\\s+('?s)\\.?(\\s|$)", "<YN> ", txt)
-    #ordinal numbers replaced with <ON>
-    txt <- gsub("<N>\\s+(st|th|nd|rd|er|ers)\\.?(\\s|$)", "<ON> ", txt)
+  
     #number intervals, can be scores, telephone numbers, ...
     txt <- gsub("(<N>)\\s+-\\s+(<N>)", "<NN> ", txt)
     #numbers in parenthesis, remove parenthesis
@@ -375,17 +367,27 @@ clean_data_text <- function(txt) {
     txt <- gsub("<S> a <S>", "<S> ", txt)
     txt <- gsub("^a <S>", "", txt)
     txt <- gsub("^q <S>", "", txt)
-
-    #remove extra whitespaces
-    txt <- stripWhitespace(txt)
-    txt <- stri_trim_both(txt)
    
     for (word in corpus::stopwords_en) {
         patt <- paste0('\\b', word, '\\b')
         repl <- paste(word, " ")
         txt <- gsub(patt, repl, txt)
     }
+    # Remove 1-2 letter words
+    txt <- gsub(" *\\b[[:alpha:]]{1,2}\\b *", " ", txt) 
+    # Remove excessive spacing
+    txt <- gsub("^ +| +$|( ) +", "\\1", txt)
+    #single quotes
+    txt <- gsub('[[:punct:] ]+', ' ', txt)
+    #remove non-alphanumeric symbols from a string
+    txt <- gsub("[^[:alnum:] ]", "", txt)
+    #remove non-alphanumeric symbols from a string
 
+    txt <- str_replace_all(txt, "[[:punct:]]", " ")
+
+    #remove extra whitespaces
+    txt <- stripWhitespace(txt)
+    txt <- stri_trim_both(txt)
     txt
 }
 
