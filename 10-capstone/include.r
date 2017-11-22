@@ -222,115 +222,106 @@ clean_data_text <- function(txt) {
     # txt: character string
     
     #stem text
-    #if (stemming) {
-        #txt <- stemText(txt)
-    #}
+    #txt <- stemText(txt)
 
-    #short form of common names: st., av., mr, etc.., remove periods
-    txt <- gsub("\\s([A-Z])\\.\\s", " \\1", txt)
-    txt <- gsub("\\s([A-Z][a-z]{1,3})\\.\\s", " \\1", txt)
-    txt <- gsub("^([A-Z])\\.\\s", " \\1", txt)
-    txt <- gsub("^([A-Z][a-z]{1,3})\\.\\s", " \\1", txt)
     #lower case text
     txt <- tolower(txt)
    
     #dont split compound words, like e-reader, e-mail, etc...
-    txt <- gsub("(^|\\s)([a-z]{1,2})-([a-z]+)", " \\2\\3 ", txt)
-    #remove RTs
-    txt <- gsub("\\brt\\b", " ", txt)
-    txt <- gsub("rt2win", " ", txt)
-    txt <- gsub("<3RT", " ", txt)
-    #replace email addresses with special mark
-    txt <- gsub("\\w*@\\w*\\.\\w*", " ", txt)
-    #replae hashtags with special marker
-    txt <- gsub("(\\#[a-zA-Záéíóúàèìòùäöüßñ0-9']+)", " ", txt)
-    #replace twitter-like names with special marker
-    txt <- gsub("\\@\\w*[a-zA-Záéíóúàèìòùäöüßñ0-9]+\\w*", " ", txt)
-    # replace URLs with special mark
-    txt <- gsub("\\b([a-z]{3,6}://)?([\\0-9a-z\\-]+\\.)+([a-z]{2,6})+(/[\\0-9a-z\\?\\=\\&\\-_]*)*", " ", txt)
-    #remove slashes
-    txt <- gsub("[\\\\\\/\\|]+", " ", txt)
-    #single words between quotes or parenthesis, remove the quotes or parenthesis
-    txt <- gsub("\\s“([a-z]+)”\\s", " ", txt)
-    txt <- gsub("\\s’([a-z]+)’\\s", " ", txt)
-    txt <- gsub("\\s'([a-z]+)'\\s", " ", txt)
-    txt <- gsub('\\s"([a-z]+)"\\s', " ", txt)
-    txt <- gsub("\\((\\s?[a-z]+\\s?)\\)", " ", txt)
-    #only one type of apostrophes, and only one at a time
-    txt <- gsub("[’`']+", " ", txt)
-    txt <- gsub("(\\.( )+)+", " ", txt)
-    # acronym or short form with apostrophe, just remove the period
-    txt <- gsub("(^|\\.|\\s)([a-záéíóúàèìòùäöüßñ<>]+)\\.'([a-z])(\\s|\\.|$)", " ", txt)
-    # replace numbers with special marker <N>
-    txt <- gsub("([0-9]+([,\\.]?[0-9]+)?)", " <N> ", txt)
-    #expressions refering time replaced with <T>
-    txt <- gsub("<N>\\s:\\s<N>\\s?(a\\s|a\\.|p\\s|p\\.|am|pm|a\\.m|p\\.m)\\.?,?(\\s|$)", " ", txt)
-    txt <- gsub("<N>\\s:\\s<N>(\\s|$)", " ", txt)
-    txt <- gsub("(<N>)\\s+(am|pm|a\\.m|p\\.m|a\\s|a\\.|p\\s|p\\.)\\.?,?(\\s)?", " ", txt)
-    txt <- gsub("(<T>)\\s+(am|pm|a\\.m|p\\.m|a\\s|a\\.|p\\s|p\\.)\\.?,?(\\s)?", " ", txt)
-    txt <- gsub("(<N>)(\\s+)?-\\s+(<T>)", " ", txt)
-    txt <- gsub("(<T>)\\s+-\\s+(<N>)", " ", txt)
-    txt <- gsub("(<T>)(\\s+)?-(\\s+)?(<T>)", " ", txt)
-    txt <- gsub("<N>\\s+to\\s+<T>", " ", txt)
-    txt <- gsub("<T>\\s+to\\s+<N>", " ", txt)
-    txt <- gsub("(<T>)\\s+(am|pm|a\\.m|p\\.m|a|p)\\.?,?(\\s|$)", " ", txt)
+    #txt <- gsub("(^|\\s)([a-z]{1,2})-([a-z]+)", "", txt)
+    ##remove RTs
+    #txt <- gsub("\\brt\\b", " ", txt)
+    #txt <- gsub("rt2win", " ", txt)
+    #txt <- gsub("<3RT", " ", txt)
+    ##replace email addresses with special mark
+    #txt <- gsub("\\w*@\\w*\\.\\w*", " ", txt)
+    ##replae hashtags with special marker
+    #txt <- gsub("(\\#[a-zA-Záéíóúàèìòùäöüßñ0-9']+)", " ", txt)
+    ##replace twitter-like names with special marker
+    #txt <- gsub("\\@\\w*[a-zA-Záéíóúàèìòùäöüßñ0-9]+\\w*", " ", txt)
+    ## replace URLs with special mark
+    #txt <- gsub("\\b([a-z]{3,6}://)?([\\0-9a-z\\-]+\\.)+([a-z]{2,6})+(/[\\0-9a-z\\?\\=\\&\\-_]*)*", " ", txt)
+    ##remove slashes
+    #txt <- gsub("[\\\\\\/\\|]+", " ", txt)
+    ##single words between quotes or parenthesis, remove the quotes or parenthesis
+    #txt <- gsub("\\s“([a-z]+)”\\s", " ", txt)
+    #txt <- gsub("\\s’([a-z]+)’\\s", " ", txt)
+    #txt <- gsub("\\s'([a-z]+)'\\s", " ", txt)
+    #txt <- gsub('\\s"([a-z]+)"\\s', " ", txt)
+    #txt <- gsub("\\((\\s?[a-z]+\\s?)\\)", " ", txt)
+    ##only one type of apostrophes, and only one at a time
+    #txt <- gsub("[’`']+", " ", txt)
+    #txt <- gsub("(\\.( )+)+", " ", txt)
+    ## acronym or short form with apostrophe, just remove the period
+    #txt <- gsub("(^|\\.|\\s)([a-záéíóúàèìòùäöüßñ<>]+)\\.'([a-z])(\\s|\\.|$)", " ", txt)
+    ## replace numbers with special marker <N>
+    #txt <- gsub("([0-9]+([,\\.]?[0-9]+)?)", " ", txt)
+    ##expressions refering time replaced with <T>
+    #txt <- gsub("<N>\\s:\\s<N>\\s?(a\\s|a\\.|p\\s|p\\.|am|pm|a\\.m|p\\.m)\\.?,?(\\s|$)", " ", txt)
+    #txt <- gsub("<N>\\s:\\s<N>(\\s|$)", " ", txt)
+    #txt <- gsub("(<N>)\\s+(am|pm|a\\.m|p\\.m|a\\s|a\\.|p\\s|p\\.)\\.?,?(\\s)?", " ", txt)
+    #txt <- gsub("(<T>)\\s+(am|pm|a\\.m|p\\.m|a\\s|a\\.|p\\s|p\\.)\\.?,?(\\s)?", " ", txt)
+    #txt <- gsub("(<N>)(\\s+)?-\\s+(<T>)", " ", txt)
+    #txt <- gsub("(<T>)\\s+-\\s+(<N>)", " ", txt)
+    #txt <- gsub("(<T>)(\\s+)?-(\\s+)?(<T>)", " ", txt)
+    #txt <- gsub("<N>\\s+to\\s+<T>", " ", txt)
+    #txt <- gsub("<T>\\s+to\\s+<N>", " ", txt)
+    #txt <- gsub("(<T>)\\s+(am|pm|a\\.m|p\\.m|a|p)\\.?,?(\\s|$)", " ", txt)
 
-    #numbers in parenthesis, remove parenthesis
-    txt <- gsub("\\(\\s?<N>\\s?\\)", "<N>", txt)
-    #numbers reffering to dates nov. 3, dec.1, etc...
-    txt <- gsub(" (jan|feb|mar|apr|may|jun|jul|aug|sept|oct|nov|dec)\\.?,?\\s\\s?(<N>|<NN>)", " ", txt)
-    txt <- gsub("(january|february|march|april|may|june|july|august|september|october|november|december),?\\s\\s?(<N>|<NN>)", " ", txt)
-    #days of the week, short form, remove periods
-    txt <- gsub(" (mon|tue|wed|thu|fri|sat|sun)\\.", " ", txt)
-    #dont split compound words, like e-reader, e-mail, etc...
-    txt <- gsub("(^|\\s)([a-z]{1,2})-([a-z]+)(\\s|\\.|\\$)", " ", txt)
-    #replaces commas with whitespace, don't break the sentence
-    txt <- gsub("(,)+", " ", txt)
-    #replace the rest of punctuation with single dots
-    txt <- gsub("( )+-( )+", " . ", txt)
-    txt <- gsub('[—!?;:…“”\\"()\\{\\}]+', " . ", txt)
-    #remove remaining non characters
-    txt <- gsub("[^0-9A-Za-záéíóúàèìòùäöüßñ.'<>]+", " ", txt)
-    #remove periods in acronyms, so we can analyze them as a single word
-    #txt <- gsub("([a-z])\\.([a-z])\\.(([a-z])\\.)?(([a-z])\\.)?(\\s|$)?", " \\1\\2\\4\\6 ", txt)
-    #remove duplicate number marks, mostly due to decimal points, but should be fixed
-    txt <- gsub("(<N>[ .']+){2,}", " ", txt)
-    #replace punctuation with special mark
-    txt <- gsub("[.]+", " <S> ", txt)
-    #replace end and start of string also with special mark
-    #txt <- gsub("^(.*?)$", "<S> \\1 <S>",txt)
-    #remove duplicate sentence marks, and marks at beggining or end of line
-    txt <- gsub("(<S>[ ]*)+", " ", txt)
-    txt <- gsub("<S>[ ]*$", "", txt)
-    txt <- gsub("^[ ]*<S>", "", txt)
-    #remove duplicates apostrophes
-    txt <- gsub("(^|\\s)('(\\s)*)+(\\s|$)", " ", txt)
-    
-    #remove apostrophes that are alone, ie, with any word
-    txt <- gsub("(^|\\s)'(\\s|$)", " ", txt)
+    ##numbers in parenthesis, remove parenthesis
+    #txt <- gsub("\\(\\s?<N>\\s?\\)", " ", txt)
+    ##numbers reffering to dates nov. 3, dec.1, etc...
+    #txt <- gsub(" (jan|feb|mar|apr|may|jun|jul|aug|sept|oct|nov|dec)\\.?,?\\s\\s?(<N>|<NN>)", " ", txt)
+    #txt <- gsub("(january|february|march|april|may|june|july|august|september|october|november|december),?\\s\\s?(<N>|<NN>)", " ", txt)
+    ##days of the week, short form, remove periods
+    #txt <- gsub(" (mon|tue|wed|thu|fri|sat|sun)\\.", " ", txt)
+    ##dont split compound words, like e-reader, e-mail, etc...
+    #txt <- gsub("(^|\\s)([a-z]{1,2})-([a-z]+)(\\s|\\.|\\$)", " ", txt)
+    ##replaces commas with whitespace, don't break the sentence
+    #txt <- gsub("(,)+", " ", txt)
+    ##replace the rest of punctuation with single dots
+    #txt <- gsub("( )+-( )+", " . ", txt)
+    #txt <- gsub('[—!?;:…“”\\"()\\{\\}]+', " ", txt)
+    ##remove remaining non characters
+    #txt <- gsub("[^0-9A-Za-záéíóúàèìòùäöüßñ.'<>]+", " ", txt)
+    ##remove periods in acronyms, so we can analyze them as a single word
+    ##txt <- gsub("([a-z])\\.([a-z])\\.(([a-z])\\.)?(([a-z])\\.)?(\\s|$)?", " \\1\\2\\4\\6 ", txt)
+    ##remove duplicate number marks, mostly due to decimal points, but should be fixed
+    #txt <- gsub("(<N>[ .']+){2,}", " ", txt)
+    ##replace punctuation with special mark
+    #txt <- gsub("[.]+", "", txt)
+    ##replace end and start of string also with special mark
+    ##txt <- gsub("^(.*?)$", "<S> \\1 <S>",txt)
+    ##remove duplicate sentence marks, and marks at beggining or end of line
+    #txt <- gsub("(<S>[ ]*)+", " ", txt)
+    #txt <- gsub("<S>[ ]*$", "", txt)
+    #txt <- gsub("^[ ]*<S>", "", txt)
+    ##remove duplicates apostrophes
 
+
+    txt <- gsub("http"," ", txt)
+    txt <- gsub("mailto", " ", txt)
     #remove genitive signs that are alone
     txt <- gsub("(\\s)'s(\\s|$)", " ", txt)
 
     #remove single apostrophes in front of a word or at the end
-    txt <- gsub("^'", "", txt)
+    txt <- gsub("^'", " ", txt)
    
     for (word in corpus::stopwords_en) {
         patt <- paste0('\\b', word, '\\b')
         repl <- paste(word, " ")
         txt <- gsub(patt, repl, txt)
     }
-    # Remove 1-2 letter words
-    txt <- gsub(" *\\b[[:alpha:]]{1,2}\\b *", " ", txt) 
+    
     # Remove excessive spacing
-    txt <- gsub("^ +| +$|( ) +", "\\1", txt)
+    txt <- gsub("^ +| +$|( ) +", " ", txt)
     #single quotes
     txt <- gsub('[[:punct:] ]+', ' ', txt)
     #remove non-alphanumeric symbols from a string
     txt <- gsub("[^[:alnum:] ]", "", txt)
-    #remove non-alphanumeric symbols from a string
-
-    txt <- str_replace_all(txt, "[[:punct:]]", " ")
+    
+    # Remove 1-2 letter words
+    txt <- gsub(" *\\b[[:alpha:]]{1,2}\\b *", " ", txt)
 
     #remove extra whitespaces
     txt <- stripWhitespace(txt)

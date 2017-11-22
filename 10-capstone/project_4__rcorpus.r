@@ -12,7 +12,7 @@ if (!file.exists(ngram_file_path)) {
         flog.info(paste("starting ngram size =", ngram_size))
 
         filt <- corpus::text_filter(stemmer = "en", drop_punct = TRUE, drop_number = TRUE, drop = corpus::stopwords_en)
-        ng <- term_stats(text, filt, ngrams = ngram_size, min_count = 10,,min_support = 1)
+        ng <- term_stats(text, filt, ngrams = ngram_size, min_count = 1,,min_support = 1)
 
         ngram <- data.table(word = unlist(ng$term), freq = unlist(ng$count))
         # sqldf("create index idx_freq on ngram(freq)")
