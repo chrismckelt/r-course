@@ -28,7 +28,7 @@ using("tau")
 p_load("foreach")
 pacman::p_load_gh("trinker/qdapRegex") # https://github.com/trinker/qdapRegex
 p_load("corpus")
-
+p_load("SnowballC")
 p_load("tm")
 library(stringr)
 options(mc.cores = 1)
