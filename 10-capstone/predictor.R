@@ -44,26 +44,26 @@ predictor <- function(text, hints = c()) {
         counter <- 1
         search_results_exist <- FALSE
 
-        if (term_count == 4) {
-            text.temp <- str_get_words(text, 3)
-            result <- search_ngram(text.temp)
-            if (is_data_frame_valid(result)) {
-                sql <- paste("select word, freq, word as predicted from result order by freq desc limit 3")
-                df.row <- sqldf(sql)
-                if (is_data_frame_valid(df.row)) {
-                    dt.search.result <- rbind(dt.search.result, data.frame(ngram = ng_id, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
-                    if (!search_results_exist) {
-                        sqldf("create index idx_freq on [dt.search.result](freq)")
-                        sqldf("create index idx_word on [dt.search.result](word)")
-                        search_results_exist <- TRUE
-                    }
-                }
-            }
+        #if (term_count == 4) {
+            #text.temp <- str_get_words(text, 3)
+            #result <- search_ngram(text.temp)
+            #if (is_data_frame_valid(result)) {
+                #sql <- paste("select word, freq, word as predicted from result order by freq desc limit 3")
+                #df.row <- sqldf(sql)
+                #if (is_data_frame_valid(df.row)) {
+                    #dt.search.result <- rbind(dt.search.result, data.frame(ngram = ng_id, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
+                    #if (!search_results_exist) {
+                        #sqldf("create index idx_freq on [dt.search.result](freq)")
+                        #sqldf("create index idx_word on [dt.search.result](word)")
+                        #search_results_exist <- TRUE
+                    #}
+                #}
+            #}
 
-            term_count <- term_count - 1
-        }
+            #term_count <- term_count - 1
+        #}
 
-        if (all(is_data_frame_valid(dt.search.result) && nrow(dt.search.result > 2))) search_complete<-TRUE
+      #  if (all(is_data_frame_valid(dt.search.result) && nrow(dt.search.result > 2))) search_complete<-TRUE
 
         if (all(term_count == 3) &&(!search_complete)) {
             text.temp <- str_get_words(text, 4)
@@ -76,14 +76,14 @@ predictor <- function(text, hints = c()) {
                     if (!search_results_exist) {
                         sqldf("create index idx_freq on [dt.search.result](freq)")
                         sqldf("create index idx_word on [dt.search.result](word)")
-                        search_results_exist <- TRUE
+                     #   search_results_exist <- TRUE
                     }
                 }
             }
             term_count <- term_count - 1
         }
 
-        if (all(is_data_frame_valid(dt.search.result) && nrow(dt.search.result > 3))) search_complete <- TRUE
+      #  if (all(is_data_frame_valid(dt.search.result) && nrow(dt.search.result > 3))) search_complete <- TRUE
 
         if (all(!term_count == 2 && (!search_complete))) {
             text.temp <- str_get_words(text, 3)
@@ -96,7 +96,7 @@ predictor <- function(text, hints = c()) {
                     if (!search_results_exist) {
                         sqldf("create index idx_freq on [dt.search.result](freq)")
                         sqldf("create index idx_word on [dt.search.result](word)")
-                        search_results_exist <- TRUE
+                        #search_results_exist <- TRUE
                     }
                 }
             }
@@ -180,7 +180,8 @@ search_ngram <- function(text) {
     check <- strsplit(text, ' ')
 
     sql <- paste0("select * from n", (word_count(check)))
-    sql <- paste0(sql, " where word like '%", text, "%'")
+    if (trim(text) =='') return (NULL)
+    sql <- paste0(sql, " where word like '", text, "%'")
     sql = paste(sql, " order by freq desc limit 3 ")
     flog.debug(paste("predictor --> search_ngram --> ", sql))
     df.result <- sqldf(sql)
