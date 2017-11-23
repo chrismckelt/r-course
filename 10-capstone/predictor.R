@@ -179,9 +179,9 @@ strategy_stupid_back_off <- function(pred) {
 search_ngram <- function(text) {
     check <- strsplit(text, ' ')
 
-    sql <- paste0("select * from n", (length(check) + 1))
-    sql <- paste0(sql, " where word like '", text, "%'")
-    sql = paste(sql, " order by freq desc limit 5 ")
+    sql <- paste0("select * from n", (word_count(check)))
+    sql <- paste0(sql, " where word like '%", text, "%'")
+    sql = paste(sql, " order by freq desc limit 3 ")
     flog.debug(paste("predictor --> search_ngram --> ", sql))
     df.result <- sqldf(sql)
     flog.debug(paste("predictor --> search_ngram sql --> rows = ", nrow(df.result)))
