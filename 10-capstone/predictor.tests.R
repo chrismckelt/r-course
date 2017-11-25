@@ -24,14 +24,12 @@ a8 <- predictor(q8, c("center", "side", "top", "middle")) #### top
 a9 <- predictor(q9, c("weekly", "outside", "daily", "inside")) #### outside
 a10 <- predictor(q10, c("movies", "novels", "stories", "pictures")) # movies
 
+ttt <- "web design"
+clean_data_text(ttt)
+predictor(ttt) 
 
-predictor("best thing") 
-
-str_get_last_word("best thing")
-txt <- "asdf best thing asdf ddd asdad ddd "
-
-str_get_words(txt,1)
-
-
-
-
+for (word in bad_words) {
+    patt <- paste0('\\b', word, '\\b')
+    repl <- paste(word, " ")
+    txt <- gsub(patt, repl, txt)
+}

@@ -13,12 +13,10 @@ if ((!file.exists(get_data_file_path("data.all.RData"))))
     flog.info("data cleaning...")
     
     data.all <- as.data.table(data.all, stringsAsFactors = FALSE) # stringsAsFactors = FALSE important for speed
- 
     data.all <- parallelize_task(sent_detect, data.all) #Detect and split sentences on endmark boundaries.
-   
-    data.all <- apply(data.all, 1, clean_data_text)
-    data.all <- rm_non_words(data.all) # Remove Non-Words & N Character Words
 
+    data.all <- data.frame(lapply(data.all, function(x) (as.character(clean_data_text(x)))))
+    
     flog.info("data cleaning complete...")
 
     save(data.all, file = get_data_file_path("data.all.RData"))
