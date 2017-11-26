@@ -219,53 +219,40 @@ parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
 #'
 #' @examples
 clean_data_text <- function(input) {
+    # Lowercase
     txt <- tolower(input)
+    for (word in bad_words) {
+        patt <- paste0('\\b', word, '\\b')
+        repl <- paste(word, " ")
+        txt <- gsub(patt, repl, txt)
+    }
 
-    #stem text
-   # require(SnowballC)
-  # txt <- wordStem(txt, language = 'en')
-
-    #txt <- gsub("[0-9](?:st|nd|rd|th)", "", txt, ignore.case = F, perl = T) #remove ordinal numbers
-    txt <- gsub("[.\\-!]", " ", txt, ignore.case = F, perl = T) #remove punctuation
-    #txt <- gsub("[^\\p{L}'\\s]+", "", txt, ignore.case = F, perl = T) #remove punctuation, leaving '
-    txt <- gsub("^\\s+|\\s+$", "", txt) #trim leading and trailing whitespace
-    #get rid of unnecessary spaces
-   # txt <- str_replace_all(txt, " ", " ")
-    # Get rid of URLs
-  #  txt <- str_replace_all(txt, "http://t.co/[a-z,A-Z,0-9]*{8}", "")
-    # Take out retweet header, there is only one
-   # txt <- str_replace(txt, "RT @[a-z,A-Z]*: ", "")
-    # Get rid of hashtags
-    #txt <- str_replace_all(txt, "#[a-z,A-Z]*", "")
-    # Get rid of references to other screennames
-   # txt <- str_replace_all(txt, "@[a-z,A-Z]*", "")
-    txt <- rm_non_words(txt, TRUE, TRUE)
+    for (word in corpus::stopwords_en) {
+        patt <- paste0('\\b', word, '\\b')
+        repl <- paste(word, " ")
+        txt <- gsub(patt, repl, txt)
+    }
+   
+    #' Remove everything that is not a number or letter (may want to keep more 
+    #' stuff in your actual analyses). 
+    txt <- stringr::str_replace_all(txt, "[^a-zA-Z\\s]", " ")
+    # Shrink down to just one white space
+    txt <- stringr::str_replace_all(txt, "[\\s]+", " ")
+    # Split it
+    txt <- stringr::str_split(txt, " ")[[1]]
+    # Get rid of trailing "" if necessary
+    indexes <- which(txt == "")
+    if (length(indexes) > 0) {
+        txt <- txt[-indexes]
+    }
+    txt <- paste(txt, collapse = ' ')
 
     txt <- gsub("http"," ", txt)
     txt <- gsub("mailto", " ", txt)
-  
-    for (word in corpus::stopwords_en) {
-      patt <- paste0('\\b', word, '\\b')
-      repl <- paste(word, " ")
-      txt <- gsub(patt, repl, txt)
-    }
-    
-    for (word in bad_words) {
-      patt <- paste0('\\b', word, '\\b')
-      repl <- paste(word, " ")
-      txt <- gsub(patt, repl, txt)
-    }
 
-    # Remove excessive spacing
-    txt <- gsub("^ +| +$|( ) +", " ", txt)
-    #single quotes
-    txt <- gsub('[[:punct:] ]+', ' ', txt)
-    #remove non-alphanumeric symbols from a string
-    txt <- gsub("[^[:alnum:] ]", "", txt)
-    
     # Remove 1-2 letter words
     txt <- gsub(" *\\b[[:alpha:]]{1,2}\\b *", " ", txt)
-
+    txt <- rm_non_words(txt)
     #remove extra whitespaces
     txt <- stripWhitespace(txt)
     txt <- stri_trim_both(txt)
@@ -304,3 +291,4 @@ is_data_frame_valid <- function(df) {
     return (FALSE)
 }
 
+ 

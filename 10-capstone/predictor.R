@@ -56,7 +56,7 @@ predictor <- function(text, hints = c()) {
                 sql <- paste("select word, freq, word as predicted from [df.result] order by freq desc limit 3")
                 df.row <- sqldf(sql)
                 if (is_data_frame_valid(df.row)) {
-                    dt.search.result <- rbind(dt.search.result, data.frame(ngram = 2, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
+                    dt.search.result <- rbind(dt.search.result, data.frame(ngram = 5, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
                     if (!search_results_exist) {
                         sqldf("create index idx_freq on [dt.search.result](freq)")
                         sqldf("create index idx_word on [dt.search.result](word)")
@@ -80,7 +80,7 @@ predictor <- function(text, hints = c()) {
                 sql <- paste("select word, freq, word as predicted from [df.result] order by freq desc limit 3")
                 df.row <- sqldf(sql)
                 if (is_data_frame_valid(df.row)) {
-                    dt.search.result <- rbind(dt.search.result, data.frame(ngram = 2, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
+                    dt.search.result <- rbind(dt.search.result, data.frame(ngram = 4, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
                     if (!search_results_exist) {
                         sqldf("create index idx_freq on [dt.search.result](freq)")
                         sqldf("create index idx_word on [dt.search.result](word)")
@@ -106,7 +106,7 @@ predictor <- function(text, hints = c()) {
                 sql <- paste("select word, freq, word as predicted from [df.result] order by freq desc limit 3")
                 df.row <- sqldf(sql)
                 if (is_data_frame_valid(df.row)) {
-                    dt.search.result <- rbind(dt.search.result, data.frame(ngram = 2, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
+                    dt.search.result <- rbind(dt.search.result, data.frame(ngram = 3, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
                     if (!search_results_exist) {
                         sqldf("create index idx_freq on [dt.search.result](freq)")
                         sqldf("create index idx_word on [dt.search.result](word)")
@@ -172,10 +172,133 @@ predictor <- function(text, hints = c()) {
 
 }
 
+predictor2 <- function(text, hints = c()) {
+    
+    if (is.na(text)) {
+        warning("text NA or empty")
+        stop()
+    }
+
+    if (length(trim(text)) == 0) {
+        warning("text NA or empty")
+        stop()
+    }
+
+    text <- clean_data_text(text)
+
+    if (length(trim(text)) == 0) stop("no input text")
+
+    # flog.debug(paste("predictor --> text.cleaned =", text))
+    dt.search.terms = as.data.table(str_split(text, " "), stringsAsFactors = FALSE)
+    dt.search.result <- colnames(c("ngram", "word", "freq", "predicted"))
+    dt.search.result$ngram <- 0
+    dt.search.result$word <- NA
+    dt.search.result$freq <- NA
+    dt.search.result$predicted <- NA
+
+
+    ### tweak to optimise speed
+    term_count <- nrow(dt.search.terms)
+    if (term_count >= 5) {
+        term_count <- 5
+    }
+
+    if (term_count == 0) return(NULL)
+
+    if (term_count > 0) {
+       
+        if ((term_count >= 5)) {
+            dt.search.result <- get_ngram_data(5, text, dt.search.result)
+        }
+
+        if ((term_count >= 4)) {
+            dt.search.result <- get_ngram_data(4, text, dt.search.result)
+        }
+
+        if ((term_count >= 3)) {
+            dt.search.result <- get_ngram_data(3, text, dt.search.result)
+        }
+
+        if ((term_count >= 2)) {
+            dt.search.result <- get_ngram_data(2, text, dt.search.result)
+        }
+
+        dt.search.result <- get_ngram_data(1, text, dt.search.result)
+        dt.search.result$predicted <- lapply(dt.search.result$word, function(x) str_get_last_word(x))
+        
+        # update column to just show predicted
+        pred <- dt.search.result
+        out <- strategy_stupid_back_off(pred)
+        print("--------------------------------------------------------------------")
+        print(out)
+        out
+    }
+
+    else {
+        flog.warn(paste("no results found for ", text))
+        #  default_words
+        c()
+    }
+
+}
+
+
 predictor.benchmark <- function(text) {
     predictor(text, c())
 }
 
+get_ngram_data <- function(ngramid, text, dt.search.result) {
+    #flog.debug(paste("predictor --> get_ngram_data --> ngramid", ngramid, " text", text))
+    
+    if (ngramid == 5) {
+        text <- str_get_words(text,4)
+        data <- (n5[word %like% text])
+        data$ngram <- 5
+    }
+
+    if (ngramid == 4) {
+        text <- str_get_words(text,3)
+        data <- (n4[word %like% text])
+        data$ngram <- 4
+        data$predicted <- NA
+    }
+
+    if (ngramid == 3) {
+        text <- str_get_words(text,2)
+        data <- (n3[word %like% text])
+        data$ngram <- 3
+    }
+
+    if (ngramid == 2) {
+        text <- str_get_words(text,1)
+        data <- (n2[word %like% text])
+        data$ngram <- 2
+    }
+
+    if (ngramid == 1) {
+        text <- str_get_words(text,1)
+        data <- (n1[word == text])
+        data$ngram <- 1
+    }
+
+    flog.debug(paste("predictor --> get_ngram_data --> ",ngramid, text, " found", nrow(data)))
+
+    if (is_data_frame_valid(data)) {
+        dt.search.result <- na.omit(dt.search.result)
+        df.row <- data[order(freq, decreasing = TRUE)]
+        for (i in 1:nrow(df.row)) {
+            dt.search.result <- rbind(dt.search.result, data.frame(ngram = df.row[i,1], word =  df.row[i,2], freq =  df.row[i,3], predicted = ""))  
+        }
+        
+        print("------------------------------------------------------------")
+        
+    } else {
+        print(paste("no results for ", text))
+    }
+
+    return(dt.search.result)
+
+}
 
 # stupid back off strategy
 # https://stackoverflow.com/questions/16383194/stupid-backoff-implementation-clarification
@@ -185,17 +308,21 @@ strategy_stupid_back_off <- function(pred) {
     if (length(pred)){ return (default_words)}
     if (nrow(pred) == 0) { return (default_words)}
 
-    print(paste("strategy_stupid_back_off", pred))
+    #print(paste("strategy_stupid_back_off", pred))
+
     pred$ngram <- as.numeric(pred$ngram)
     pred$freq <- as.numeric(pred$freq)
     pred$word <- as.character(pred$word)
     pred$predicted <- as.character(pred$predicted)
-    freq_total_5 <- sqldf("select sum(freq) from pred where ngram = 5")
-    freq_total_4 <- sqldf("select sum(freq) from pred where ngram = 4")
-    freq_total_3 <- sqldf("select sum(freq) from pred where ngram = 3")
-    freq_total_2 <- sqldf("select sum(freq) from pred where ngram = 2")
-    freq_total_1 <- sqldf("select sum(freq) from pred where ngram = 1")
-    print(paste("strategy_stupid_back_off 22", pred))
+
+    totals <- sqldf("select ngram, sum(freq) as total from pred group by ngram")
+    
+    freq_total_5 <-  sqldf("select total from totals where ngram = 5")
+    freq_total_4 <-  sqldf("select total from totals where ngram = 4")
+    freq_total_3 <-  sqldf("select total from totals where ngram = 3")
+    freq_total_2 <-  sqldf("select total from totals where ngram = 2")
+    freq_total_1 <-  sqldf("select total from totals where ngram = 1")
+    
     i <- nrow(pred)
     score <- 1
     while (i > 0) {
@@ -215,17 +342,15 @@ strategy_stupid_back_off <- function(pred) {
         pred$score[i] <- score
         i <- i - 1
     }
-
-    print(paste("strategy_stupid_back_off 33", pred))
-    #data <- c(sqldf("select word from pred where score > 0 order by score desc limit 3"))
-    #return (data)
-    pred[order(score),]$word
-    #if (nrow(data) > 0) return (data)
-
+    pred$score <- as.double(pred$score)
+    aggregated <- sqldf("select predicted, sum(score) as total from pred group by predicted")
+    result <- sqldf("select predicted from aggregated order by total desc limit 3")
+    result
     #return (default_words)
    
 
 }
+
 
 #' Cycle down ngram functions when no data found
 search_ngram <- function(text) {

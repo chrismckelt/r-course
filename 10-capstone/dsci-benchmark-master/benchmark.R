@@ -207,10 +207,8 @@ benchmark <- compiler::cmpfun(function(FUN, ..., sent.list, ext.output=T) {
 # the three most frequent English words.
 predict.baseline <- function(x) {
 
-    if (length(trim(x)) > 0) {
-        res <- predictor(x)
-        res
-    }
+    res <- predictor2(x)
+    res
 
 
 
