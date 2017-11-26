@@ -206,24 +206,28 @@ predictor2 <- function(text, hints = c()) {
     if (term_count == 0) return(NULL)
 
     if (term_count > 0) {
-       
-        if ((term_count >= 5)) {
-            dt.search.result <- get_ngram_data(5, text, dt.search.result)
-        }
 
-        if ((term_count >= 4)) {
-            dt.search.result <- get_ngram_data(4, text, dt.search.result)
+        dt.search.result <- get_ngram_data(1, text, dt.search.result)
+        dt.search.result <- na.omit(dt.search.result)
+
+        if (!is_data_frame_valid(dt.search.result)) default_words
+
+        if ((term_count >= 2)) {
+            dt.search.result <- get_ngram_data(2, text, dt.search.result)
         }
 
         if ((term_count >= 3)) {
             dt.search.result <- get_ngram_data(3, text, dt.search.result)
         }
 
-        if ((term_count >= 2)) {
-            dt.search.result <- get_ngram_data(2, text, dt.search.result)
+        if ((term_count >= 4)) {
+            dt.search.result <- get_ngram_data(4, text, dt.search.result)
         }
 
-        dt.search.result <- get_ngram_data(1, text, dt.search.result)
+        if ((term_count >= 5)) {
+            dt.search.result <- get_ngram_data(5, text, dt.search.result)
+        }
+
         dt.search.result$predicted <- lapply(dt.search.result$word, function(x) str_get_last_word(x))
         
         # update column to just show predicted
@@ -250,42 +254,32 @@ predictor.benchmark <- function(text) {
 get_ngram_data <- function(ngramid, text, dt.search.result) {
     #flog.debug(paste("predictor --> get_ngram_data --> ngramid", ngramid, " text", text))
 
-    data_exists <- FALSE
     if (ngramid == 1) {
         text <- str_get_words(text, 1)
         data <- (n1[word == text])
         data$ngram <- 1
-        data_exists <- is_data_frame_valid(data)
     }
 
-    if (!data_exists) default_words
+    text <- str_get_words(text, (ngramid-1))
 
-    if (all(ngramid == 2) && (data_exists)) {
-        text <- str_get_words(text, 1)
+    if (ngramid == 2){
         data <- (n2[word %like% text])
         data$ngram <- 2
-        data_exists <- is_data_frame_valid(data)
     }
 
-    if (all(ngramid == 3) && (data_exists)) {
-        text <- str_get_words(text, 2)
+    if (ngramid == 3) {
         data <- (n3[word %like% text])
         data$ngram <- 3
-        data_exists <- is_data_frame_valid(data)
     }
 
-    if (all(ngramid == 4) && (data_exists)) {
-        text <- str_get_words(text, 3)
+    if (ngramid == 4) {
         data <- (n4[word %like% text])
         data$ngram <- 4
-        data_exists <- is_data_frame_valid(data)
     }
 
-    if (all(ngramid == 5) && (data_exists)) {
-        text <- str_get_words(text,4)
+    if (ngramid == 5) {
         data <- (n5[word %like% text])
         data$ngram <- 5
-        data_exists <- is_data_frame_valid(data)
     }
     
     flog.debug(paste("predictor --> get_ngram_data --> ",ngramid, text, " found", nrow(data)))
