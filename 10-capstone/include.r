@@ -279,15 +279,16 @@ str_get_words <- function(txt, total){
 
 is_data_frame_valid <- function(df) {
 
-    tryCatch({
-        if (length(df) == 0) return(FALSE)
-    })
+    if (is.data.frame(df)) {
+        if (is.null(df)) return(FALSE)
+   #     if (is.na(df)) return(FALSE)
+        if (length(df) > 0) return(FALSE)
 
-    tryCatch({
         if (nrow(df) > 0) return(TRUE)
-    })
 
+    }
 
+    
     return (FALSE)
 }
 

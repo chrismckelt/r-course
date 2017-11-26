@@ -249,38 +249,45 @@ predictor.benchmark <- function(text) {
 
 get_ngram_data <- function(ngramid, text, dt.search.result) {
     #flog.debug(paste("predictor --> get_ngram_data --> ngramid", ngramid, " text", text))
-    
-    if (ngramid == 5) {
+
+    data_exists <- FALSE
+    if (ngramid == 1) {
+        text <- str_get_words(text, 1)
+        data <- (n1[word == text])
+        data$ngram <- 1
+        data_exists <- is_data_frame_valid(data)
+    }
+
+    if (!data_exists) default_words
+
+    if (all(ngramid == 2) && (data_exists)) {
+        text <- str_get_words(text, 1)
+        data <- (n2[word %like% text])
+        data$ngram <- 2
+        data_exists <- is_data_frame_valid(data)
+    }
+
+    if (all(ngramid == 3) && (data_exists)) {
+        text <- str_get_words(text, 2)
+        data <- (n3[word %like% text])
+        data$ngram <- 3
+        data_exists <- is_data_frame_valid(data)
+    }
+
+    if (all(ngramid == 4) && (data_exists)) {
+        text <- str_get_words(text, 3)
+        data <- (n4[word %like% text])
+        data$ngram <- 4
+        data_exists <- is_data_frame_valid(data)
+    }
+
+    if (all(ngramid == 5) && (data_exists)) {
         text <- str_get_words(text,4)
         data <- (n5[word %like% text])
         data$ngram <- 5
+        data_exists <- is_data_frame_valid(data)
     }
-
-    if (ngramid == 4) {
-        text <- str_get_words(text,3)
-        data <- (n4[word %like% text])
-        data$ngram <- 4
-        data$predicted <- NA
-    }
-
-    if (ngramid == 3) {
-        text <- str_get_words(text,2)
-        data <- (n3[word %like% text])
-        data$ngram <- 3
-    }
-
-    if (ngramid == 2) {
-        text <- str_get_words(text,1)
-        data <- (n2[word %like% text])
-        data$ngram <- 2
-    }
-
-    if (ngramid == 1) {
-        text <- str_get_words(text,1)
-        data <- (n1[word == text])
-        data$ngram <- 1
-    }
-
+    
     flog.debug(paste("predictor --> get_ngram_data --> ",ngramid, text, " found", nrow(data)))
 
     if (is_data_frame_valid(data)) {
