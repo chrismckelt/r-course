@@ -1,6 +1,6 @@
 ## SETUP ##
 suppressMessages(rm(list = ls()))
-suppressMessages(setwd("C:/dev/r-course/9-data-products/week-4"))
+suppressMessages(setwd("C:/dev/r-course/10-capstone/"))
 
 #shiny::runApp('C:/dev/r-course/9-data-products/week-4', port = 9191, display.mode = "showcase")
 #shiny::stopApp()
@@ -12,6 +12,6 @@ rsconnect::setAccountInfo(name = 'chrismckelt',
                            secret = 'ys4H/4hnLulYPoq5/wITCwXAiWoSktKzH/HP3PCC')
 
 
- rsconnect::deployApp(appTitle = "data-products-1", appDir = "C:/dev/r-course/9-data-products/week-4")
+ rsconnect::deployApp(appTitle = "Capstone", appDir = "C:/dev/r-course/10-capstone/")
 
 

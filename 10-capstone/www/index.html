@@ -29,42 +29,93 @@
     <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
     <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
 
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
     <!-- theme and plugin javascript -->
     <script src="js/favicon.min.js"></script>
     <script src="js/inspinia.js"></script>
     <script src="js/plugins/pace/pace.min.js"></script>
     <script src="js/plugins/select2/select2.full.min.js"></script>
+
     <script>
-        $(function() {
-            var availableTags = [
-                "ActionScript",
-                "AppleScript",
-                "Asp",
-                "BASIC",
-                "C",
-                "C++",
-                "Clojure",
-                "COBOL",
-                "ColdFusion",
-                "Erlang",
-                "Fortran",
-                "Groovy",
-                "Haskell",
-                "Java",
-                "JavaScript",
-                "Lisp",
-                "Perl",
-                "PHP",
-                "Python",
-                "Ruby",
-                "Scala",
-                "Scheme"
+        $(document).ready(function() {
+            // https://simple.wikipedia.org/wiki/Most_common_words_in_English
+            var mostCommonWords = [
+                "the",
+                "be",
+                "to",
+                "of",
+                "and",
+                "a",
+                "in",
+                "that",
+                "have",
+                "I",
+                "it",
+                "for",
+                "not",
+                "on",
+                "with",
+                "he",
+                "as",
+                "you",
+                "do",
+                "at",
+                "this",
+                "but",
+                "his",
+                "by",
+                "from",
+                "they",
+                "we",
+                "say",
+                "her",
+                "she",
             ];
-            $("#search").autocomplete({
-                source: availableTags
-            });
+
+            var predictedWords = ["c++", "java", "php", "coldfusion", "javascript", "asp", "ruby"];
+
+            function split(val) {
+                return val.split(/,\s*/);
+            }
+
+            function extractLast(term) {
+                return split(term).pop();
+            }
+
+            $("#search")
+                .on("keydown", function(event) {
+                    if (event.keyCode === $.ui.keyCode.TAB &&
+                        $(this).autocomplete("instance").menu.active) {
+                        event.preventDefault();
+                    }
+                })
+                .autocomplete({
+                    minLength: 0,
+                    source: function(request, response) {
+                        if (request.term.endsWith(' ')) {
+                            response($.ui.autocomplete.filter(mostCommonWords, extractLast(request.term)));
+                        } else {
+                            response($.ui.autocomplete.filter(predictedWords, extractLast(request.term)));
+                        }
+                    },
+                    focus: function() {
+                        // prevent value inserted on focus
+                        return false;
+                    },
+                    select: function(event, ui) {
+                        var terms = split(this.value);
+                        // remove the current input
+                        terms.pop();
+                        // add the selected item
+                        terms.push(ui.item.value);
+                        // add placeholder to get the comma-and-space at the end
+                        terms.push("");
+                        this.value = terms.join(", ");
+                        return false;
+                    }
+                });
+
+
         });
     </script>
 </head>
@@ -151,7 +202,7 @@
                                 </div>
 
                                 <div class="row">
-                                    <button type="submit" class="btn btn-default">Submit</button>
+                                    <button type="submit" class="btn btn-default">Search</button>
                                 </div>
                             </form>
                         </div>

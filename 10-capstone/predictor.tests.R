@@ -25,6 +25,6 @@ using("assertthat")
 #a10 <- predictor(q10, c("movies", "novels", "stories", "pictures")) # movies
 
  
-predictor2("enjoy day yet") 
+predictor2("day yet") 
 
- 
+

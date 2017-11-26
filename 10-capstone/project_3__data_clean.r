@@ -22,12 +22,6 @@ if ((!file.exists(get_data_file_path("data.all.RData"))))
     save(data.all, file = get_data_file_path("data.all.RData"))
     flog.info("data cleaning file saved...")
 
-    rm(remove_symbols)
-    rm(reduce_periods)
-    rm(convert_to_and)
-    rm(convert_to_period)
-    rm(replace_numbers)
-    gc()
 }
 
 load(get_data_file_path("data.all.RData"))

@@ -220,43 +220,28 @@ parallelize_task_chunked <- function(task, df.big, chunk_size = 1000) {
 #' @examples
 clean_data_text <- function(input) {
     # Lowercase
-    txt <- tolower(input)
+    input <- tolower(input)
     for (word in bad_words) {
         patt <- paste0('\\b', word, '\\b')
         repl <- paste(word, " ")
-        txt <- gsub(patt, repl, txt)
+        txt <- gsub(patt, repl, input)
     }
 
-    for (word in corpus::stopwords_en) {
-        patt <- paste0('\\b', word, '\\b')
-        repl <- paste(word, " ")
-        txt <- gsub(patt, repl, txt)
-    }
-   
-    #' Remove everything that is not a number or letter (may want to keep more 
-    #' stuff in your actual analyses). 
-    txt <- stringr::str_replace_all(txt, "[^a-zA-Z\\s]", " ")
-    # Shrink down to just one white space
-    txt <- stringr::str_replace_all(txt, "[\\s]+", " ")
-    # Split it
-    txt <- stringr::str_split(txt, " ")[[1]]
-    # Get rid of trailing "" if necessary
-    indexes <- which(txt == "")
-    if (length(indexes) > 0) {
-        txt <- txt[-indexes]
-    }
-    txt <- paste(txt, collapse = ' ')
+    input <- gsub("http", " ", input)
+    input <- gsub("mailto", " ", input)
 
-    txt <- gsub("http"," ", txt)
-    txt <- gsub("mailto", " ", txt)
-
+    input <- gsub("[0-9](?:st|nd|rd|th)", "", input, ignore.case = F, perl = T) #remove ordinal numbers
+    input <- gsub("[.\\-!]", " ", input, ignore.case = F, perl = T) #remove punctuation
+    input <- gsub("[^\\p{L}'\\s]+", "", input, ignore.case = F, perl = T) #remove punctuation, leaving '
+    input <- gsub("^\\s+|\\s+$", "", input) #trim leading and trailing whitespace
+    input <- stripWhitespace(input)
     # Remove 1-2 letter words
-    txt <- gsub(" *\\b[[:alpha:]]{1,2}\\b *", " ", txt)
-    txt <- rm_non_words(txt)
+    input <- gsub(" *\\b[[:alpha:]]{1,2}\\b *", " ", input)
+    input <- rm_non_words(input)
     #remove extra whitespaces
-    txt <- stripWhitespace(txt)
-    txt <- stri_trim_both(txt)
-    txt
+    input <- stripWhitespace(input)
+    input <- stri_trim_both(input)
+    input
 }
 
 

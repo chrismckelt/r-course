@@ -154,19 +154,18 @@ predictor <- function(text, hints = c()) {
                 #dt.fast.lookup <- rbind(dt.search.result, data.frame(ngram = 1, word = df.row[1], freq = df.row[2], predicted = df.row[3]))
             }
         }
-
         
         # update column to just show predicted
         dt.search.result$predicted <- lapply(dt.search.result$predicted, function(x) str_get_last_word(x))
         out <- strategy_stupid_back_off(dt.search.result)
-        print("--------------------------------------------------------------------")
-        print(out)
+      #  print("--------------------------------------------------------------------")
+      #  print(out)
         out
     }
  
     else {
         flog.warn(paste("no results found for ",text))
-        #  default_words
+        #default_words
         c()
     }
 
@@ -212,6 +211,8 @@ predictor2 <- function(text, hints = c()) {
 
         if (!is_data_frame_valid(dt.search.result)) default_words
 
+       # if  (nrow(dt.search.result)) default_words
+
         if ((term_count >= 2)) {
             dt.search.result <- get_ngram_data(2, text, dt.search.result)
         }
@@ -229,19 +230,22 @@ predictor2 <- function(text, hints = c()) {
         }
 
         dt.search.result$predicted <- lapply(dt.search.result$word, function(x) str_get_last_word(x))
-        
-        # update column to just show predicted
-        pred <- dt.search.result
-        out <- strategy_stupid_back_off(pred)
-        print("--------------------------------------------------------------------")
-        print(out)
-        out
+
+        if (is_data_frame_valid(dt.search.result)) {
+            # update column to just show predicted
+            pred <- dt.search.result
+            out <- strategy_stupid_back_off(pred)
+            out
+        } else {
+            default_words
+        }
     }
 
     else {
         flog.warn(paste("no results found for ", text))
-        #  default_words
-        c()
+        
+        default_words
+        #c()
     }
 
 }
@@ -255,7 +259,7 @@ get_ngram_data <- function(ngramid, text, dt.search.result) {
     #flog.debug(paste("predictor --> get_ngram_data --> ngramid", ngramid, " text", text))
 
     if (ngramid == 1) {
-        text <- str_get_words(text, 1)
+        text <- str_get_last_word(text)
         data <- (n1[word == text])
         data$ngram <- 1
     }
@@ -266,7 +270,7 @@ get_ngram_data <- function(ngramid, text, dt.search.result) {
         data <- (n2[word %like% text])
         data$ngram <- 2
     }
-
+     
     if (ngramid == 3) {
         data <- (n3[word %like% text])
         data$ngram <- 3
@@ -284,19 +288,18 @@ get_ngram_data <- function(ngramid, text, dt.search.result) {
     
     flog.debug(paste("predictor --> get_ngram_data --> ",ngramid, text, " found", nrow(data)))
 
-    if (is_data_frame_valid(data)) {
+    if (is_data_frame_valid(data) || nrow(data)>1) {
         dt.search.result <- na.omit(dt.search.result)
         df.row <- data[order(freq, decreasing = TRUE)]
         for (i in 1:nrow(df.row)) {
-            dt.search.result <- rbind(dt.search.result, data.frame(ngram = df.row[i,1], word =  df.row[i,2], freq =  df.row[i,3], predicted = ""))  
+            dt.search.result <- rbind(dt.search.result, data.frame(ngram = df.row[i, 1], word = df.row[i, 2], freq = df.row[i, 3], predicted = ""))
         }
-        
         print("------------------------------------------------------------")
         
     } else {
         print(paste("no results for ", text))
     }
-
+ 
     return(dt.search.result)
 
 }
@@ -305,10 +308,7 @@ get_ngram_data <- function(ngramid, text, dt.search.result) {
 # https://stackoverflow.com/questions/16383194/stupid-backoff-implementation-clarification
 strategy_stupid_back_off <- function(pred) {
 
-    if (is.null(pred)){ return (default_words)}
-    if (length(pred)){ return (default_words)}
-    if (nrow(pred) == 0) { return (default_words)}
-
+    if (!is_data_frame_valid(pred)) default_words
     #print(paste("strategy_stupid_back_off", pred))
 
     pred$ngram <- as.numeric(pred$ngram)
@@ -376,7 +376,4 @@ search_unigram <- function(text) {
 
 
 default_words <- c('the', 'on', 'a')
-
-
-dt.fast.lookup <- colnames(c("ngram", "word", "freq", "predicted"))
-indexed <- FALSE
+#default_words <- sqldf("select word from n1 order by freq desc limit 3")
