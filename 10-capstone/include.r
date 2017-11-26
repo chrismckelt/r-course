@@ -222,28 +222,17 @@ clean_data_text <- function(input) {
     txt <- tolower(input)
 
     #stem text
-    require(SnowballC)
-    txt <- wordStem(txt, language = 'en')
+   # require(SnowballC)
+  # txt <- wordStem(txt, language = 'en')
 
-    for (word in corpus::stopwords_en) {
-        patt <- paste0('\\b', word, '\\b')
-        repl <- paste(word, " ")
-        txt <- gsub(patt, repl, txt)
-    }
-
-    for (word in bad_words) {
-        patt <- paste0('\\b', word, '\\b')
-        repl <- paste(word, " ")
-        txt <- gsub(patt, repl, txt)
-    }
     #txt <- gsub("[0-9](?:st|nd|rd|th)", "", txt, ignore.case = F, perl = T) #remove ordinal numbers
-    #txt <- gsub("[.\\-!]", " ", txt, ignore.case = F, perl = T) #remove punctuation
+    txt <- gsub("[.\\-!]", " ", txt, ignore.case = F, perl = T) #remove punctuation
     #txt <- gsub("[^\\p{L}'\\s]+", "", txt, ignore.case = F, perl = T) #remove punctuation, leaving '
-    #txt <- gsub("^\\s+|\\s+$", "", txt) #trim leading and trailing whitespace
+    txt <- gsub("^\\s+|\\s+$", "", txt) #trim leading and trailing whitespace
     #get rid of unnecessary spaces
    # txt <- str_replace_all(txt, " ", " ")
     # Get rid of URLs
-    #txt <- str_replace_all(txt, "http://t.co/[a-z,A-Z,0-9]*{8}", "")
+  #  txt <- str_replace_all(txt, "http://t.co/[a-z,A-Z,0-9]*{8}", "")
     # Take out retweet header, there is only one
    # txt <- str_replace(txt, "RT @[a-z,A-Z]*: ", "")
     # Get rid of hashtags
@@ -255,6 +244,17 @@ clean_data_text <- function(input) {
     txt <- gsub("http"," ", txt)
     txt <- gsub("mailto", " ", txt)
   
+    for (word in corpus::stopwords_en) {
+      patt <- paste0('\\b', word, '\\b')
+      repl <- paste(word, " ")
+      txt <- gsub(patt, repl, txt)
+    }
+    
+    for (word in bad_words) {
+      patt <- paste0('\\b', word, '\\b')
+      repl <- paste(word, " ")
+      txt <- gsub(patt, repl, txt)
+    }
 
     # Remove excessive spacing
     txt <- gsub("^ +| +$|( ) +", " ", txt)
