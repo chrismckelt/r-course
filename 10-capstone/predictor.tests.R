@@ -24,7 +24,8 @@ using("assertthat")
 #a9 <- predictor(q9, c("weekly", "outside", "daily", "inside")) #### outside
 #a10 <- predictor(q10, c("movies", "novels", "stories", "pictures")) # movies
 
- 
-predictor2("day yet") 
+
+predictor("able pay its")
+predictor2("able pay its") 
 
 

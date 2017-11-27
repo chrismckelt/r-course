@@ -15,6 +15,8 @@ if (!file.exists(ngram_file_path)) {
         ng <- term_stats(text, filt, ngrams = ngram_size, min_count = 1,,min_support = 1)
 
         ngram <- data.table(word = unlist(ng$term), freq = unlist(ng$count))
+        ngram$word <- as.character(ngram$word)
+        ngram$freq <- as.numeric(ngram$freq)
         # sqldf("create index idx_freq on ngram(freq)")
         # sqldf("create index idx_word on ngram(word)")
         return(ngram)

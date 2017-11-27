@@ -231,20 +231,20 @@ predictor2 <- function(text, hints = c()) {
 
         dt.search.result$predicted <- lapply(dt.search.result$word, function(x) str_get_last_word(x))
 
-        if (is_data_frame_valid(dt.search.result)) {
+        if (nrow(dt.search.result) > 1) {
             # update column to just show predicted
             pred <- dt.search.result
             out <- strategy_stupid_back_off(pred)
-            out
-        } else {
-            default_words
+            return (out)
         }
+        flow.warn("FAILED")
+        return (default_words)
     }
 
     else {
-        flog.warn(paste("no results found for ", text))
+        flog.warn(paste("input invalid", text))
         
-        default_words
+        return(default_words)
         #c()
     }
 
@@ -259,36 +259,33 @@ get_ngram_data <- function(ngramid, text, dt.search.result) {
     #flog.debug(paste("predictor --> get_ngram_data --> ngramid", ngramid, " text", text))
 
     if (ngramid == 1) {
-        text <- str_get_last_word(text)
-        data <- (n1[word == text])
+        data <- (n1[word == str_get_last_word(text)])
         data$ngram <- 1
     }
 
-    text <- str_get_words(text, (ngramid-1))
-
     if (ngramid == 2){
-        data <- (n2[word %like% text])
+        data <- (n2[word %like% str_get_words(text, (ngramid - 1))])
         data$ngram <- 2
     }
      
     if (ngramid == 3) {
-        data <- (n3[word %like% text])
+        data <- (n3[word %like% str_get_words(text, (ngramid - 1))])
         data$ngram <- 3
     }
 
     if (ngramid == 4) {
-        data <- (n4[word %like% text])
+        data <- (n4[word %like% str_get_words(text, (ngramid - 1))])
         data$ngram <- 4
     }
 
     if (ngramid == 5) {
-        data <- (n5[word %like% text])
+        data <- (n5[word %like% str_get_words(text, (ngramid - 1))])
         data$ngram <- 5
     }
     
-    flog.debug(paste("predictor --> get_ngram_data --> ",ngramid, text, " found", nrow(data)))
-
-    if (is_data_frame_valid(data) || nrow(data)>1) {
+    flog.debug(paste("predictor --> get_ngram_data --> ", ngramid, text <- str_get_words(text, (ngramid - 1)), " found", nrow(data)))
+    #print(data)
+    if (is_data_frame_valid(data)) {
         dt.search.result <- na.omit(dt.search.result)
         df.row <- data[order(freq, decreasing = TRUE)]
         for (i in 1:nrow(df.row)) {
@@ -308,7 +305,9 @@ get_ngram_data <- function(ngramid, text, dt.search.result) {
 # https://stackoverflow.com/questions/16383194/stupid-backoff-implementation-clarification
 strategy_stupid_back_off <- function(pred) {
 
-    if (!is_data_frame_valid(pred)) default_words
+    if (!is_data_frame_valid(pred)) {
+        return (NULL)
+    }
     #print(paste("strategy_stupid_back_off", pred))
 
     pred$ngram <- as.numeric(pred$ngram)
@@ -355,6 +354,7 @@ strategy_stupid_back_off <- function(pred) {
 
 #' Cycle down ngram functions when no data found
 search_ngram <- function(text) {
+    
     check <- strsplit(text, ' ')
 
     sql <- paste0("select * from n", (word_count(check)))
@@ -362,6 +362,7 @@ search_ngram <- function(text) {
     sql <- paste0(sql, " where word like '", text, "%'")
     sql = paste(sql, " order by freq desc limit 3 ")
     flog.debug(paste("predictor --> search_ngram --> ", sql))
+  
     df.result <- sqldf(sql)
     flog.debug(paste("predictor --> search_ngram sql --> rows = ", nrow(df.result)))
     df.result

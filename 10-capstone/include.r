@@ -233,11 +233,12 @@ clean_data_text <- function(input) {
     input <- gsub("[0-9](?:st|nd|rd|th)", "", input, ignore.case = F, perl = T) #remove ordinal numbers
     input <- gsub("[.\\-!]", " ", input, ignore.case = F, perl = T) #remove punctuation
     input <- gsub("[^\\p{L}'\\s]+", "", input, ignore.case = F, perl = T) #remove punctuation, leaving '
-    input <- gsub("^\\s+|\\s+$", "", input) #trim leading and trailing whitespace
-    input <- stripWhitespace(input)
+   
     # Remove 1-2 letter words
     input <- gsub(" *\\b[[:alpha:]]{1,2}\\b *", " ", input)
+    input <- gsub("'", '', input)
     input <- rm_non_words(input)
+    input <- gsub("^\\s+|\\s+$", "", input) #trim leading and trailing whitespace
     #remove extra whitespaces
     input <- stripWhitespace(input)
     input <- stri_trim_both(input)
@@ -263,17 +264,13 @@ str_get_words <- function(txt, total){
 
 
 is_data_frame_valid <- function(df) {
-
+    if (is.null(df)) return(FALSE)
+    
     if (is.data.frame(df)) {
-        if (is.null(df)) return(FALSE)
-   #     if (is.na(df)) return(FALSE)
-        if (length(df) > 0) return(FALSE)
-
+        #if (length(df) > 0) return(FALSE)
         if (nrow(df) > 0) return(TRUE)
-
     }
 
-    
     return (FALSE)
 }
 
