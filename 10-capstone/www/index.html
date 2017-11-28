@@ -22,7 +22,7 @@
     <!--shiny -->
     {{ headContent() }}
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <script src="js/bootstrap.min.js"></script>
@@ -187,11 +187,12 @@
                     </div>
                 </nav>
             </div>
-            <div id="div1" class="wrapper wrapper-content animated fadeInRight">
-                <div class="row">
+            
+			<div id="div1" class="wrapper wrapper-content animated fadeInRight">
                     <div class="col-lg-12">
                         <div class="text-centre m-t-lg">
                             <h1> Start typing below to activate a prediction of the next word.</h1>
+							<hr/>
                             <p>The next word will be predicted</p>
                             <form role="form">
                                 <div class="row">
@@ -207,55 +208,47 @@
                             </form>
                         </div>
                     </div>
-                </div>
-                <div id="div2" class="wrapper wrapper-content animated fadeInRight">
+            </div>
+			
+            <div id="div2" class="wrapper wrapper-content animated fadeInRight">
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="text-left m-t-lg">
                                 <h1>
-                                    Instructions
+                                    Overview
                                 </h1>
-                                <h3>Click a row item from the data dictionary table</h3>
-                                <p>This will compare the variable against the aggregated loan amount.</p>
-                                <p>
-                                    Some interesting comparisons include:
-                                    <ol>
-                                        <li>grade - credit quality of applicant</li>
-                                        <li>home_ownership - The home ownership status provided by the borrower during registration. Our values are: RENT, OWN, MORTGAGE, OTHER.</li>
-                                        <li>term - The number of payments on the loan. Values are in months and can be either 36 or 60.</li>
-                                        <li>zip_code - The first 3 numbers of the zip code provided by the borrower in the loan application.</li>
-                                    </ol>
-                                </p>
-                                <p>
-                                    <img src="https://user-images.githubusercontent.com/662868/31750771-9c20e4b6-b4b4-11e7-9767-b401845660d5.png" alt="Click on a row to change the chart" />
-                                </p>
+                                <hr/>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="div3" class="wrapper wrapper-content animated fadeInRight">
+            <div id="div3" class="wrapper wrapper-content animated fadeInRight">
                     <div class="col-xs-12">
+						<h1>
+							Contact the author 
+                        </h1>
+						<hr/>
                         <ul class="list" style="list-style-type: none;">
-                            <li>
-                                <a href="https://www.dropbox.com/s/m31zsq56uhacrqm/Chris_McKelt_Resume.docx?dl=0" class="zocial dropbox">resume</a>
-                            </li>
-                            <li>
-                                <li>
-                                    <a href="http://www.linkedin.com/in/chrismckelt" class="zocial linkedin">linkedin</a>
-                                </li>
-                                <li>
-                                    <a href="http://twitter.com/chris_mckelt" class="zocial email">chris@mckelt.com</a>
-                                </li>
-                                <li>
-                                    <a href="http://twitter.com/chris_mckelt" class="zocial twitter">@chris_mckelt</a>
-                                </li>
-                                <li>
-                                    <a href="https://github.com/chrismckelt" class="zocial github">chrismckelt</a>
-                                </li>
-                                <li>
-                                    <a href="http://mckelt.com/blog" class="zocial blogger">Blog</a>
-                                </li>
+							<li>
+								<a href="http://www.linkedin.com/in/chrismckelt" class="zocial linkedin">linkedin</a>
+							</li>
+							<li>&nbsp;</li>
+							<li>
+								<a href="http://twitter.com/chris_mckelt" class="zocial email">chris@mckelt.com</a>
+							</li>
+							<li>&nbsp;</li>
+							<li>
+								<a href="http://twitter.com/chris_mckelt" class="zocial twitter">@chris_mckelt</a>
+							</li>
+							<li>&nbsp;</li>
+							<li>
+								<a href="https://github.com/chrismckelt" class="zocial github">chrismckelt</a>
+							</li>
+							<li>&nbsp;</li>
+							<li>
+								<a href="http://mckelt.com/blog" class="zocial blogger">Blog</a>
+							</li>
                         </ul>
                     </div>
                 </div>
