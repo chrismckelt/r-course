@@ -16,6 +16,7 @@ if (!file.exists(ngram_file_path)) {
         ngram <- data.table(word = names(ng), freq = unclass(ng))
         ngram$word <- as.character(ngram$word)
         ngram$freq <- as.numeric(ngram$freq)
+        setkey(as.data.table(ngram),freq)
         #ngram <- data.table(word = unlist(ng$term), freq = unlist(ng$count))
         
         return(ngram)

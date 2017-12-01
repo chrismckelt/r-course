@@ -233,7 +233,7 @@ clean_data_text <- function(input) {
     input <- gsub("[0-9](?:st|nd|rd|th)", "", input, ignore.case = F, perl = T) #remove ordinal numbers
     input <- gsub("[.\\-!]", " ", input, ignore.case = F, perl = T) #remove punctuation
     input <- gsub("[^\\p{L}'\\s]+", "", input, ignore.case = F, perl = T) #remove punctuation, leaving '
-   
+    input <- gsub('[[:digit:]]+', '', input)
     # Remove 1-2 letter words
     input <- gsub(" *\\b[[:alpha:]]{1,2}\\b *", " ", input)
     input <- gsub("'", '', input)

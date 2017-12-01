@@ -195,7 +195,6 @@ predictor2 <- function(text, hints = c()) {
     dt.search.result$freq <- NA
     dt.search.result$predicted <- NA
 
-
     ### tweak to optimise speed
     term_count <- nrow(dt.search.terms)
     if (term_count >= 5) {
@@ -211,33 +210,33 @@ predictor2 <- function(text, hints = c()) {
 
         if (!is_data_frame_valid(dt.search.result)) default_words
 
-       # if  (nrow(dt.search.result)) default_words
-
+        setkey(as.data.table(dt.search.result), predicted)
+        
         if ((term_count >= 2)) {
             dt.search.result <- get_ngram_data(2, text, dt.search.result)
         }
 
-        if ((term_count >= 3)) {
-            dt.search.result <- get_ngram_data(3, text, dt.search.result)
-        }
+        #if ((term_count >= 3)) {
+            #dt.search.result <- get_ngram_data(3, text, dt.search.result)
+        #}
 
-        if ((term_count >= 4)) {
-            dt.search.result <- get_ngram_data(4, text, dt.search.result)
-        }
+        #if ((term_count >= 4)) {
+            #dt.search.result <- get_ngram_data(4, text, dt.search.result)
+        #}
 
-        if ((term_count >= 5)) {
-            dt.search.result <- get_ngram_data(5, text, dt.search.result)
-        }
+        #if ((term_count >= 5)) {
+            #dt.search.result <- get_ngram_data(5, text, dt.search.result)
+        #}
 
         dt.search.result$predicted <- lapply(dt.search.result$word, function(x) str_get_last_word(x))
 
-        if (nrow(dt.search.result) > 1) {
+        if (length(dt.search.result) && is_data_frame_valid(dt.search.result) > 0) {
             # update column to just show predicted
             pred <- dt.search.result
             out <- strategy_stupid_back_off(pred)
             return (out)
         }
-        flow.warn("FAILED")
+        flog.warn("FAILED")
         return (default_words)
     }
 
@@ -264,7 +263,7 @@ get_ngram_data <- function(ngramid, text, dt.search.result) {
     }
 
     if (ngramid == 2){
-        data <- (n2[word %like% str_get_words(text, (ngramid - 1))])
+        data <- (n2[word %like% str_get_last_word(text)])
         data$ngram <- 2
     }
      
@@ -283,20 +282,24 @@ get_ngram_data <- function(ngramid, text, dt.search.result) {
         data$ngram <- 5
     }
     
-    flog.debug(paste("predictor --> get_ngram_data --> ", ngramid, text <- str_get_words(text, (ngramid - 1)), " found", nrow(data)))
+    flog.debug(paste("predictor --> get_ngram_data --> ", ngramid, text <- ifelse(ngramid <= 2, str_get_last_word(text) , str_get_words(text, (ngramid - 1))), " found", nrow(data)))
     #print(data)
     if (is_data_frame_valid(data)) {
         dt.search.result <- na.omit(dt.search.result)
+        
+        dt.search.result <- head(sort(dt.search.result$freq, decreasing = TRUE), n = 3)
         df.row <- data[order(freq, decreasing = TRUE)]
         for (i in 1:nrow(df.row)) {
             dt.search.result <- rbind(dt.search.result, data.frame(ngram = df.row[i, 1], word = df.row[i, 2], freq = df.row[i, 3], predicted = ""))
         }
+
+        dt.search.result <- dt.search.result[-1,]
         print("------------------------------------------------------------")
         
     } else {
         print(paste("no results for ", text))
     }
- 
+    
     return(dt.search.result)
 
 }
@@ -317,8 +320,8 @@ strategy_stupid_back_off <- function(pred) {
 
     totals <- sqldf("select ngram, sum(freq) as total from pred group by ngram")
     
-    freq_total_5 <-  sqldf("select total from totals where ngram = 5")
-    freq_total_4 <-  sqldf("select total from totals where ngram = 4")
+    #freq_total_5 <-  sqldf("select total from totals where ngram = 5")
+    #freq_total_4 <-  sqldf("select total from totals where ngram = 4")
     freq_total_3 <-  sqldf("select total from totals where ngram = 3")
     freq_total_2 <-  sqldf("select total from totals where ngram = 2")
     freq_total_1 <-  sqldf("select total from totals where ngram = 1")
@@ -328,9 +331,9 @@ strategy_stupid_back_off <- function(pred) {
     while (i > 0) {
 
         if (pred$ngram[i] == 5) {
-            score <- pred$freq[i] / freq_total_4
+            #score <- pred$freq[i] / freq_total_4
         } else if (pred$ngram[i] == 4) {
-            score <- 0.4 * pred$freq[i] / freq_total_3
+            #score <- 0.4 * pred$freq[i] / freq_total_3
         } else if (pred$ngram[i] == 3) {
             score <- 0.4 * 0.4 * pred$freq[i] / freq_total_2
         } else if (pred$ngram[i] == 2) {
@@ -369,7 +372,7 @@ search_ngram <- function(text) {
 }
 
 search_unigram <- function(text) {
-    sql <- paste0("select * from n1 where word = '", text, "' order by freq desc limit 5 ")
+    sql <- paste0("select * from n1 where word = '", text, "' order by freq desc limit 3 ")
     flog.debug(paste("predictor --> search_unigram --> ", sql))
     df.result <- sqldf(sql)
     df.result
