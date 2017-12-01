@@ -36,7 +36,7 @@ options(DT.autoHideNavigation = FALSE)
 options(scipen = 999)
 set.seed(3333)
 
- source('c:/dev/r-course/10-capstone/project_0_run.r')
+source('c:/dev/r-course/10-capstone/project_0_run.r')
  
 #stop("stopping")
 
@@ -65,14 +65,6 @@ server <- function(input, output, session) {
     })
 
 
-    #observeEvent(input$divChanged, {
-    #cat("divChanged")
-    #session$sendCustomMessage(type = 'divChanged', shiny:::flushReact())
-    #})
-
-
-    outputOptions(output, 'chartLoanAmount', suspendWhenHidden = FALSE)
-    outputOptions(output, 'data_dictionary', suspendWhenHidden = FALSE)
 }
 
 #' UI
