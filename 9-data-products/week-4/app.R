@@ -8,26 +8,6 @@ switch(Sys.info()[['sysname']],
      #  Linux  = {suppressMessages(setwd("~/srv/connect/apps/loan_book_analyser"))},
        Darwin = {print("I'm a Mac.")})
 
-library(pacman)
-library(tidyverse)
-library(knitr)
-library(markdown)
-library(data.table)
-library(sqldf)
-library(ggplot2)
-library(lubridate)
-library(foreach)
-library(RSQLite)
-library(shiny)
-library(shinyjs)
-library(choroplethr)
-library(choroplethrMaps)
-library(DescTools)
-library(readxl)
-library(devtools)
-library(ggplot2)
-library(plotly)
-library(DT)
 
 Sys.setenv("plotly_username" = "chrismckelt")
 Sys.setenv("plotly_api_key" = "M6S961nyr6MaEAwtNAM0")
@@ -36,71 +16,7 @@ options(DT.autoHideNavigation = FALSE)
 options(scipen = 999)
 set.seed(3333)
 
-#' download and save file
-save_file = function(url, name) {
-  if (!file.exists(name)) {
-    library(downloader)
-    download(url, destfile = name)
-  }
-}
-
-outdir <- paste0(trimws(getwd()), "/data")
-outdir
-zippedFile <- paste0(trimws(outdir), "/lending-club-loan-data.zip")
-zippedFile
-
-if (!file.exists(zippedFile)) {
-  ### original file = "https://www.kaggle.com/wendykan/lending-club-loan-data/downloads/lending-club-loan-data.zip"
-  ### requires authentication
-  ### for this exercise most to server with no Auth for download
-  save_file("http://www.mckelt.com/lending-club-loan-data.zip", zippedFile)
  
-  unzip(zipfile=zippedFile,exdir = outdir)
-}
-
-
-connection_string <- paste(getwd(), '/data/database.sqlite', sep = '')
-db <- RSQLite::dbConnect(SQLite(), dbname = connection_string, loadable.extensions = TRUE, cache_size = NULL, synchronous = "off", flags = SQLITE_RWC, vfs = NULL)
-
-data.tables = dbListTables(db)
-data_loanbook <- sqldf("select * from loan", connection = db)
-
-## clean
-#excel_file <- paste0(getwd(), "/data/LCdatadictionary.xlsx")
-data_dictionary <- read_excel("data/LCDataDictionary.xlsx")
-data_dictionary <- sqldf("select LoanStatNew as Variable_name, description from [data_dictionary] where LoanStatNew != 'NA'")
-data_dictionary$Id <- seq.int(nrow(data_dictionary))
-
-### keep only columns in data dictionary
-cols_to_keep <- data_dictionary[[1]]
-data_loanbook <- data_loanbook[, which(names(data_loanbook) %in% cols_to_keep)]
-
-### fix dates
-data_loanbook$issue_d <- as.Date(gsub("^", "01-", data_loanbook$issue_d), format = "%d-%b-%Y")
-data_loanbook$grade <- as.factor(data_loanbook$grade)
-
-## load the state names
-data(state.regions)
-# merge the loan book with the state names
-data_loanbook <- merge(data_loanbook, state.regions, by.x = "addr_state", by.y = "abb")
-
-#' takes a variable name to filter and group the data (vs total loan amount)
-#'
-#' @param by
-#'
-#' @return
-#' @export
-#'
-#' @examples
-query.data <- function(by) {
-    if (length(by) < 1) {
-        by <- "grade"
-    }
-    sql <- paste("select sum(loan_amnt) as total_loan_amount, ", by, " from [data_loanbook] group by ", by)
-    print(sql)
-    return(sqldf(sql))
-}
-
 
 #stop("stopping")
 

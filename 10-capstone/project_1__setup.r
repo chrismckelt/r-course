@@ -20,7 +20,12 @@ p_load("cluster")
 p_load("Matrix")
 p_load("dplyr")
 p_load("SparseM")
-p_load("qdap")
+install_github(
+    "trinker/qdapDictionaries",
+    "trinker/qdapRegex",
+    "trinker/qdapTools",
+    "trinker/qdap"
+)
 p_load("parallel")
 p_load("DBI")
 using("textreg") #https://cran.r-project.org/web/packages/textreg/textreg.pdf
