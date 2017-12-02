@@ -35,6 +35,7 @@
     <script src="js/inspinia.js"></script>
     <script src="js/plugins/pace/pace.min.js"></script>
     <script src="js/plugins/select2/select2.full.min.js"></script>
+    {{ useShinyjs() }}
 
     <script>
         $(document).ready(function() {
@@ -169,8 +170,8 @@
                         </li>
                         <li>
                             <a href="#">
-                            {{actionLink("stop", "Stop")}}
-                        </a>
+                                {{actionLink("stop", "stop")}}
+                            </a>
                         </li>
                 </ul>
             </div>
@@ -187,75 +188,79 @@
                     </div>
                 </nav>
             </div>
-            
-			<div id="div1" class="wrapper wrapper-content animated fadeInRight">
-                    <div class="col-lg-12">
-                        <div class="text-centre m-t-lg">
-                            <h1> Start typing below to activate a prediction of the next word.</h1>
-							<hr/>
-                            <p>The next word will be predicted</p>
-                            <form role="form">
-                                <div class="row">
-                                    <div class="form-group">
-                                        <label for="search">Search</label>
-                                        <input id="search" type="text" class="form-control input-lg">
-                                    </div>
-                                </div>
 
-                                <div class="row">
-                                    <button type="submit" class="btn btn-default">Search</button>
+            <div id="div1" class="wrapper wrapper-content animated fadeInRight">
+                <div class="col-lg-12">
+                    <div class="text-centre m-t-lg">
+                        <h1> Start typing below to activate a prediction of the next word.</h1>
+                        <hr/>
+                        <p>The next word will be predicted</p>
+                        <form role="form">
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="search">Search</label>
+                                    <input id="search" type="text" class="form-control input-lg">
                                 </div>
-                            </form>
-                        </div>
-                    </div>
-            </div>
-			
-            <div id="div2" class="wrapper wrapper-content animated fadeInRight">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="text-left m-t-lg">
-                                <h1>
-                                    Overview
-                                </h1>
-                                <hr/>
                             </div>
+
+                            <div class="row">
+                                <button type="submit" class="btn btn-default">Search</button>
+                            </div>
+                            <div class="row">
+
+                            </div>
+                            {{textOutput('search_result_1')}}
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="div2" class="wrapper wrapper-content animated fadeInRight">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="text-left m-t-lg">
+                            <h1>
+                                Overview
+                            </h1>
+                            <hr/>
                         </div>
                     </div>
                 </div>
+            </div>
 
             <div id="div3" class="wrapper wrapper-content animated fadeInRight">
-                    <div class="col-xs-12">
-						<h1>
-							Contact the author 
-                        </h1>
-						<hr/>
-                        <ul class="list" style="list-style-type: none;">
-							<li>
-								<a href="http://www.linkedin.com/in/chrismckelt" class="zocial linkedin">linkedin</a>
-							</li>
-							<li>&nbsp;</li>
-							<li>
-								<a href="http://twitter.com/chris_mckelt" class="zocial email">chris@mckelt.com</a>
-							</li>
-							<li>&nbsp;</li>
-							<li>
-								<a href="http://twitter.com/chris_mckelt" class="zocial twitter">@chris_mckelt</a>
-							</li>
-							<li>&nbsp;</li>
-							<li>
-								<a href="https://github.com/chrismckelt" class="zocial github">chrismckelt</a>
-							</li>
-							<li>&nbsp;</li>
-							<li>
-								<a href="http://mckelt.com/blog" class="zocial blogger">Blog</a>
-							</li>
-                        </ul>
-                    </div>
+                <div class="col-xs-12">
+                    <h1>
+                        Contact the author
+                    </h1>
+                    <hr/>
+                    <ul class="list" style="list-style-type: none;">
+                        <li>
+                            <a href="http://www.linkedin.com/in/chrismckelt" class="zocial linkedin">linkedin</a>
+                        </li>
+                        <li>&nbsp;</li>
+                        <li>
+                            <a href="http://twitter.com/chris_mckelt" class="zocial email">chris@mckelt.com</a>
+                        </li>
+                        <li>&nbsp;</li>
+                        <li>
+                            <a href="http://twitter.com/chris_mckelt" class="zocial twitter">@chris_mckelt</a>
+                        </li>
+                        <li>&nbsp;</li>
+                        <li>
+                            <a href="https://github.com/chrismckelt" class="zocial github">chrismckelt</a>
+                        </li>
+                        <li>&nbsp;</li>
+                        <li>
+                            <a href="http://mckelt.com/blog" class="zocial blogger">Blog</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-
         </div>
-        <script src="js/custom.js"></script>
+
+    </div>
+    <script src="js/custom.js"></script>
 </body>
 
 </html>

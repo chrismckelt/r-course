@@ -13,19 +13,19 @@ predictor <- function(text, hints = c()) {
    # text <- "asdf best thing asdf ddd asdad ddd "
     if (is.na(text)) {
         warning("text NA or empty")
-        stop()
+        return (default_words)
     }
 
     if (length(trim(text)) == 0) {
         warning("text NA or empty")
-        stop()
+        return (default_words)
     }
  
     text <- clean_data_text(text)
 
-    if (length(trim(text)) == 0)  stop("no input text")
+    if (length(trim(text)) == 0)  return (default_words)
 
-   # flog.debug(paste("predictor --> text.cleaned =", text))
+    flog.debug(paste("predictor --> text.cleaned =", text))
     dt.search.result <- colnames(c("ngram", "word", "freq", "predicted"))
     dt.search.terms = as.data.table(str_split(text, " "), stringsAsFactors = FALSE)
 
@@ -165,8 +165,8 @@ predictor <- function(text, hints = c()) {
  
     else {
         flog.warn(paste("no results found for ",text))
-        #default_words
-        c()
+        return (default_words)
+        #c()
     }
 
 }

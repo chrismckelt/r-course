@@ -211,7 +211,7 @@ predict.baseline <- function(x) {
     res
 
 
-
+    a[[]]
 }
 
 #tweets <- small_sample(tweets,.1)

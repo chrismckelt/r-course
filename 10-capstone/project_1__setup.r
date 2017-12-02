@@ -1,4 +1,5 @@
 #Sys.setenv(JAVA_HOME = 'C:\\Program Files\\Java\\jre1.8.0_151\\')
+
 source('c:/dev/r-course/10-capstone/include.r')
 
 install_standard_packages()
@@ -35,7 +36,26 @@ pacman::p_load_gh("trinker/qdapRegex") # https://github.com/trinker/qdapRegex
 p_load("corpus")
 p_load("SnowballC")
 p_load("tm")
+
+library(pacman)
+library(tidyverse)
+library(knitr)
+library(markdown)
+library(data.table)
+library(sqldf)
+library(ggplot2)
+library(lubridate)
+library(foreach)
+library(devtools)
+library(ggplot2)
+library(plotly)
+library(DT)
 library(stringr)
+
+library(shiny)
+library(shinyjs)
+
+
 options(mc.cores = 1)
 options(encoding = "UTF-8")
 options(stringsAsFactors = FALSE)

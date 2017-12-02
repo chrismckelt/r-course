@@ -29,7 +29,7 @@ if (!file.exists(data.file.name))
     # =c((length(nchar(data.twitter))))) kable(data_summary)
     if (sample_mode) {
         rm(sample.blogs)
-        rm(sample.news)
+        #rm(sample.news)
         rm(sample.twitter)
     }
 

@@ -1,46 +1,18 @@
 suppressMessages(rm(list = ls()))
-options(encoding = "UTF-8")
-#options(shiny.error = browser)
-options(shiny.reactlog = TRUE)
-
-switch(Sys.info()[['sysname']],
-       Windows= {suppressMessages(setwd("C:/dev/r-course/9-data-products/week-4"))},
-     #  Linux  = {suppressMessages(setwd("~/srv/connect/apps/loan_book_analyser"))},
-       Darwin = {print("I'm a Mac.")})
-
-library(pacman)
-library(tidyverse)
-library(knitr)
-library(markdown)
-library(data.table)
-library(sqldf)
-library(ggplot2)
-library(lubridate)
-library(foreach)
-library(RSQLite)
-library(shiny)
-library(shinyjs)
-library(choroplethr)
-library(choroplethrMaps)
-library(DescTools)
-library(readxl)
-library(devtools)
-library(ggplot2)
-library(plotly)
-library(DT)
-
 Sys.setenv("plotly_username" = "chrismckelt")
 Sys.setenv("plotly_api_key" = "M6S961nyr6MaEAwtNAM0")
 options(DT.fillContainer = FALSE)
 options(DT.autoHideNavigation = FALSE)
-options(scipen = 999)
-set.seed(3333)
+options(shiny.port = 7775)
+options(encoding = "UTF-8")
+options(shiny.error = browser)
+options(shiny.reactlog = TRUE)
 
 source('c:/dev/r-course/10-capstone/project_0_run.r')
- 
+suppressMessages(setwd("C:/dev/r-course/10-capstone"))
 #stop("stopping")
 
-# SHINY S
+# SHINY 
 
 #' SERVER
 #'
@@ -53,23 +25,44 @@ source('c:/dev/r-course/10-capstone/project_0_run.r')
 #'
 #' @examples 
 server <- function(input, output, session) {
-
-    observe({
-        p <- predictor(input$search)
-        return(p)
+    useShinyjs(html = TRUE)
+  
+    reactive({
+      output$search_result_1 <- reactiveVal("aaa")
+      
     })
 
+    observeEvent(input$search, {
+      flog.info(input$search)
+      results <- predictor(input$search)
+      flog.debug(results)
+      if (length(results) > 0)        
+      {
+        output$search_result_1 <- renderText("gg")
+      }
+    })
+    
+    
     observeEvent(input$stop, {
         shiny::stopApp()
         #RSQLite::dbDisconnect()
     })
-
-
+    
+    #outputOptions(output$search_result_1, 'search_result_1', suspendWhenHidden = FALSE)
+    #outputOptions(output$search_result_2, 'search_result_2', suspendWhenHidden = FALSE)
+    #outputOptions(output$search_result_3, 'search_result_3', suspendWhenHidden = FALSE)
 }
 
 #' UI
 #'
-ui = htmlTemplate("www/index.html")
+
+ui = htmlTemplate("www/index.html", button_search_result_1 =  actionButton("r1", 'search_result_1'))
+#                 button_search_result_2 =  actionButton("r1",output$search_result_2),
+#                 button_search_result_3 =  actionButton("r1",output$search_result_3)
+#                 )
+
+#ui = htmlTemplate("www/index.html")
+
 
 shinyApp(ui, server)
 

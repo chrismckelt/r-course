@@ -2,7 +2,11 @@
 suppressMessages(rm(list = ls()))
 set.seed(2017)
 
-suppressMessages(setwd("c:/dev/r-course/10-capstone/"))
+switch(Sys.info()[['sysname']],
+       Windows = { suppressMessages(setwd("C:/dev/r-course/10-capstone")) },
+       Linux = { suppressMessages(setwd("~/srv/connect/apps/loan_book_analyser")) },
+       Darwin = { print("I'm a Mac.") })
+
 
 source('c:/dev/r-course/10-capstone/project_1__setup.r')
  
