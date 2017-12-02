@@ -28,7 +28,9 @@ server <- function(input, output, session) {
     useShinyjs(html = TRUE)
   
     reactive({
-      output$search_result_1 <- reactiveVal("aaa")
+      output$search_result_1 <- reactiveVal("")
+      output$search_result_2 <- reactiveVal("")
+      output$search_result_3 <- reactiveVal("")
       
     })
 
@@ -38,7 +40,9 @@ server <- function(input, output, session) {
       flog.debug(results)
       if (length(results) > 0)        
       {
-        output$search_result_1 <- renderText("gg")
+        output$search_result_1 <- renderText(results$predicted[1])
+        output$search_result_2 <- renderText(results$predicted[2])
+        output$search_result_3 <- renderText(results$predicted[3])
       }
     })
     
@@ -56,12 +60,12 @@ server <- function(input, output, session) {
 #' UI
 #'
 
-ui = htmlTemplate("www/index.html", button_search_result_1 =  actionButton("r1", 'search_result_1'))
+#ui = htmlTemplate("www/index.html", button_search_result_1 =  actionButton("r1", 'search_result_1'))
 #                 button_search_result_2 =  actionButton("r1",output$search_result_2),
 #                 button_search_result_3 =  actionButton("r1",output$search_result_3)
 #                 )
 
-#ui = htmlTemplate("www/index.html")
+ui = htmlTemplate("www/index.html")
 
 
 shinyApp(ui, server)
