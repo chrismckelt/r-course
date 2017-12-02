@@ -26,23 +26,21 @@ suppressMessages(setwd("C:/dev/r-course/10-capstone"))
 #' @examples 
 server <- function(input, output, session) {
     useShinyjs(html = TRUE)
-  
-    reactive({
-      output$search_result_1 <- reactiveVal("")
-      output$search_result_2 <- reactiveVal("")
-      output$search_result_3 <- reactiveVal("")
-      
-    })
+
 
     observeEvent(input$search, {
-      flog.info(input$search)
-      results <- predictor(input$search)
-      flog.debug(results)
-      if (length(results) > 0)        
+      if (input$search != "")
       {
-        output$search_result_1 <- renderText(results$predicted[1])
-        output$search_result_2 <- renderText(results$predicted[2])
-        output$search_result_3 <- renderText(results$predicted[3])
+        flog.info(input$search)
+        results <- predictor(input$search)
+        flog.debug(results)
+        if (length(results) > 0)        
+        {
+          print(paste("results found", nrow(results)))
+          session$sendCustomMessage(type = 'pred_1', message = results$predicted[1])
+          session$sendCustomMessage(type = 'pred_2', message = results$predicted[2])
+          session$sendCustomMessage(type = 'pred_3', message = results$predicted[3])
+        } 
       }
     })
     
@@ -59,11 +57,6 @@ server <- function(input, output, session) {
 
 #' UI
 #'
-
-#ui = htmlTemplate("www/index.html", button_search_result_1 =  actionButton("r1", 'search_result_1'))
-#                 button_search_result_2 =  actionButton("r1",output$search_result_2),
-#                 button_search_result_3 =  actionButton("r1",output$search_result_3)
-#                 )
 
 ui = htmlTemplate("www/index.html")
 
