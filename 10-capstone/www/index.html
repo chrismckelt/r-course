@@ -21,8 +21,9 @@
 
     <!--shiny -->
     {{ headContent() }}
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
     <script src="js/bootstrap.min.js"></script>
@@ -34,68 +35,50 @@
     <script src="js/favicon.min.js"></script>
     <script src="js/inspinia.js"></script>
     <script src="js/plugins/pace/pace.min.js"></script>
-    <script src="js/plugins/select2/select2.full.min.js"></script>
+
     {{ useShinyjs() }}
 
     <script>
-        predictedWords = [""];
+        predictedWords = ["the", "be", "to"];
+
+
+
+        function remove_duplicates(arr) {
+            var obj = {};
+            var ret_arr = [];
+            for (var i = 0; i < arr.length; i++) {
+                obj[arr[i]] = true;
+            }
+            for (var key in obj) {
+                ret_arr.push(key);
+            }
+            return ret_arr;
+        }
+
+
 
         $(document).ready(function() {
 
-            // https://simple.wikipedia.org/wiki/Most_common_words_in_English
-            var mostCommonWords = [
-                "the",
-                "be",
-                "to",
-                "of",
-                "and"
-            ];
-
-            function split(val) {
-                return val.split(/,\s*/);
-            }
-
-            function extractLast(term) {
-                return split(term).pop();
-            }
-
-            $("#search")
-                .on("keydown", function(event) {
-                    if (event.keyCode === $.ui.keyCode.TAB &&
-                        $(this).autocomplete("instance").menu.active) {
-                        event.preventDefault();
+            options = {
+                minLength: 0,
+                delay: 100,
+                source: predictedWords,
+                search: extractLast($("#search").val()),
+                focus: function() {
+                    // prevent value inserted on focus
+                    event.preventDefault();
+                },
+                select: function(event, ui) {
+                    search_text = $("#search").val();
+                    var arr = split(search_text, ' ');
+                    if (arr.length > 1) {
+                        $("#search").val(search_text + ' ' + ui.item.value.replace(/"/g, '') + ' ');
+                    } else {
+                        $("#search").val(ui.item.value.replace(/"/g, ''));
                     }
-                })
-                .autocomplete({
-                    minLength: 0,
-                    source: function(request, response) {
-                        if (request.term.endsWith(' ')) {
-                            remoteAllElements();
-                            $("#search_button").click();
-                            $("#predictions").show();
-                            response($.ui.autocomplete.filter(predictedWords, extractLast(request.term)));
-                        } else if (request.term === '') {
-                            response($.ui.autocomplete.filter(mostCommonWords, extractLast(request.term)));
-                        } else {
-                            response($.ui.autocomplete.filter(predictedWords, extractLast(request.term)));
-                        }
-                    },
-                    focus: function() {
-                        // prevent value inserted on focus
-                        return false;
-                    },
-                    select: function(event, ui) {
-                        var terms = split(this.value);
-                        // remove the current input
-                        terms.pop();
-                        // add the selected item
-                        terms.push(ui.item.value);
-                        // add placeholder to get the comma-and-space at the end
-                        terms.push("");
-                        this.value = terms.join(" ");
-                        return false;
-                    }
-                });
+                    event.preventDefault();
+                }
+            }
 
             // This recieves messages of type "testmessage" from the server.
             // See http://shiny.rstudio.com/gallery/server-to-client-custom-messages.html
@@ -103,9 +86,7 @@
             Shiny.addCustomMessageHandler("pred_1",
                 function(message) {
                     result = JSON.stringify(message)
-                    console.log(result);
                     createElement(result);
-                    predictedWords.push(result);
                 }
             );
 
@@ -123,28 +104,58 @@
                 }
             );
 
-            ul = $('#prediction_results');
+            function split(val) {
+                return val.split(/,\s*/);
+            }
+
+            function extractLast(term) {
+                return split(term).pop();
+            }
+
+            function cleanPredictedWords() {
+                $('#prediction_results').empty();
+            }
 
             function createElement(word) {
                 console.log(word);
                 if (word == 'null') return;
-                if ($.inArray(word, predictedWords)) {
-                    predictedWords.push(word);
-                    ul.append($('<li>' + word + '</li>'));
+                if (word == '') return;
+                if (!word) return;
+                word = word.replace(/"/g, '').trim();
+                cleanPredictedWords();
+                predictedWords.push(word);
+                predictedWords = remove_duplicates(predictedWords);
+
+                $("#search").autocomplete(options);
+
+                for (var i = 0; i < predictedWords.length; i++) {
+                    $('#prediction_results').append($('<li class="list-group-item">' + predictedWords[i] + '</li>'));
                 }
-
-                predictedWords = predictedWords.filter(onlyUnique);
             }
 
-            function remoteAllElements() {
-                ul.empty();
-                predictedWords = [];
-            }
+            $("#search")
+                .on("keydown", function(event) {
+                    if (event.keyCode === $.ui.keyCode.TAB &&
+                        $(this).autocomplete("instance").menu.active) {
+                        event.preventDefault();
+                    }
+                    if ($("#search").val().trim().length > 0) {
+                        predictedWords = [];
+                        cleanPredictedWords();
+                        $("#search_button").click();
+                        $("#predictions").show();
+                    } else {
+                        cleanPredictedWords();
+                        predictedWords = ["the", "be", "to", "of", "and"];
+                        $("#predictions").hide();
+                    }
+                })
+                .autocomplete(options);
 
-            function onlyUnique(value, index, self) {
-                return self.indexOf(value) === index;
-            }
-
+            $("#prediction_results").on('click', 'li', function() {
+                var txt = $("#search").val() + ' ' + ($(this).text());
+                $("#search").val(txt);
+            });
 
         });
     </script>
@@ -227,13 +238,12 @@
                                     <input id="search" type="text" class="form-control input-lg">
                                 </div>
                             </div>
-
                             <div class="row">
                                 <button id="search_button" type="submit" class="btn btn-default" style="display:none;">Search</button>
                             </div>
                             <div id="predictions" class="row">
-                                <h4>predictions</h4>
-                                <ul id="prediction_results">
+                                <h4>click a prediction below...</h4>
+                                <ul id="prediction_results" class="list-group">
                                 </ul>
                             </div>
                         </form>

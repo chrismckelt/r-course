@@ -15,3 +15,5 @@ rsconnect::setAccountInfo(name = 'chrismckelt',
  rsconnect::deployApp(appTitle = "Capstone", appDir = "C:/dev/r-course/10-capstone/")
 
 
+
+ 
