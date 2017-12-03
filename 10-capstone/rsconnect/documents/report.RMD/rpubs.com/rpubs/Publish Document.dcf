@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/336913/c12f84a5e2b34b11bea74e2e86a009db
+bundleId: https://api.rpubs.com/api/v1/document/336913/c12f84a5e2b34b11bea74e2e86a009db
+url: http://rpubs.com/chris_mckelt/336913
+when: 1512297416.91039

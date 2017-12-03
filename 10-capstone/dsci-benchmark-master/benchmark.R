@@ -206,12 +206,10 @@ benchmark <- compiler::cmpfun(function(FUN, ..., sent.list, ext.output=T) {
 # As an example, we create a very simple baseline algorithm which always returns
 # the three most frequent English words.
 predict.baseline <- function(x) {
-
-    res <- predictor2(x)
+    print(x)
+    res <- predictor(x)
     res
 
-
-    a[[]]
 }
 
 #tweets <- small_sample(tweets,.1)

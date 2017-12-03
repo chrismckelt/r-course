@@ -8,9 +8,13 @@ options(encoding = "UTF-8")
 options(shiny.error = browser)
 options(shiny.reactlog = TRUE)
 
-source('c:/dev/r-course/10-capstone/project_0_run.r')
-suppressMessages(setwd("C:/dev/r-course/10-capstone"))
-#stop("stopping")
+suppressMessages(rm(list = ls()))
+set.seed(2017)
+switch(Sys.info()[['sysname']],
+       Windows = { suppressMessages(setwd("C:/dev/r-course/10-capstone")) },
+       #Linux = { suppressMessages(setwd("~/srv/connect/apps/datascience-captstone")) },
+       Darwin = { print("I'm a Mac.") })
+source(paste0(getwd(),'/project_0_run.r'))
 
 # SHINY 
 
@@ -44,22 +48,16 @@ server <- function(input, output, session) {
       }
     })
     
-    
     observeEvent(input$stop, {
         shiny::stopApp()
         #RSQLite::dbDisconnect()
     })
-    
-    #outputOptions(output$search_result_1, 'search_result_1', suspendWhenHidden = FALSE)
-    #outputOptions(output$search_result_2, 'search_result_2', suspendWhenHidden = FALSE)
-    #outputOptions(output$search_result_3, 'search_result_3', suspendWhenHidden = FALSE)
 }
 
 #' UI
 #'
 
 ui = htmlTemplate("www/index.html")
-
 
 shinyApp(ui, server)
 

@@ -30,7 +30,6 @@
     <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
     <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
 
-
     <!-- theme and plugin javascript -->
     <script src="js/favicon.min.js"></script>
     <script src="js/inspinia.js"></script>
@@ -71,9 +70,7 @@
                 }
             }
 
-            // This recieves messages of type "testmessage" from the server.
             // See http://shiny.rstudio.com/gallery/server-to-client-custom-messages.html
-            // for details
             Shiny.addCustomMessageHandler("pred_1",
                 function(message) {
                     result = JSON.stringify(message)
@@ -189,21 +186,21 @@
                     <li>
                         <li class="active" href="#" onclick="javascript: showDiv(1);">
                             <a href="#">
-                                <i class="fa fa-th-large"></i> <span class="nav-label">1. Prediction</span>
+                                <i class="fa fa-th-large"></i> <span class="nav-label">Prediction</span>
                             </a>
                         </li>
-                        <li onclick="javascript: showDiv(2);">
+                        <!-- <li onclick="javascript: showDiv(2);">
                             <a href="#">
                                 <i class="fa fa-th-large"></i> <span class="nav-label">2. Documentation</span>
                             </a>
-                        </li>
+                        </li> -->
                         <li class="#" onclick="javascript: showDiv(3);">
                             <a href="#">
-                                <i class="fa fa-th-large"></i> <span class="nav-label">3. Contact</span>
+                                <i class="fa fa-th-large"></i> <span class="nav-label">Contact</span>
                             </a>
                         </li>
                         <li class="#">
-                            <a href="https://chrismckelt.github.io/r-course/10-capstone/" target="_new">
+                            <a href="http://rpubs.com/chris_mckelt/datascience-capstone" target="_new">
                                 <i class="fa fa-th-large"></i> <span class="nav-label">Report</span>
                             </a>
                         </li>

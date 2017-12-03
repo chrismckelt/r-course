@@ -12,7 +12,7 @@ rsconnect::setAccountInfo(name = 'chrismckelt',
                            secret = 'ys4H/4hnLulYPoq5/wITCwXAiWoSktKzH/HP3PCC')
 
 
- rsconnect::deployApp(appTitle = "Capstone", appDir = "C:/dev/r-course/10-capstone/")
+ rsconnect::deployApp(appTitle = "datascience-capstone", appDir = "C:/dev/r-course/10-capstone/")
 
 
 

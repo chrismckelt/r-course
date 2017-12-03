@@ -92,7 +92,6 @@ predictor <- function(text, hints = c()) {
             }
         }
 
-      #  if (all(is_data_frame_valid(dt.search.result) && nrow(dt.search.result > 2))) search_complete<-TRUE
 
         if ((term_count >= 3) && (!search_complete)) {
             text.temp <- str_get_words(text,2)
@@ -118,7 +117,6 @@ predictor <- function(text, hints = c()) {
             }
         }
 
-        if (all(is_data_frame_valid(dt.search.result) && nrow(dt.search.result > 3))) search_complete <- TRUE
 
         if ((term_count >= 2) && (!search_complete)) {
             text.temp <- str_get_last_word(text)
@@ -216,17 +214,17 @@ predictor2 <- function(text, hints = c()) {
             dt.search.result <- get_ngram_data(2, text, dt.search.result)
         }
 
-        #if ((term_count >= 3)) {
-            #dt.search.result <- get_ngram_data(3, text, dt.search.result)
-        #}
+        if ((term_count >= 3)) {
+            dt.search.result <- get_ngram_data(3, text, dt.search.result)
+        }
 
-        #if ((term_count >= 4)) {
-            #dt.search.result <- get_ngram_data(4, text, dt.search.result)
-        #}
+        if ((term_count >= 4)) {
+            dt.search.result <- get_ngram_data(4, text, dt.search.result)
+        }
 
-        #if ((term_count >= 5)) {
-            #dt.search.result <- get_ngram_data(5, text, dt.search.result)
-        #}
+        if ((term_count >= 5)) {
+            dt.search.result <- get_ngram_data(5, text, dt.search.result)
+        }
 
         dt.search.result$predicted <- lapply(dt.search.result$word, function(x) str_get_last_word(x))
 
@@ -320,8 +318,8 @@ strategy_stupid_back_off <- function(pred) {
 
     totals <- sqldf("select ngram, sum(freq) as total from pred group by ngram")
     
-    #freq_total_5 <-  sqldf("select total from totals where ngram = 5")
-    #freq_total_4 <-  sqldf("select total from totals where ngram = 4")
+    freq_total_5 <-  sqldf("select total from totals where ngram = 5")
+    freq_total_4 <-  sqldf("select total from totals where ngram = 4")
     freq_total_3 <-  sqldf("select total from totals where ngram = 3")
     freq_total_2 <-  sqldf("select total from totals where ngram = 2")
     freq_total_1 <-  sqldf("select total from totals where ngram = 1")
@@ -331,9 +329,9 @@ strategy_stupid_back_off <- function(pred) {
     while (i > 0) {
 
         if (pred$ngram[i] == 5) {
-            #score <- pred$freq[i] / freq_total_4
+            score <- pred$freq[i] / freq_total_4
         } else if (pred$ngram[i] == 4) {
-            #score <- 0.4 * pred$freq[i] / freq_total_3
+            score <- 0.4 * pred$freq[i] / freq_total_3
         } else if (pred$ngram[i] == 3) {
             score <- 0.4 * 0.4 * pred$freq[i] / freq_total_2
         } else if (pred$ngram[i] == 2) {
@@ -379,5 +377,5 @@ search_unigram <- function(text) {
 }
 
 
-default_words <- c('the', 'on', 'a')
+default_words <- c('the', 'be', 'to')
 #default_words <- sqldf("select word from n1 order by freq desc limit 3")

@@ -1,0 +1,13 @@
+name: datascience-capstone
+title: datascience-capstone
+username:
+account: chrismckelt
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 243252
+bundleId: 1111871
+url: https://chrismckelt.shinyapps.io/datascience-capstone/
+when: 1512308330.49995
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: cleanup.linq|deploy.R|markov.linq|ngram-overview-flow.xml|predictor.tests.R|project_3__data_load_and_clean.r|project_4__rcorpus.r|project_4__tokenization.r|report.RMD|data/final/de_DE/de_DE.blogs.txt|data/final/de_DE/de_DE.news.txt|data/final/de_DE/de_DE.twitter.txt|data/final/fi_FI/fi_FI.blogs.txt|data/final/fi_FI/fi_FI.news.txt|data/final/fi_FI/fi_FI.twitter.txt|data/final/ru_RU/ru_RU.blogs.txt|data/final/ru_RU/ru_RU.news.txt|data/final/ru_RU/ru_RU.twitter.txt|dsci-benchmark-master/.gitignore|dsci-benchmark-master/benchmark.R|dsci-benchmark-master/data.zip|dsci-benchmark-master/generate_dataset.R|dsci-benchmark-master/README.md|dsci-benchmark-master/data/blogs.txt|dsci-benchmark-master/data/ngrams.RData|dsci-benchmark-master/data/tweets.txt|milestone/milestone-report.html|milestone/milestone-report.R|milestone/milestone-report.rmd|quiz/quiz1.R|quiz/quiz2.R

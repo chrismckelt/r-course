@@ -15,22 +15,8 @@ using <- function(packageName) {
    library(packageName, character.only = TRUE)
 }
 
-using("pacman")
+require(pacman)
 
-#' Load "devtools", "tidyverse", "knitr", "markdown", "moments", "e1071", "data.table", "sqldf", "downloader", "magrittr", "ggplot2", "lubridate"
-#'
-#' @return
-#' @export
-#'
-#' @examples
-install_standard_packages <- function() {
-    ## setup - install missing packages and reference
-    packs <- c("devtools", "tidyverse", "knitr", "markdown", "moments", "e1071", "data.table",  "downloader", "magrittr", "ggplot2", "lubridate")
-    p_load("foreach")
-    foreach(n = 1:length(packs)) %do%  using(packs[n])
-}
-
-devtools::install_github("ggrothendieck/sqldf")
 
 #' Download and save a file from the given url
 #'
@@ -58,9 +44,9 @@ download_zip_files <- function() {
     url <- "https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip"
     if (!file.exists("data.zip")) {
         save_file(url, "data.zip")
-        output_folder <- "c:/dev/r-course/10-capstone/data"
+        output_folder <- paste(getwd(),"/data")
         if (!dir.exists(output_folder)) dir.create(output_folder)
-        unzip(zipfile = "c:/dev/r-course/10-capstone/data.zip",exdir = output_folder)
+        unzip(zipfile = "data.zip",exdir = output_folder)
     }
 }
 
@@ -154,9 +140,11 @@ get_data_file_path <- function(filename, dir ="/data/") {
 #' @export
 #'
 #' @examples
-generate_rmd <- function(path = 'c:/dev/r-course/10-capstone/milestone-report.RMD') {
+generate_rmd <- function(path = 'report.RMD') {
     library(knitr)
     rmarkdown::render()
+    knit(path)
+    markdownToHTML(path, 'report.html', options=c("use_xhml"))
 }
 
 
