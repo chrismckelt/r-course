@@ -58,6 +58,8 @@ require(qdapDictionaries)
 require(qdapTools)
 require(qdap)
 
+require(sqldf)
+
 #install_github("ggrothendieck/sqldf")
 #install_github("trinker/qdapRegex")
 #install_github("trinker/qdapDictionaries")
