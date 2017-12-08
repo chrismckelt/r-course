@@ -2,21 +2,21 @@ download_zip_files()
 
 data.file.name <- "data.all.RData"
 
-sample_mode <- FALSE
+sample_mode <- TRUE
 
 if (!file.exists(data.file.name))
     {
-   # data.blogs <- read_file("data/final/en_US/en_US.blogs.txt")
-  #  data.twitter <- read_file("data/final/en_US/en_US.twitter.txt")
-    data.blogs <- read_file("data/final/en_US/blogs.txt")
-    data.twitter <- read_file("data/final/en_US/tweets.txt")
+    data.blogs <- read_file("data/final/en_US/en_US.blogs.txt")
+    data.twitter <- read_file("data/final/en_US/en_US.twitter.txt")
+   # data.blogs <- read_file("data/final/en_US/blogs.txt")
+  #  data.twitter <- read_file("data/final/en_US/tweets.txt")
     data.blogs = iconv(data.blogs, "latin1", "ASCII", sub = "")
     data.twitter = iconv(data.twitter, "latin1", "ASCII", sub = "")
 
     if (sample_mode) {
-        sample.blogs <- small_sample(data.blogs, .001)
+        sample.blogs <- small_sample(data.blogs, .03)
         #sample.news <- small_sample(data.news, .1)
-        sample.twitter <- small_sample(data.twitter, .001)
+        sample.twitter <- small_sample(data.twitter, .01)
         data.all <- c(sample.blogs, sample.twitter)
     }
     else {
